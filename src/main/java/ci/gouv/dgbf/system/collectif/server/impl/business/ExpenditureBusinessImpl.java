@@ -1,0 +1,81 @@
+package ci.gouv.dgbf.system.collectif.server.impl.business;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+
+import org.cyk.utility.__kernel__.collection.CollectionHelper;
+import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.business.Result;
+import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
+
+import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
+
+@ApplicationScoped
+public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
+
+	@Inject EntityManager entityManager;
+	@Inject ExpenditurePersistence expenditurePersistence;
+	
+	@Override @Transactional
+	public Result adjust(Map<String, Long[]> adjustments,String auditWho) {
+		return adjust(adjustments, auditWho, ADJUST_AUDIT_IDENTIFIER);
+	}
+	
+	private Result adjust(Map<String, Long[]> adjustments,String auditWho,String auditFunctionality) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		ValidatorImpl.Expenditure.validateAdjust(adjustments, auditWho, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		
+		// Validation of adjustments
+		Collection<String> providedIdentifiers = adjustments.entrySet().stream().map(x -> x.getKey()).collect(Collectors.toList());		
+		Collection<Object[]> arrays = new ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader().readByIdentifiers(providedIdentifiers, null);
+		Collection<String> identifiers = CollectionHelper.isEmpty(arrays) ? null : arrays.stream().map(array -> (String)array[0]).collect(Collectors.toList());	
+		ValidatorImpl.validateIdentifiers(providedIdentifiers, identifiers, throwablesMessages);
+		ValidatorImpl.Expenditure.validateAdjustmentsAvailable(adjustments, arrays, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.ENTRY_AUTHORIZATION_AVAILABLE_INDEX
+				, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.PAYMENT_CREDIT_AVAILABLE_INDEX, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		
+		// Validation of objects
+		Collection<ExpenditureImpl> expenditures = entityManager.createNamedQuery(ExpenditureImpl.QUERY_READ_BY_IDENTIIFERS, ExpenditureImpl.class)
+				.setParameter("identifiers", adjustments.entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
+				.getResultList();
+		ValidatorImpl.validateIdentifiers(providedIdentifiers, FieldHelper.readSystemIdentifiersAsStrings(expenditures), throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		
+		// Persist of objects
+		LocalDateTime auditWhen = LocalDateTime.now();
+		expenditures.forEach(expenditure -> {
+			expenditure.getEntryAuthorization(Boolean.TRUE).setAdjustment(adjustments.get(expenditure.getIdentifier())[0]);
+			expenditure.getPaymentCredit(Boolean.TRUE).setAdjustment(adjustments.get(expenditure.getIdentifier())[1]);
+			audit(expenditure,auditFunctionality,auditWho,auditWhen);
+			entityManager.merge(expenditure);
+		});
+
+		// Return of message
+		result.close().setName(String.format("Ajustement de %s dépense(s) par %s",expenditures.size(),auditWho)).log(getClass());
+		result.addMessages(String.format("Nombre de ligne de dépense mise à jour : %s", expenditures.size()));
+		return result;
+	}
+	
+	@Override @Transactional
+	public Result adjustByEntryAuthorizations(Map<String, Long> entryAuthorizations,String auditWho) {
+		return adjust(entryAuthorizations == null ? null : Optional.ofNullable(entryAuthorizations).get().entrySet().stream()
+				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> new Long[] {entry.getValue(),entry.getValue()})),auditWho,ADJUST_BY_ENTRY_AUTHORIZATIONS_AUDIT_IDENTIFIER);
+	}
+}
