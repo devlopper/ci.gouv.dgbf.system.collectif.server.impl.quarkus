@@ -31,6 +31,7 @@ public class RegulatoryActImpl extends AbstractIdentifiableSystemScalarStringIde
 	@Transient Boolean included;
 	@Transient String includedAsString;
 	@Transient String legislativeActJoinIdentifier;
+	@Transient Boolean applied;
 	
 	@Transient String __audit__;
 	@Transient String __auditWho__;

@@ -28,6 +28,22 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	}
 
 	/**/
+	
+	static void validateAuditWho(String auditWho,ThrowablesMessages throwablesMessages) {
+		throwablesMessages.addIfTrue("Le nom d'utilisateur est requis", StringHelper.isBlank(auditWho));
+	}
+	
+	public static interface LegislativeActVersion {
+		
+		static void validateGenerateInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(identifier));
+			validateAuditWho(auditWho, throwablesMessages);
+		}
+		
+		static void validateGenerate(Collection<Object[]> arrays,Boolean existingIgnorable,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateAuditWho(auditWho, throwablesMessages);
+		}
+	}
 
 	public static interface Expenditure {
 		
@@ -71,13 +87,18 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			
 		}
 
-		static void validateAdjust(Map<String, Long> adjustments,String userIdentifier,ThrowablesMessages throwablesMessages) {
+		static void validateAdjust(Map<String, Long> adjustments,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("Ajustements requis",MapHelper.isEmpty(adjustments));
-			throwablesMessages.addIfTrue("Nom d'utilisateur requis",StringHelper.isBlank(userIdentifier));		
+			validateAuditWho(auditWho, throwablesMessages);
 		}
 	}
 
 	public static interface RegulatoryAct {
+		static void validateIncludeOrExcludeInputs(Collection<String> identifiers, String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			throwablesMessages.addIfTrue("Les identifiants des actes de gestion sont requis", CollectionHelper.isEmpty(identifiers));
+			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
+			validateAuditWho(auditWho, throwablesMessages);
+		}
 		
 		static void validateIncludeOrExclude(Collection<Object[]> arrays,Boolean include,Boolean existingIgnorable,ThrowablesMessages throwablesMessages) {
 			if(Boolean.TRUE.equals(existingIgnorable))
@@ -89,6 +110,18 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 				return;
 			throwablesMessages.add(String.format("Les %s suivant sont déja %s : %s",ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct.NAME_PLURAL,Boolean.TRUE.equals(include) ? "inclus" : "exclus"
 				, includedOrExcluded.stream().map(array -> (String)array[3]+" "+array[4]).collect(Collectors.joining(","))));
+		}
+	}
+	
+	public static interface GeneratedAct {
+		
+		static void validateGenerateInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
+			validateAuditWho(auditWho, throwablesMessages);
+		}
+		
+		static void validateGenerate(Collection<Object[]> arrays,Boolean existingIgnorable,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateAuditWho(auditWho, throwablesMessages);
 		}
 	}
 }

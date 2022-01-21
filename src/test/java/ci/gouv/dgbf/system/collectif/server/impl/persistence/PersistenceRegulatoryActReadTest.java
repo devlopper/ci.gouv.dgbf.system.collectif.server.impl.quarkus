@@ -51,7 +51,7 @@ public class PersistenceRegulatoryActReadTest {
 		assertThat(regulatoryAct.getName()).isEqualTo("1");
 		assertThat(regulatoryAct.getEntryAuthorizationAmount()).isEqualTo(0);
 		assertThat(regulatoryAct.getPaymentCreditAmount()).isEqualTo(0);
-		assertThat(regulatoryAct.getIncluded()).isEqualTo(null);
+		assertThat(regulatoryAct.getIncluded()).isEqualTo(Boolean.FALSE);
 		assertThat(regulatoryAct.getIncludedAsString()).isEqualTo("Non");
 	}
 	

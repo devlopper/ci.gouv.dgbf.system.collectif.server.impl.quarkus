@@ -32,6 +32,8 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecialization
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecializationUnitPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedAct;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
@@ -57,9 +59,16 @@ public class Assertor {
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject LegislativeActPersistence actPersistence;
 	@Inject LegislativeActVersionPersistence actVersionPersistence;
+	@Inject GeneratedActPersistence generatedPersistence;
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
 	@Inject SpecificServiceGetter specificServiceGetter;
 	@Inject LegislativeActVersionController actVersionController;
+	
+	@Test
+	public void assertGeneratedActIdentifiers(String legislativeActVersionIdentifier,Collection<String> expectedIdentifiers) {
+		Collection<GeneratedAct> generatedActs = generatedPersistence.readMany(new QueryExecutorArguments());
+		assertIdentifiers(generatedActs, expectedIdentifiers);
+	}
 	
 	@Test
 	public void assertExpenditureMovementIncluded(String identifier,Long entryAuthorization,Long paymentCredit) {

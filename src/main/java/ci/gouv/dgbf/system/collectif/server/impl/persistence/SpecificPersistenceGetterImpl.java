@@ -14,6 +14,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.EconomicNaturePersis
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditureNaturePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.FundingSourcePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LessorPersistence;
@@ -30,6 +31,7 @@ public class SpecificPersistenceGetterImpl extends AbstractSpecificPersistenceGe
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ResourcePersistence resourcePersistence;
+	@Inject GeneratedActPersistence generatedActPersistence;
 	
 	@Inject SectionPersistence sectionPersistence;
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;

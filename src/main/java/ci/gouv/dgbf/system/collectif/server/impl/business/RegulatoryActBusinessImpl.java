@@ -114,9 +114,7 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	
 	private Object[] validate(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,Boolean include,String auditWho) {
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
-		throwablesMessages.addIfTrue("Les identifiants des actes de gestion sont requis", CollectionHelper.isEmpty(identifiers));
-		throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
-		throwablesMessages.addIfTrue("Le nom d'utilisateur est requis", StringHelper.isBlank(auditWho));
+		ValidatorImpl.RegulatoryAct.validateIncludeOrExcludeInputs(identifiers, legislativeActVersionIdentifier, auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
 		Collection<Object[]> arrays = new RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader().readByIdentifiers(identifiers, Map.of(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier));

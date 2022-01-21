@@ -193,6 +193,28 @@ public interface Profiles {
 			}
 		}
 		
+		public interface GeneratedAct {
+			public class Generate implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Generate.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Generate.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Business.buildTags(ArrayUtils.addFirst(classes, GeneratedAct.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Business.buildConfig(ArrayUtils.addFirst(classes, GeneratedAct.class));
+			}
+		}
+		
 		public static Set<String> buildTags(Class<?>...classes) {
 			return Profiles.buildTags(ArrayUtils.addFirst(classes, Business.class));
 		}

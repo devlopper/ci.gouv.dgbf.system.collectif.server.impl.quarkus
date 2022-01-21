@@ -15,7 +15,7 @@ import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(Profiles.Business.RegulatoryAct.IncludeExclude.class)
-public class BusinessRegulatoryActDefaultTest {
+public class BusinessRegulatoryActIncludeExcludeTest {
 
 	@Inject Assertor assertor;
 	@Inject RegulatoryActBusiness regulatoryActBusiness;
@@ -48,7 +48,7 @@ public class BusinessRegulatoryActDefaultTest {
 	
 	@Test
 	void include_null() {
-		assertor.assertRegulatoryAct("include_included_null","1",null);
+		assertor.assertRegulatoryAct("include_included_null","1",Boolean.FALSE);
 		regulatoryActBusiness.include("1",Boolean.TRUE,"meliane", "include_included_null");
 		assertor.assertRegulatoryAct("include_included_null","1",Boolean.TRUE);
 	}
@@ -73,7 +73,7 @@ public class BusinessRegulatoryActDefaultTest {
 	
 	@Test
 	void exclude_null() {
-		assertor.assertRegulatoryAct("exclude_included_null","1",null);
+		assertor.assertRegulatoryAct("exclude_included_null","1",Boolean.FALSE);
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			regulatoryActBusiness.exclude("1",null,"meliane", "exclude_included_null");
 	    });

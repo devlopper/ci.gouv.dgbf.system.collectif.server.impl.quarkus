@@ -57,6 +57,6 @@ public class ServiceResourceAdjustTest {
 			//.log().all()
         	.statusCode(Response.Status.BAD_REQUEST.getStatusCode())
         	;
-		assertThat(response.then().extract().asString()).isEqualTo("Ajustements requis\r\nNom d'utilisateur requis");
+		assertThat(response.then().extract().asString()).isEqualTo("Ajustements requis\r\nLe nom d'utilisateur est requis");
 	}
 }

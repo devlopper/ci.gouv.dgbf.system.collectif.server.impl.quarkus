@@ -39,7 +39,7 @@ public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiable
 
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_REGULATORY_ACT,nullable = false) RegulatoryActImpl regulatoryAct;
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_LEGISLATIVE_ACT_VERSION,nullable = false) LegislativeActVersionImpl legislativeActVersion;
-	@Column(name = COLUMN_INCLUDED) Boolean included;
+	@NotNull @Column(name = COLUMN_INCLUDED,nullable = false) Boolean included;
 	
 	@Override
 	public RegulatoryActLegislativeActVersionImpl setIdentifier(String identifier) {
@@ -61,13 +61,15 @@ public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiable
 	public static final String FIELD_REGULATORY_ACT = "regulatoryAct";
 	public static final String FIELD_LEGISLATIVE_ACT_VERSION = "legislativeActVersion";
 	public static final String FIELD_INCLUDED = "included";
+	public static final String FIELD_ACTS_GENERATED = "actsGenerated";
 	
 	public static final String ENTITY_NAME = "RegulatoryActLegislativeActVersionImpl";
 	public static final String TABLE_NAME = "TA_ACTE_GESTION_VERSION_ACTE";
 	
-	public static final String COLUMN_REGULATORY_ACT = "acte_gestion";
-	public static final String COLUMN_LEGISLATIVE_ACT_VERSION = "version_acte";
-	public static final String COLUMN_INCLUDED = "inclus";
+	public static final String COLUMN_REGULATORY_ACT = "ACTE_GESTION";
+	public static final String COLUMN_LEGISLATIVE_ACT_VERSION = "VERSION_ACTE";
+	public static final String COLUMN_INCLUDED = "INCLUS";
+	public static final String COLUMN_ACTS_GENERATED = "ACTES_GENERES";
 	
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
