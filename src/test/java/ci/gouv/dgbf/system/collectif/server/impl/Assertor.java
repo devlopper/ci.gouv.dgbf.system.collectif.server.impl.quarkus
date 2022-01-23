@@ -66,7 +66,7 @@ public class Assertor {
 	
 	@Test
 	public void assertGeneratedActIdentifiers(String legislativeActVersionIdentifier,Collection<String> expectedIdentifiers) {
-		Collection<GeneratedAct> generatedActs = generatedPersistence.readMany(new QueryExecutorArguments());
+		Collection<GeneratedAct> generatedActs = generatedPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier));
 		assertIdentifiers(generatedActs, expectedIdentifiers);
 	}
 	

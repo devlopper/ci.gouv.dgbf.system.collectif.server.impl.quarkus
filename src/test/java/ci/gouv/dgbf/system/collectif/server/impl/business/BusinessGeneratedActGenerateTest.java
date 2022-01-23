@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.GeneratedActBusiness;
-import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.Assertor;
 import ci.gouv.dgbf.system.collectif.server.impl.Profiles;
 import io.quarkus.test.junit.QuarkusTest;
@@ -22,23 +22,22 @@ public class BusinessGeneratedActGenerateTest {
 
 	@Inject Assertor assertor;
 	@Inject GeneratedActBusiness generatedActBusiness;
+	@Inject GeneratedActPersistence generatedActPersistence;
 	
-	/* Include */
-	
-	/*@Test
+	@Test
 	void generate_alreadyGenerated() {
-		assertor.assertRegulatoryAct("include_included_true","1",Boolean.TRUE);
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
-			regulatoryActBusiness.include("1",null,"meliane", "include_included_true");
+			generatedActBusiness.generateByLegislativeActVersionIdentifier("3", "meliane");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant sont déja inclus : 1 1");
-	}*/
+		assertThat(exception.getMessage()).isEqualTo("L'acte de la version du collectif 3 a déja été générée");
+	}
 	
 	@Test
 	void generate_notYetGenerated() {
-		//assertor.assertRegulatoryAct("include_included_true","1",Boolean.TRUE);
+		assertor.assertGeneratedActIdentifiers("1", null);
+		assertor.assertGeneratedActIdentifiers("3", List.of("3"));
 		generatedActBusiness.generateByLegislativeActVersionIdentifier("1", "meliane");
 		assertor.assertGeneratedActIdentifiers("1", List.of("1"));
-		//assertor.assertRegulatoryAct("include_included_true","1",Boolean.TRUE);
+		assertor.assertGeneratedActIdentifiers("3", List.of("3"));
 	}
 }
