@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -28,6 +29,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersis
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LessorPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourceActivityPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourcePersistence;
@@ -48,6 +50,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ResourcePersistence resourcePersistence;
 	@Inject RegulatoryActPersistence regulatoryActPersistence;
+	@Inject RegulatoryActExpenditurePersistence regulatoryActExpenditurePersistence;
 	@Inject GeneratedActPersistence generatedActPersistence;
 	@Inject GeneratedActExpenditurePersistence generatedActExpenditurePersistence;
 	
@@ -109,6 +112,8 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			populatePredicateLessor(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(regulatoryActPersistence.isProcessable(arguments)))
 			populatePredicateRegulatoryAct(arguments, builderArguments, predicate, filter);
+		else if(Boolean.TRUE.equals(regulatoryActExpenditurePersistence.isProcessable(arguments)))
+			populatePredicateRegulatoryActExpenditure(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(generatedActPersistence.isProcessable(arguments)))
 			populatePredicateGeneratedAct(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(generatedActExpenditurePersistence.isProcessable(arguments)))
@@ -180,7 +185,9 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		
 		Boolean generatedActExpenditureExists = arguments.getFilterFieldValueAsBoolean(null,Parameters.GENERATED_ACT_EXPENDITURE_EXISTS);
 		if(generatedActExpenditureExists != null) {
-			predicate.add(String.format("%sEXISTS(SELECT p.identifier FROM %s p WHERE p.%s = t)",generatedActExpenditureExists ? "" : "NOT ",GeneratedActExpenditureImpl.ENTITY_NAME,GeneratedActExpenditureImpl.FIELD_EXPENDITURE));
+			predicate.add(String.format("%1$sEXISTS(SELECT p.identifier FROM %2$s p WHERE p.%3$s = t.%3$s AND p.%4$s = t.%4$s AND p.%5$s = t.%5$s AND p.%6$s = t.%6$s)"
+					,generatedActExpenditureExists ? "" : "NOT ",GeneratedActExpenditureImpl.ENTITY_NAME,GeneratedActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,GeneratedActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
+							,GeneratedActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,GeneratedActExpenditureImpl.FIELD_LESSOR_IDENTIFIER));
 		}
 	}
 	
@@ -285,6 +292,15 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		}
 	}
 	
+	public static void populatePredicateRegulatoryActExpenditure(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+		@SuppressWarnings("unchecked")
+		Collection<String> regulatoryActIdentifiers = (Collection<String>) arguments.getFilterFieldValue(Parameters.REGULATORY_ACT_IDENTIFIERS);
+		if(CollectionHelper.isNotEmpty(regulatoryActIdentifiers)) {
+			predicate.add(String.format("t.%s IN :%s",RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER,Parameters.REGULATORY_ACT_IDENTIFIERS));
+			filter.addField(Parameters.REGULATORY_ACT_IDENTIFIERS, regulatoryActIdentifiers);
+		}
+	}
+	
 	public static void populatePredicateGeneratedAct(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"t"
 				,FieldHelper.join(GeneratedActImpl.FIELD_LEGISLATIVE_ACT_VERSION,LegislativeActImpl.FIELD_IDENTIFIER));
@@ -293,6 +309,13 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	public static void populatePredicateGeneratedActExpenditure(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.GENERATED_ACT_IDENTIFIER,"t"
 				,FieldHelper.join(GeneratedActExpenditureImpl.FIELD_ACT,GeneratedActImpl.FIELD_IDENTIFIER));
+		
+		@SuppressWarnings("unchecked")
+		Collection<String> generatedActIdentifiers = (Collection<String>) arguments.getFilterFieldValue(Parameters.GENERATED_ACT_IDENTIFIERS);
+		if(CollectionHelper.isNotEmpty(generatedActIdentifiers)) {
+			predicate.add(String.format("t.%s.identifier IN :%s",GeneratedActExpenditureImpl.FIELD_ACT,Parameters.GENERATED_ACT_IDENTIFIERS));
+			filter.addField(Parameters.GENERATED_ACT_IDENTIFIERS, generatedActIdentifiers);
+		}
 	}
 	
 	/**/

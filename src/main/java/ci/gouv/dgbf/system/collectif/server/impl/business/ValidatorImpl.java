@@ -120,6 +120,11 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			validateAuditWho(auditWho, throwablesMessages);
 		}
 		
+		static void validateDeleteInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
+			validateAuditWho(auditWho, throwablesMessages);
+		}
+		
 		static void validateGenerate(Collection<Object[]> arrays,Boolean existingIgnorable,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateAuditWho(auditWho, throwablesMessages);
 		}

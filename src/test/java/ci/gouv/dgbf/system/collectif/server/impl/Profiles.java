@@ -206,6 +206,18 @@ public interface Profiles {
 				}
 			}
 			
+			public class Delete implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Delete.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Delete.class);
+				}
+			}
+			
 			public static Set<String> buildTags(Class<?>...classes) {
 				return Business.buildTags(ArrayUtils.addFirst(classes, GeneratedAct.class));
 			}
