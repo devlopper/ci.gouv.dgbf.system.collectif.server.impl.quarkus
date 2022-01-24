@@ -29,15 +29,20 @@ public class BusinessGeneratedActGenerateTest {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			generatedActBusiness.generateByLegislativeActVersionIdentifier("3", "meliane");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("L'acte de la version du collectif 3 a déja été générée");
+		assertThat(exception.getMessage()).isEqualTo("L'acte de la version du collectif 3 a déja été généré");
 	}
 	
 	@Test
 	void generate_notYetGenerated() {
-		assertor.assertGeneratedActIdentifiers("1", null);
-		assertor.assertGeneratedActIdentifiers("3", List.of("3"));
+		assertor.assertGeneratedActIdentifiersByLegislativeActVersionIdentifier("1", null);
+		
+		assertor.assertGeneratedActIdentifiersByLegislativeActVersionIdentifier("3", List.of("3"));
+		
 		generatedActBusiness.generateByLegislativeActVersionIdentifier("1", "meliane");
-		assertor.assertGeneratedActIdentifiers("1", List.of("1"));
-		assertor.assertGeneratedActIdentifiers("3", List.of("3"));
+		
+		assertor.assertGeneratedActIdentifiersByLegislativeActVersionIdentifier("1", List.of("1"));
+		assertor.assertGeneratedActExpenditureIdentifiersByGeneratedActIdentifier("1", List.of("1_2","1_3","1_4"));
+		
+		assertor.assertGeneratedActIdentifiersByLegislativeActVersionIdentifier("3", List.of("3"));
 	}
 }

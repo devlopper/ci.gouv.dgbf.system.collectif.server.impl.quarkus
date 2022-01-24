@@ -32,7 +32,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecialization
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecializationUnitPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedAct;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
@@ -59,15 +59,18 @@ public class Assertor {
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject LegislativeActPersistence actPersistence;
 	@Inject LegislativeActVersionPersistence actVersionPersistence;
-	@Inject GeneratedActPersistence generatedPersistence;
+	@Inject GeneratedActPersistence generatedActPersistence;
+	@Inject GeneratedActExpenditurePersistence generatedActExpenditurePersistence;
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
 	@Inject SpecificServiceGetter specificServiceGetter;
 	@Inject LegislativeActVersionController actVersionController;
 	
-	@Test
-	public void assertGeneratedActIdentifiers(String legislativeActVersionIdentifier,Collection<String> expectedIdentifiers) {
-		Collection<GeneratedAct> generatedActs = generatedPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier));
-		assertIdentifiers(generatedActs, expectedIdentifiers);
+	public void assertGeneratedActIdentifiersByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier,Collection<String> expectedIdentifiers) {
+		assertIdentifiers(generatedActPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier)), expectedIdentifiers);
+	}
+	
+	public void assertGeneratedActExpenditureIdentifiersByGeneratedActIdentifier(String generatedActIdentifier,Collection<String> expectedIdentifiers) {
+		assertIdentifiers(generatedActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.GENERATED_ACT_IDENTIFIER,generatedActIdentifier)), expectedIdentifiers);
 	}
 	
 	@Test

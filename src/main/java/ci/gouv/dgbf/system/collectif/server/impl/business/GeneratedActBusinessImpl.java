@@ -87,7 +87,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	private void generateAdjustmentAct(LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages) {
 		Long generatedCount = persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()));
 		if(NumberHelper.isGreaterThanZero(generatedCount)) {
-			throwablesMessages.add(String.format("L'acte de la version du collectif %s a déja été générée", legislativeActVersion.getCode()));
+			throwablesMessages.add(String.format("L'acte de la version du collectif %s a déja été généré", legislativeActVersion.getCode()));
 			return;
 		}
 		
@@ -109,10 +109,10 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		
 		//TODO use pagination
 		Collection<ExpenditureImpl> expenditures = CollectionHelper.cast(ExpenditureImpl.class, expenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
-				,Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE)));
+				,Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE,Parameters.GENERATED_ACT_EXPENDITURE_EXISTS,Boolean.FALSE)));
 		
 		if(CollectionHelper.isEmpty(expenditures)) {
-			throwablesMessages.add(String.format("Aucune dépense ajustée trouvée dans la version du collectif %s", legislativeActVersion.getCode()));
+			throwablesMessages.add(String.format("Aucune dépense ajustée et non encore générée trouvée dans la version du collectif %s", legislativeActVersion.getCode()));
 			return;
 		}
 		Collection<GeneratedActExpenditure> generatedActExpenditures = 
