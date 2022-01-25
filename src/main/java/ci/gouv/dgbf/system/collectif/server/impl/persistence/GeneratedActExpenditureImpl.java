@@ -64,7 +64,7 @@ public class GeneratedActExpenditureImpl extends AbstractIdentifiableSystemScala
 	public static final String ENTITY_NAME = "GeneratedActExpenditureImpl";
 	public static final String TABLE_NAME = "TA_ACTE_GENERE_DEPENSE";
 	
-	public static final String COLUMN_ACT = "ACTE_GENERE";
+	public static final String COLUMN_ACT = "ACTE";
 	public static final String COLUMN_ACTIVITY_IDENTIFIER = "activite";
 	public static final String COLUMN_ECONOMIC_NATURE_IDENTIFIER = "nature_economique";
 	public static final String COLUMN_FUNDING_SOURCE_IDENTIFIER = "source_financement";

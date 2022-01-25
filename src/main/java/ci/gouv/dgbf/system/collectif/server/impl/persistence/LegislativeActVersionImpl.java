@@ -23,14 +23,17 @@ import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true) 
 @Entity(name = LegislativeActVersionImpl.ENTITY_NAME) @Access(AccessType.FIELD)
-@Table(name=LegislativeActVersionImpl.TABLE_NAME)
+@Table(name = LegislativeActVersionImpl.TABLE_NAME)
 public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements LegislativeActVersion,Serializable {
 
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT) private LegislativeActImpl act;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) private LegislativeActImpl act;
 	@Transient private String actIdentifier;
-	@NotNull @Column(name = COLUMN_NUMBER) private Byte number;
-	@NotNull @Column(name = COLUMN_CREATION_DATE) private LocalDateTime creationDate;
-	
+	@Transient private String actAsString;
+	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) private Byte number;
+	@NotNull @Column(name = COLUMN_CREATION_DATE,nullable = false) private LocalDateTime creationDate;
+	@Transient private String creationDateAsString;
+	@Transient private Short generatedActCount;
+
 	@Override
 	public LegislativeActVersionImpl setIdentifier(String identifier) {
 		return (LegislativeActVersionImpl) super.setIdentifier(identifier);
@@ -54,10 +57,14 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	
 	public static final String FIELD_ACT = "act";
 	public static final String FIELD_ACT_IDENTIFIER = "actIdentifier";
+	public static final String FIELD_ACT_AS_STRING = "actAsString";
 	public static final String FIELD_NUMBER = "number";
 	public static final String FIELD_CREATION_DATE = "creationDate";
 	public static final String FIELD_EXPENDITURE_NATURES = "expenditureNatures";
 	public static final String FIELD_EXPENDITURE_NATURES_SUMS_AND_TOTAL = "expenditureNaturesSumsAndTotal";
+	public static final String FIELD_GENERATED_ACT_COUNT = "generatedActCount";
+	public static final String FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER_CREATION_DATE_AS_STRING = "actAsStringCodeNameNumberCreationDateAsString";
+	public static final String FIELDS_CODE_NAME_NUMBER_CREATION_DATE_AS_STRING = "codeNameNumberCreationDateAsString";
 	
 	public static final String COLUMN_ACT = "ACTE";
 	public static final String COLUMN_NUMBER = "NUMERO";

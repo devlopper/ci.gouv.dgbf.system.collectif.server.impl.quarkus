@@ -95,6 +95,28 @@ public interface Profiles {
 			}
 		}
 		
+		public interface LegislativeActVersion {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Persistence.buildTags(ArrayUtils.addFirst(classes, LegislativeActVersion.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Persistence.buildConfig(ArrayUtils.addFirst(classes, LegislativeActVersion.class));
+			}
+		}
+		
 		public interface Filter {
 			public class Default implements QuarkusTestProfile {
 				@Override

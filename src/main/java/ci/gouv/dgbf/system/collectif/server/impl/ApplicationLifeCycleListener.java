@@ -22,6 +22,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.GeneratedActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LessorImpl;
@@ -43,6 +44,8 @@ import ci.gouv.dgbf.system.collectif.server.impl.service.ExpenditureNatureDtoImp
 import ci.gouv.dgbf.system.collectif.server.impl.service.ExpenditureNatureDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.FundingSourceDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.FundingSourceDtoImplMapper;
+import ci.gouv.dgbf.system.collectif.server.impl.service.GeneratedActDtoImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.service.GeneratedActDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.LegislativeActDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.LegislativeActDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.LegislativeActVersionDtoImpl;
@@ -118,6 +121,9 @@ public class ApplicationLifeCycleListener {
     	
     	MapperClassGetter.MAP.put(RegulatoryActDtoImpl.class, RegulatoryActDtoImplMapper.class);
     	PersistenceEntityClassGetterImpl.MAP.put(RegulatoryActDtoImpl.class,RegulatoryActImpl.class);
+    	
+    	MapperClassGetter.MAP.put(GeneratedActDtoImpl.class, GeneratedActDtoImplMapper.class);
+    	PersistenceEntityClassGetterImpl.MAP.put(GeneratedActDtoImpl.class,GeneratedActImpl.class);
     	/**/
 
     	//ContainerRequestFilter.LEVEL = Level.INFO;
