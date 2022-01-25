@@ -58,7 +58,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		throwablesMessages.throwIfNotEmpty();
 		
 		Long generatedCount = persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()));
-		System.out.println("GeneratedActBusinessImpl.validate() : "+generatedCount);
+		
 		if(Boolean.TRUE.equals(generate) && NumberHelper.isGreaterThanZero(generatedCount))
 			throwablesMessages.addIfTrue(String.format("L'acte de la version du collectif %s a déja été généré", legislativeActVersion.getCode()),NumberHelper.isGreaterThanZero(generatedCount));
 		else if(!Boolean.TRUE.equals(generate) && NumberHelper.isEqualToZero(generatedCount))
@@ -70,26 +70,24 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	@Override @Transactional
 	public Result deleteByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
-		LegislativeActVersion legislativeActVersion = validate(legislativeActVersionIdentifier, auditWho,Boolean.FALSE, throwablesMessages);
+		validate(legislativeActVersionIdentifier, auditWho,Boolean.FALSE, throwablesMessages);
 		
 		Result result = new Result().open();
 		LocalDateTime auditWhen = LocalDateTime.now();
-		Collection<GeneratedActImpl> generatedActs = CollectionHelper.cast(GeneratedActImpl.class, persistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER
-				,legislativeActVersion.getIdentifier())));
-		Collection<GeneratedActExpenditureImpl> generatedActExpenditures = CollectionHelper.cast(GeneratedActExpenditureImpl.class, generatedActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.GENERATED_ACT_IDENTIFIERS
-				,FieldHelper.readSystemIdentifiersAsStrings(generatedActs))));
+		Collection<GeneratedActImpl> generatedActs = entityManager.createNamedQuery(GeneratedActImpl.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIIFER,GeneratedActImpl.class).setParameter("legislativeActVersionIdentifier", legislativeActVersionIdentifier)
+				.getResultList();
+		Collection<GeneratedActExpenditureImpl> generatedActExpenditures = entityManager.createNamedQuery(GeneratedActExpenditureImpl.QUERY_READ_BY_ACT_IDENTIIFERS,GeneratedActExpenditureImpl.class)
+				.setParameter("actIdentifiers", FieldHelper.readSystemIdentifiersAsStrings(generatedActs)).getResultList();
 		
 		if(CollectionHelper.isNotEmpty(generatedActExpenditures))
 			generatedActExpenditures.forEach(generatedActExpenditure -> {
 				audit(generatedActExpenditure, DELETE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER, auditWho, auditWhen);
-				entityManager.merge(generatedActExpenditure);
 				entityManager.remove(generatedActExpenditure);
 			});
 		
 		if(CollectionHelper.isNotEmpty(generatedActs))
 			generatedActs.forEach(generatedAct -> {
 				audit(generatedAct, DELETE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER, auditWho, auditWhen);
-				entityManager.merge(generatedAct);
 				entityManager.remove(generatedAct);
 			});
 		

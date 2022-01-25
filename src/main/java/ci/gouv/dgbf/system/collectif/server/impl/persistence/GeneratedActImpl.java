@@ -26,7 +26,7 @@ import lombok.experimental.Accessors;
 @Entity(name = GeneratedActImpl.ENTITY_NAME) @Access(AccessType.FIELD)
 @Table(name=GeneratedActImpl.TABLE_NAME)
 @NamedQueries(value = {
-		@NamedQuery(name = GeneratedActImpl.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIIFER,query = "SELECT t FROM GeneratedActImpl t WHERE t.legislativeActVersion.identifier IN :identifiers")
+		@NamedQuery(name = GeneratedActImpl.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIIFER,query = "SELECT t FROM GeneratedActImpl t WHERE t.legislativeActVersion.identifier = :legislativeActVersionIdentifier")
 })
 @AttributeOverrides(value= {
 		@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_WHO__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_WHO__,nullable = false))

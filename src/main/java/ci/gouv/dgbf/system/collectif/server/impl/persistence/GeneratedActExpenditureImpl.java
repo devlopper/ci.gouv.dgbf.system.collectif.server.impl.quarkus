@@ -30,7 +30,7 @@ import lombok.experimental.Accessors;
 				,GeneratedActExpenditureImpl.COLUMN_FUNDING_SOURCE_IDENTIFIER,GeneratedActExpenditureImpl.COLUMN_LESSOR_IDENTIFIER})
 })
 @NamedQueries(value = {
-		@NamedQuery(name = GeneratedActExpenditureImpl.QUERY_READ_BY_ACT_IDENTIIFERS,query = "SELECT t FROM GeneratedActExpenditureImpl t WHERE t.act.identifier IN :identifiers")
+		@NamedQuery(name = GeneratedActExpenditureImpl.QUERY_READ_BY_ACT_IDENTIIFERS,query = "SELECT t FROM GeneratedActExpenditureImpl t WHERE t.act.identifier IN :actIdentifiers")
 })
 @AttributeOverrides(value= {
 		@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
