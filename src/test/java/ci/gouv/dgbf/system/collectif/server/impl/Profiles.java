@@ -272,6 +272,40 @@ public interface Profiles {
 			}
 		}
 		
+		public interface GeneratedAct {
+			public class Generate implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Generate.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Generate.class);
+				}
+			}
+			
+			public class Delete implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Delete.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Delete.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Service.buildTags(ArrayUtils.addFirst(classes, GeneratedAct.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Service.buildConfig(ArrayUtils.addFirst(classes, GeneratedAct.class));
+			}
+		}
+		
 		public class Unit implements QuarkusTestProfile {
 			@Override
 			public Set<String> tags() {
@@ -332,6 +366,40 @@ public interface Profiles {
 			
 			public static Map<String,String> buildConfig(Class<?>...classes) {
 				return Client.buildConfig(ArrayUtils.addFirst(classes, Resource.class));
+			}
+		}
+		
+		public interface GeneratedAct {
+			public class Generate implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Generate.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Generate.class);
+				}
+			}
+			
+			public class Delete implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Delete.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Delete.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Client.buildTags(ArrayUtils.addFirst(classes, GeneratedAct.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Client.buildConfig(ArrayUtils.addFirst(classes, GeneratedAct.class));
 			}
 		}
 		

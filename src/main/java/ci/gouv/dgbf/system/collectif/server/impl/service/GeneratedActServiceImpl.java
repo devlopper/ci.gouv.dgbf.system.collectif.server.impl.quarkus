@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 
 import org.cyk.utility.service.server.AbstractSpecificServiceImpl;
 
@@ -24,5 +25,15 @@ public class GeneratedActServiceImpl extends AbstractSpecificServiceImpl<Generat
 		this.serviceEntityImplClass = GeneratedActDtoImpl.class;
 		this.persistenceEntityClass = GeneratedAct.class;
 		this.persistenceEntityImplClass = GeneratedActImpl.class;
+	}
+
+	@Override
+	public Response generateByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
+		return buildResponseOk(business.generateByLegislativeActVersionIdentifier(legislativeActVersionIdentifier, auditWho));
+	}
+
+	@Override
+	public Response deleteByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
+		return buildResponseOk(business.deleteByLegislativeActVersionIdentifier(legislativeActVersionIdentifier, auditWho));
 	}
 }
