@@ -117,6 +117,28 @@ public interface Profiles {
 			}
 		}
 		
+		public interface LegislativeAct {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Persistence.buildTags(ArrayUtils.addFirst(classes, LegislativeAct.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Persistence.buildConfig(ArrayUtils.addFirst(classes, LegislativeAct.class));
+			}
+		}
+		
 		public interface LegislativeActVersion {
 			public class Read implements QuarkusTestProfile {
 				@Override
@@ -316,6 +338,28 @@ public interface Profiles {
 			}
 		}
 		
+		public interface Exercise {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Service.buildTags(ArrayUtils.addFirst(classes, Exercise.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Service.buildConfig(ArrayUtils.addFirst(classes, Exercise.class));
+			}
+		}
+		
 		public interface GeneratedAct {
 			public class Generate implements QuarkusTestProfile {
 				@Override
@@ -410,6 +454,28 @@ public interface Profiles {
 			
 			public static Map<String,String> buildConfig(Class<?>...classes) {
 				return Client.buildConfig(ArrayUtils.addFirst(classes, Resource.class));
+			}
+		}
+		
+		public interface Exercise {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Client.buildTags(ArrayUtils.addFirst(classes, Exercise.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Client.buildConfig(ArrayUtils.addFirst(classes, Exercise.class));
 			}
 		}
 		

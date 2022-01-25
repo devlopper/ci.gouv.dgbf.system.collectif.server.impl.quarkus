@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -38,8 +39,8 @@ import io.quarkus.arc.Unremovable;
 @ApplicationScoped @ci.gouv.dgbf.system.collectif.server.api.System @Unremovable
 public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.AbstractImpl implements Serializable {
 
-	@Inject LegislativeActPersistence actPersistence;
-	@Inject LegislativeActVersionPersistence actVersionPersistence;
+	@Inject LegislativeActPersistence legislativeActPersistence;
+	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
 	@Inject ActionPersistence actionPersistence;
 	@Inject ActivityPersistence activityPersistence;
@@ -57,7 +58,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	@Override
 	protected void setTuple(QueryExecutorArguments arguments, Arguments builderArguments) {
 		super.setTuple(arguments, builderArguments);
-		if(Boolean.TRUE.equals(actPersistence.isProcessable(arguments))) {
+		if(Boolean.TRUE.equals(legislativeActPersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",LegislativeActImpl.ENTITY_NAME));
 			String versionIdentifier = (String) arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER);
 			if(StringHelper.isNotBlank(versionIdentifier)) {
@@ -94,7 +95,9 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			populatePredicateExpenditure(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(resourcePersistence.isProcessable(arguments)))
 			populatePredicateResource(arguments, builderArguments, predicate, filter);
-		else if(Boolean.TRUE.equals(actVersionPersistence.isProcessable(arguments)))
+		else if(Boolean.TRUE.equals(legislativeActPersistence.isProcessable(arguments)))
+			populatePredicateLegislativeAct(arguments, builderArguments, predicate, filter);
+		else if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(arguments)))
 			populatePredicateLegislativeActVersion(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(budgetSpecializationUnitPersistence.isProcessable(arguments)))
 			populatePredicateBudgetSpecializationUnit(arguments, builderArguments, predicate, filter);
@@ -138,7 +141,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				else
 					builderArguments.getOrder(Boolean.TRUE).asc("t", "identifier");
 			}
-		}else if(Boolean.TRUE.equals(actVersionPersistence.isProcessable(arguments))) {
+		}else if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(arguments))) {
 			Boolean latest = arguments.getFilterFieldValueAsBoolean(null,Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
 			if(Boolean.TRUE.equals(latest)) {
 				builderArguments.getOrder(Boolean.TRUE).desc("t", LegislativeActVersionImpl.FIELD_CREATION_DATE);
@@ -211,8 +214,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		if(arguments.getFilterField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER) != null) {
 			predicate.add(String.format("EXISTS(SELECT bav.identifier FROM %s bav WHERE bav.act.identifier = :%s)",arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER)));
 		}
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_IDENTIFIER,"t"
-				,FieldHelper.join(LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_IDENTIFIER));
+		if(arguments.getFilterField(Parameters.EXERCISE_YEAR) != null) {
+			predicate.add(String.format("t.year = :%s",Parameters.EXERCISE_YEAR));
+			filter.addField(Parameters.EXERCISE_YEAR, NumberHelper.get(Short.class, arguments.getFilterFieldValue(Parameters.EXERCISE_YEAR)));
+		}
 	}
 	
 	public static void populatePredicateLegislativeActVersion(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {

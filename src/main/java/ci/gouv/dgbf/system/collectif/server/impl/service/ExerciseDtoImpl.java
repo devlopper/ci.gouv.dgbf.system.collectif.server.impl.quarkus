@@ -11,6 +11,7 @@ import org.cyk.utility.service.entity.AbstractIdentifiableSystemScalarStringIden
 import org.cyk.utility.service.server.AbstractServiceImpl;
 
 import ci.gouv.dgbf.system.collectif.server.api.service.ExerciseDto;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
 import io.quarkus.arc.Unremovable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) @NoArgsConstructor @RequestScoped @Unremovable
 public class ExerciseDtoImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements ExerciseDto,Serializable {
 
-	private Short year;
+	@JsonbProperty(value = JSON_YEAR) private Short year;
 	
 	@Override @JsonbProperty(value = JSON_IDENTIFIER)
 	public ExerciseDtoImpl setIdentifier(String identifier) {
@@ -58,6 +59,7 @@ public class ExerciseDtoImpl extends AbstractIdentifiableSystemScalarStringIdent
 				JSON_IDENTIFIER,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_IDENTIFIER
     			,JSON_CODE,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_CODE
     			,JSON_NAME,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_NAME
+    			,JSON_YEAR,ExerciseImpl.FIELD_YEAR
     			));
 		AbstractServiceImpl.setProjections(ExerciseDtoImpl.class, map);
 	}
