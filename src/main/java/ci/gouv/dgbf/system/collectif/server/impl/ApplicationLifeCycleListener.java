@@ -19,6 +19,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.BudgetSpecializationUnitImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
@@ -38,6 +39,8 @@ import ci.gouv.dgbf.system.collectif.server.impl.service.BudgetSpecializationUni
 import ci.gouv.dgbf.system.collectif.server.impl.service.BudgetSpecializationUnitDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.EconomicNatureDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.EconomicNatureDtoImplMapper;
+import ci.gouv.dgbf.system.collectif.server.impl.service.ExerciseDtoImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.service.ExerciseDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ExpenditureDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ExpenditureDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ExpenditureNatureDtoImpl;
@@ -77,6 +80,9 @@ public class ApplicationLifeCycleListener {
     	VariableHelper.write(VariableName.SYSTEM_LOGGING_THROWABLE_PRINT_STACK_TRACE, Boolean.TRUE);
     	
     	EntityLifeCycleListenerImpl.useFrenchValues();
+    	
+    	MapperClassGetter.MAP.put(ExerciseDtoImpl.class, ExerciseDtoImplMapper.class);
+    	PersistenceEntityClassGetterImpl.MAP.put(ExerciseDtoImpl.class,ExerciseImpl.class);
     	
     	MapperClassGetter.MAP.put(LegislativeActDtoImpl.class, LegislativeActDtoImplMapper.class);
     	PersistenceEntityClassGetterImpl.MAP.put(LegislativeActDtoImpl.class,LegislativeActImpl.class);

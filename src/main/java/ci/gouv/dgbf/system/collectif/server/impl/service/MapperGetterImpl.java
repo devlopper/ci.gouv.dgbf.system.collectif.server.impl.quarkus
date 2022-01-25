@@ -28,4 +28,5 @@ public class MapperGetterImpl extends AbstractMapperGetterImpl implements Serial
 	@Inject FundingSourceDtoImplMapper fundingSourceDtoImplMapper;
 	@Inject LessorDtoImplMapper lessorDtoImplMapper;
 	@Inject RegulatoryActDtoImplMapper regulatoryActDtoImplMapper;
+	@Inject ExerciseDtoImplMapper exerciseDtoImplMapper;
 }

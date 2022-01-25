@@ -17,6 +17,28 @@ public interface Profiles {
 	
 	public interface Persistence {
 		
+		public interface Exercise {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Persistence.buildTags(ArrayUtils.addFirst(classes, Exercise.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Persistence.buildConfig(ArrayUtils.addFirst(classes, Exercise.class));
+			}
+		}
+		
 		public interface Expenditure {
 			public class Default implements QuarkusTestProfile {
 				@Override
