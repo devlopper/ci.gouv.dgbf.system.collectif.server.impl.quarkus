@@ -36,8 +36,8 @@ public class PersistenceLegislativeActVersionReadTest {
 	}
 	
 	@Test
-	void readOne_projections_FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER_CREATION_DATE_AS_STRING() {
-		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne("1_1",List.of(LegislativeActVersionImpl.FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER_CREATION_DATE_AS_STRING));
+	void readOne_projections_FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne("1_1",List.of(LegislativeActVersionImpl.FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER));
 		assertThat(legislativeActVersion).isNotNull();
 		assertThat(legislativeActVersion.getIdentifier()).isEqualTo("1_1");
 		assertThat(legislativeActVersion.getCode()).isEqualTo("1_1");

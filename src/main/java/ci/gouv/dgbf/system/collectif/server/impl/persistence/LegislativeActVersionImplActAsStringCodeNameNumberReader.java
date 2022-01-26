@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
-public class LegislativeActVersionImplActAsStringCodeNameNumberCreationDateAsStringReader extends LegislativeActVersionImplCodeNameNumberCreationDateAsStringReader implements Serializable {
+public class LegislativeActVersionImplActAsStringCodeNameNumberReader extends LegislativeActVersionImplCodeNameNumberReader implements Serializable {
 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {

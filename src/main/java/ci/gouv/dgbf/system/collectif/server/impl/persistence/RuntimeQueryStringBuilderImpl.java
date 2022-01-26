@@ -144,7 +144,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		}else if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(arguments))) {
 			Boolean latest = arguments.getFilterFieldValueAsBoolean(null,Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
 			if(Boolean.TRUE.equals(latest)) {
-				builderArguments.getOrder(Boolean.TRUE).desc("t", LegislativeActVersionImpl.FIELD_CREATION_DATE);
+				builderArguments.getOrder(Boolean.TRUE).desc("t", LegislativeActVersionImpl.FIELD_NUMBER);
 				arguments.setNumberOfTuples(1);
 			}
 			arguments.removeFilterFields(Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
