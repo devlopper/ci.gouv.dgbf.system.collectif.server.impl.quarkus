@@ -10,4 +10,11 @@ public class LegislativeActVersionImplGeneratedCountActGeneratableGeneratedActDe
 		legislativeActVersion.setActGeneratable(legislativeActVersion.getGeneratedActCount() == null || legislativeActVersion.getGeneratedActCount() == 0);
 		legislativeActVersion.setGeneratedActDeletable(!Boolean.TRUE.equals(legislativeActVersion.getActGeneratable()));
 	}
+	
+	@Override
+	protected void processWhenHasNoEntityArray(LegislativeActVersionImpl legislativeActVersion) {
+		super.processWhenHasNoEntityArray(legislativeActVersion);
+		legislativeActVersion.setActGeneratable(Boolean.TRUE);
+		legislativeActVersion.setGeneratedActDeletable(Boolean.FALSE);
+	}
 }

@@ -22,4 +22,10 @@ public class LegislativeActVersionImplGeneratedCountReader extends AbstractLegis
 		legislativeActVersion.setIdentifier(getAsString(array, index++));
 		legislativeActVersion.setGeneratedActCount(NumberHelper.get(Short.class, getAsLong(array, index++)));
 	}
+	
+	@Override
+	protected void processWhenHasNoEntityArray(LegislativeActVersionImpl legislativeActVersion) {
+		super.processWhenHasNoEntityArray(legislativeActVersion);
+		legislativeActVersion.setGeneratedActCount(Short.valueOf("0"));
+	}
 }
