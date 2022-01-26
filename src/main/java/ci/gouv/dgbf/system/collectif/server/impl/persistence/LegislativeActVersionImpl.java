@@ -33,6 +33,8 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@Transient private LocalDateTime creationDate;
 	@Transient private String creationDateAsString;
 	@Transient private Short generatedActCount;
+	@Transient private Boolean actGeneratable;
+	@Transient private Boolean generatedActDeletable;
 
 	@Override
 	public LegislativeActVersionImpl setIdentifier(String identifier) {
@@ -63,6 +65,9 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELD_EXPENDITURE_NATURES = "expenditureNatures";
 	public static final String FIELD_EXPENDITURE_NATURES_SUMS_AND_TOTAL = "expenditureNaturesSumsAndTotal";
 	public static final String FIELD_GENERATED_ACT_COUNT = "generatedActCount";
+	public static final String FIELD_ACT_GENERATABLE = "actGeneratable";
+	public static final String FIELD_GENERATED_ACT_DELETABLE = "generatedActDeletable";
+	public static final String FIELDS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE = "generatedActCountActGeneratableGeneratedActDeletable";
 	public static final String FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER = "actAsStringCodeNameNumberCreationDateAsString";
 	public static final String FIELDS_CODE_NAME_NUMBER = "codeNameNumberCreationDateAsString";
 

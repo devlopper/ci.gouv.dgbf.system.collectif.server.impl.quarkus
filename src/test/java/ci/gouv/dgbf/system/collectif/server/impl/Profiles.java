@@ -423,6 +423,50 @@ public interface Profiles {
 	}
 	
 	public interface Client {
+		public interface LegislativeAct {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Client.buildTags(ArrayUtils.addFirst(classes, LegislativeAct.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Client.buildConfig(ArrayUtils.addFirst(classes, LegislativeAct.class));
+			}
+		}
+		
+		public interface LegislativeActVersion {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Client.buildTags(ArrayUtils.addFirst(classes, LegislativeActVersion.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Client.buildConfig(ArrayUtils.addFirst(classes, LegislativeActVersion.class));
+			}
+		}
+		
 		public interface Resource {
 			public class Read implements QuarkusTestProfile {
 				@Override
