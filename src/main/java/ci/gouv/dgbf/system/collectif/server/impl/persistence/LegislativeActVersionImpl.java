@@ -65,11 +65,11 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELD_GENERATED_ACT_COUNT = "generatedActCount";
 	public static final String FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER_CREATION_DATE_AS_STRING = "actAsStringCodeNameNumberCreationDateAsString";
 	public static final String FIELDS_CODE_NAME_NUMBER_CREATION_DATE_AS_STRING = "codeNameNumberCreationDateAsString";
+
+	public static final String ENTITY_NAME = "LegislativeActVersionImpl";
+	public static final String TABLE_NAME = "TA_VERSION_COLLECTIF";
 	
 	public static final String COLUMN_ACT = "ACTE";
 	public static final String COLUMN_NUMBER = "NUMERO";
 	public static final String COLUMN_CREATION_DATE = "DATE_CREATION";
-	
-	public static final String ENTITY_NAME = "LegislativeActVersionImpl";
-	public static final String TABLE_NAME = "TA_VERSION_ACTE";
 }

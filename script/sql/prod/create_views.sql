@@ -99,7 +99,7 @@ SELECT a.identifiant AS "IDENTIFIANT",va.identifiant AS "VERSION_ACTE"
 FROM COLLECTIF.VMA_ACTIVITE a
 JOIN COLLECTIF.VMA_ACTION action ON action.identifiant = a.action
 JOIN COLLECTIF.TA_LIGNE_DEPENSE ld ON ld.activite = a.identifiant
-JOIN COLLECTIF.TA_VERSION_ACTE va ON va.acte = ld.version_acte
+JOIN COLLECTIF.TA_VERSION_COLLECTIF va ON va.acte = ld.version_acte
 GROUP BY a.identifiant,va.identifiant
 ORDER BY a.identifiant,va.identifiant;
 
@@ -109,7 +109,7 @@ SELECT s.identifiant AS "IDENTIFIANT",va.identifiant AS "VERSION_ACTE"
 FROM COLLECTIF.VMA_SECTION s
 JOIN COLLECTIF.VMA_ACTIVITE a ON a.section = s.identifiant
 JOIN COLLECTIF.TA_LIGNE_DEPENSE ld ON ld.activite = a.identifiant
-JOIN COLLECTIF.TA_VERSION_ACTE va ON va.acte = ld.version_acte
+JOIN COLLECTIF.TA_VERSION_COLLECTIF va ON va.acte = ld.version_acte
 GROUP BY s.identifiant,va.identifiant
 ORDER BY s.identifiant,va.identifiant;
 
@@ -120,7 +120,7 @@ AS SELECT nd.identifiant AS "IDENTIFIANT",va.identifiant AS "VERSION_ACTE"
 FROM COLLECTIF.VMA_NATURE_DEPENSE nd
 JOIN COLLECTIF.VMA_ACTIVITE a ON a.nature_depense = nd.identifiant
 JOIN COLLECTIF.TA_LIGNE_DEPENSE ld ON ld.activite = a.identifiant
-JOIN COLLECTIF.TA_VERSION_ACTE va ON va.acte = ld.version_acte
+JOIN COLLECTIF.TA_VERSION_COLLECTIF va ON va.acte = ld.version_acte
 GROUP BY nd.identifiant,va.identifiant,a.section,a.usb,a.action
 ORDER BY nd.identifiant,va.identifiant,a.section,a.usb,a.action;
 
@@ -131,7 +131,7 @@ SELECT usb.identifiant AS "IDENTIFIANT",va.identifiant AS "VERSION_ACTE"
 FROM COLLECTIF.VMA_USB usb
 JOIN COLLECTIF.VMA_ACTIVITE a ON a.usb = usb.identifiant
 JOIN COLLECTIF.TA_LIGNE_DEPENSE ld ON ld.activite = a.identifiant
-JOIN COLLECTIF.TA_VERSION_ACTE va ON va.acte = ld.version_acte
+JOIN COLLECTIF.TA_VERSION_COLLECTIF va ON va.acte = ld.version_acte
 GROUP BY usb.identifiant,va.identifiant,a.nature_depense
 ORDER BY usb.identifiant,va.identifiant,a.nature_depense;
 
