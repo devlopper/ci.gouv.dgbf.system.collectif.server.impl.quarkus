@@ -42,4 +42,9 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 		return buildResponseOk(business.adjustByEntryAuthorizations(adjustmentsDtos == null ? null : Optional.ofNullable(adjustmentsDtos).get().stream()
 				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> dto.getEntryAuthorization())),userIdentifier));
 	}
+	
+	@Override
+	public Response import_(String legislativeActVersionIdentifier,String auditWho) {
+		return buildResponseOk(business.import_(legislativeActVersionIdentifier,auditWho));
+	}
 }

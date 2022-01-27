@@ -13,6 +13,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NamedStoredProcedureQueries;
+import javax.persistence.NamedStoredProcedureQuery;
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureParameter;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -45,6 +49,19 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_WHEN__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
+@NamedStoredProcedureQueries(value = {
+		@NamedStoredProcedureQuery(
+			name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT
+			,procedureName = ExpenditureImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT
+			,parameters = {
+				@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_LEGISLATIVE_ACT_VERSION_IDENTIFIER , mode = ParameterMode.IN,type = String.class)
+				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHO , mode = ParameterMode.IN,type = String.class)
+				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_FUNCTIONALITY , mode = ParameterMode.IN,type = String.class)
+				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT , mode = ParameterMode.IN,type = String.class)
+				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN , mode = ParameterMode.IN,type = java.sql.Date.class)
+			}
+		)
+	})
 public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Expenditure,Serializable {
 
 	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false) String activityIdentifier;
@@ -152,4 +169,11 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String QUERY_READ_BY_IDENTIIFERS = "ExpenditureImpl.readByIdentifiers";
 	
 	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
+	
+	public static final String STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT = "PA_IMPORTER_DEPENSE";
+	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "version_collectif";
+	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHO = "audit_acteur";
+	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_FUNCTIONALITY = "audit_fonctionnalite";
+	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT = "audit_action";
+	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN = "audit_date";
 }

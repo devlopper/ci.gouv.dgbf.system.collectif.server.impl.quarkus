@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
 
@@ -31,6 +32,8 @@ import lombok.experimental.Accessors;
 public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeAct,Serializable {
 
 	@ManyToOne @JoinColumn(name = COLUMN_EXERCISE) ExerciseImpl exercise;
+	@ManyToOne @JoinColumn(name = COLUMN_VERSION) LegislativeActVersionImpl version;
+	@Transient String versionIdentifier;
 	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {
@@ -48,6 +51,9 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	}
 	
 	public static final String FIELD_EXERCISE = "exercise";
+	public static final String FIELD_VERSION = "version";
+	public static final String FIELD_VERSION_IDENTIFIER = "version_identifier";
+	
 	public static final String FIELD_SIGNATORY = "signatory";
 	public static final String FIELD_REFERENCE = "reference";
 	public static final String FIELD_VERSIONS = "versions";
@@ -56,6 +62,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String TABLE_NAME = "TA_COLLECTIF";
 	
 	public static final String COLUMN_EXERCISE = "EXERCICE";
+	public static final String COLUMN_VERSION = "VERSION";
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";
 	public static final String COLUMN_REFERENCE = "REFERENCE";
 	

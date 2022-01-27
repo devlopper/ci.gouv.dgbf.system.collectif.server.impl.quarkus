@@ -14,21 +14,32 @@ import javax.transaction.Transactional;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
+import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
+import io.quarkus.scheduler.Scheduled;
 
 @ApplicationScoped
 public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
 
 	@Inject EntityManager entityManager;
-	@Inject ExpenditurePersistence expenditurePersistence;
+	@Inject ExpenditurePersistence persistence;
+	@Inject LegislativeActPersistence legislativeActPersistence;
+	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	
 	@Override @Transactional
 	public Result adjust(Map<String, Long[]> adjustments,String auditWho) {
@@ -77,5 +88,32 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	public Result adjustByEntryAuthorizations(Map<String, Long> entryAuthorizations,String auditWho) {
 		return adjust(entryAuthorizations == null ? null : Optional.ofNullable(entryAuthorizations).get().entrySet().stream()
 				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> new Long[] {entry.getValue(),entry.getValue()})),auditWho,ADJUST_BY_ENTRY_AUTHORIZATIONS_AUDIT_IDENTIFIER);
+	}
+
+	@Override @Transactional
+	public Result import_(String legislativeActVersionIdentifier,String auditWho) {
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		ValidatorImpl.Expenditure.validateImport(legislativeActVersionIdentifier,auditWho, throwablesMessages);
+		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier), legislativeActVersionPersistence.readOne(legislativeActVersionIdentifier) == null);
+		throwablesMessages.throwIfNotEmpty();
+		
+		Result result = new Result().open();
+		Long count = persistence.count();
+		persistence.import_(legislativeActVersionIdentifier,auditWho, IMPORT_AUDIT_IDENTIFIER, "CREATION", new java.sql.Date(TimeHelper.toMillisecond(LocalDateTime.now())));
+		count = NumberHelper.getLong(NumberHelper.subtract(persistence.count(),count));
+		// Return of message
+		result.close().setName(String.format("Importation de %s %s(s) par %s",count,Expenditure.NAME,auditWho)).log(getClass());
+		result.addMessages(String.format("Nombre de %s importée : %s",Expenditure.NAME, count));
+		return result;
+	}
+	
+	@Scheduled(every = "120s")
+	void automaticallyImport() {
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) legislativeActPersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActImpl.FIELD_VERSION)
+				.addFilterFieldsValues(Parameters.LATEST_LEGISLATIVE_ACT,Boolean.TRUE));
+		if(legislativeAct == null)
+			return;
+		import_("1", "SYSTEME");
 	}
 }

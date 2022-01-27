@@ -33,6 +33,10 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		throwablesMessages.addIfTrue("Le nom d'utilisateur est requis", StringHelper.isBlank(auditWho));
 	}
 	
+	static void validateLegislativeActVersionIdentifier(String legislativeActVersionIdentifier,ThrowablesMessages throwablesMessages) {
+		throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
+	}
+	
 	public static interface LegislativeActVersion {
 		
 		static void validateGenerateInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
@@ -75,9 +79,14 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			return NumberHelper.isGreaterThanOrEqualZero(NumberHelper.add(available,adjustment));
 		}
 		
-		static void validateAdjust(Map<String, Long[]> adjustments,String userIdentifier,ThrowablesMessages throwablesMessages) {
+		static void validateAdjust(Map<String, Long[]> adjustments,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("Ajustements requis",MapHelper.isEmpty(adjustments));
-			throwablesMessages.addIfTrue("Nom d'utilisateur requis",StringHelper.isBlank(userIdentifier));		
+			throwablesMessages.addIfTrue("Nom d'utilisateur requis",StringHelper.isBlank(auditWho));		
+		}
+		
+		static void validateImport(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateLegislativeActVersionIdentifier(legislativeActVersionIdentifier, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);		
 		}
 	}
 	
