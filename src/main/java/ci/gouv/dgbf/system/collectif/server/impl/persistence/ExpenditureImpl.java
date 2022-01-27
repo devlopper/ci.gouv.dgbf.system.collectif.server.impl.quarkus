@@ -47,17 +47,10 @@ import lombok.experimental.Accessors;
 })
 public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Expenditure,Serializable {
 
-	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false)
-	String activityIdentifier;
-	
-	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false)
-	String economicNatureIdentifier;
-	
-	@NotNull @Column(name = COLUMN_FUNDING_SOURCE_IDENTIFIER,nullable = false)
-	String fundingSourceIdentifier;
-	
-	@NotNull @Column(name = COLUMN_LESSOR_IDENTIFIER,nullable = false)
-	String lessorIdentifier;
+	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false) String activityIdentifier;
+	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false) String economicNatureIdentifier;
+	@NotNull @Column(name = COLUMN_FUNDING_SOURCE_IDENTIFIER,nullable = false) String fundingSourceIdentifier;
+	@NotNull @Column(name = COLUMN_LESSOR_IDENTIFIER,nullable = false) String lessorIdentifier;
 	
 	@Valid
 	@Embedded
@@ -149,7 +142,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String COLUMN_LESSOR_IDENTIFIER = "bailleur";
 	public static final String COLUMN_ENTRY_AUTHORIZATION_ADJUSTMENT = EntryAuthorizationImpl.COLUMN_ADJUSTMENT;
 	public static final String COLUMN_PAYMENT_CREDIT_ADJUSTMENT = PaymentCreditImpl.COLUMN_ADJUSTMENT;
-	public static final String COLUMN_ACT_VERSION = "version_acte";
+	public static final String COLUMN_ACT_VERSION = "VERSION_COLLECTIF";
 	
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";

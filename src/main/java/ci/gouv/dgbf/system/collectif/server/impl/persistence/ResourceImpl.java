@@ -113,7 +113,7 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	public static final String COLUMN_ACTIVITY_IDENTIFIER = "ACTIVITE";
 	public static final String COLUMN_ECONOMIC_NATURE_IDENTIFIER = "NATURE_ECONOMIQUE";
 	public static final String COLUMN_REVENUE_ADJUSTMENT = RevenueImpl.COLUMN_ADJUSTMENT;
-	public static final String COLUMN_ACT_VERSION = "VERSION_ACTE";
+	public static final String COLUMN_ACT_VERSION = "VERSION_COLLECTIF";
 	
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";

@@ -26,7 +26,7 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) 
 @Entity(name = RegulatoryActLegislativeActVersionImpl.ENTITY_NAME) @Access(AccessType.FIELD)
 @Table(name=RegulatoryActLegislativeActVersionImpl.TABLE_NAME,uniqueConstraints = {
-		@UniqueConstraint(name = "ACTE_GESTION_VERSION_ACTE_UK1"
+		@UniqueConstraint(name = "ACTE_GESTION_VERSION_COLLECTIF_UK1"
 				,columnNames = {RegulatoryActLegislativeActVersionImpl.COLUMN_REGULATORY_ACT,RegulatoryActLegislativeActVersionImpl.COLUMN_LEGISLATIVE_ACT_VERSION})
 })
 @AttributeOverrides(value= {
@@ -67,7 +67,7 @@ public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiable
 	public static final String TABLE_NAME = "TA_ACTE_GESTION_V_COLLECTIF";
 	
 	public static final String COLUMN_REGULATORY_ACT = "ACTE_GESTION";
-	public static final String COLUMN_LEGISLATIVE_ACT_VERSION = "VERSION_ACTE";
+	public static final String COLUMN_LEGISLATIVE_ACT_VERSION = "VERSION_COLLECTIF";
 	public static final String COLUMN_INCLUDED = "INCLUS";
 	public static final String COLUMN_ACTS_GENERATED = "ACTES_GENERES";
 	
