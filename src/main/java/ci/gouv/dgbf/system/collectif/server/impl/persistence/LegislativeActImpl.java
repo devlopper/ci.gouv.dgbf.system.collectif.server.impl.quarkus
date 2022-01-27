@@ -8,8 +8,9 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
 
@@ -29,7 +30,7 @@ import lombok.experimental.Accessors;
 })
 public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeAct,Serializable {
 
-	@NotNull @Column(name = COLUMN_YEAR,nullable = false) Short year;
+	@ManyToOne @JoinColumn(name = COLUMN_EXERCISE) ExerciseImpl exercise;
 	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {
@@ -46,7 +47,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 		return (LegislativeActImpl) super.setName(name);
 	}
 	
-	public static final String FIELD_YEAR = "year";
+	public static final String FIELD_EXERCISE = "exercise";
 	public static final String FIELD_SIGNATORY = "signatory";
 	public static final String FIELD_REFERENCE = "reference";
 	public static final String FIELD_VERSIONS = "versions";
@@ -54,7 +55,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String ENTITY_NAME = "LegislativeActImpl";
 	public static final String TABLE_NAME = "TA_COLLECTIF";
 	
-	public static final String COLUMN_YEAR = "EXERCICE";
+	public static final String COLUMN_EXERCISE = "EXERCICE";
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";
 	public static final String COLUMN_REFERENCE = "REFERENCE";
 	

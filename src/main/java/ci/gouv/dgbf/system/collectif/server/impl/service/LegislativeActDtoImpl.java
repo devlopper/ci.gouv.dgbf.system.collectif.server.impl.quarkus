@@ -10,6 +10,7 @@ import org.cyk.utility.service.entity.AbstractIdentifiableSystemScalarStringIden
 import org.cyk.utility.service.server.AbstractServiceImpl;
 
 import ci.gouv.dgbf.system.collectif.server.api.service.LegislativeActDto;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -17,6 +18,8 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true)
 public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements LegislativeActDto,Serializable {
 
+	@JsonbProperty(value = JSON_EXERCISE) ExerciseDtoImpl exercise;
+	
 	@Override @JsonbProperty(value = JSON_IDENTIFIER)
 	public LegislativeActDtoImpl setIdentifier(String identifier) {
 		return (LegislativeActDtoImpl) super.setIdentifier(identifier);
@@ -53,6 +56,7 @@ public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStrin
 				JSON_IDENTIFIER,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_IDENTIFIER
     			,JSON_CODE,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_CODE
     			,JSON_NAME,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_NAME
+    			,JSON_EXERCISE,LegislativeActImpl.FIELD_EXERCISE
     			));
 		AbstractServiceImpl.setProjections(LegislativeActDtoImpl.class, map);
 	}

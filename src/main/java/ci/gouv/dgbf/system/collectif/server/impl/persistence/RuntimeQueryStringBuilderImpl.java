@@ -215,7 +215,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			predicate.add(String.format("EXISTS(SELECT bav.identifier FROM %s bav WHERE bav.act.identifier = :%s)",arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER)));
 		}
 		if(arguments.getFilterField(Parameters.EXERCISE_YEAR) != null) {
-			predicate.add(String.format("t.year = :%s",Parameters.EXERCISE_YEAR));
+			predicate.add(String.format("t.exercise.year = :%s",Parameters.EXERCISE_YEAR));
 			filter.addField(Parameters.EXERCISE_YEAR, NumberHelper.get(Short.class, arguments.getFilterFieldValue(Parameters.EXERCISE_YEAR)));
 		}
 	}
@@ -283,7 +283,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.YEAR);
 		String legislativeActVersionIdentifier = (String) arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER);
 		if(StringHelper.isNotBlank(legislativeActVersionIdentifier)) {
-			predicate.add(String.format("EXISTS(SELECT lav.identifier FROM LegislativeActVersionImpl lav JOIN LegislativeActImpl la ON la = lav.act AND lav.identifier = :%s WHERE t.year = la.year)",Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
+			predicate.add(String.format("EXISTS(SELECT lav.identifier FROM LegislativeActVersionImpl lav JOIN LegislativeActImpl la ON la = lav.act AND lav.identifier = :%s WHERE t.year = la.exercise.year)",Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
 			filter.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, legislativeActVersionIdentifier);
 		}
 		
