@@ -280,7 +280,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	}
 	
 	public static void populatePredicateRegulatoryAct(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.YEAR);
+		//addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.YEAR);
 		String legislativeActVersionIdentifier = (String) arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER);
 		if(StringHelper.isNotBlank(legislativeActVersionIdentifier)) {
 			predicate.add(String.format("EXISTS(SELECT lav.identifier FROM LegislativeActVersionImpl lav JOIN LegislativeActImpl la ON la = lav.act AND lav.identifier = :%s WHERE t.year = la.exercise.year)",Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));

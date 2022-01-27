@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -13,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl;
+import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
@@ -24,17 +26,23 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) 
 @Entity(name = LegislativeActVersionImpl.ENTITY_NAME) @Access(AccessType.FIELD)
 @Table(name = LegislativeActVersionImpl.TABLE_NAME)
-public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements LegislativeActVersion,Serializable {
+@AttributeOverrides(value= {
+		@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHO__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHO__,nullable = false))
+		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHAT__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHAT__,nullable = false))
+		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHEN__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHEN__,nullable = false))
+		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
+})
+public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeActVersion,Serializable {
 
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) private LegislativeActImpl act;
-	@Transient private String actIdentifier;
-	@Transient private String actAsString;
-	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) private Byte number;
-	@Transient private LocalDateTime creationDate;
-	@Transient private String creationDateAsString;
-	@Transient private Short generatedActCount;
-	@Transient private Boolean actGeneratable;
-	@Transient private Boolean generatedActDeletable;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) LegislativeActImpl act;
+	@Transient String actIdentifier;
+	@Transient String actAsString;
+	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
+	@Transient LocalDateTime creationDate;
+	@Transient String creationDateAsString;
+	@Transient Short generatedActCount;
+	@Transient Boolean actGeneratable;
+	@Transient Boolean generatedActDeletable;
 
 	@Override
 	public LegislativeActVersionImpl setIdentifier(String identifier) {
@@ -74,6 +82,10 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String ENTITY_NAME = "LegislativeActVersionImpl";
 	public static final String TABLE_NAME = "TA_VERSION_COLLECTIF";
 	
-	public static final String COLUMN_ACT = "ACTE";
+	public static final String COLUMN_ACT = "COLLECTIF";
 	public static final String COLUMN_NUMBER = "NUMERO";
+	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
+	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
+	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";
+	public static final String COLUMN___AUDIT_WHEN__ = "AUDIT_DATE";
 }
