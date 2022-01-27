@@ -1,5 +1,8 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
+import static org.cyk.utility.persistence.query.Language.parenthesis;
+import static org.cyk.utility.persistence.query.Language.Where.or;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -12,8 +15,11 @@ import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
+import org.cyk.utility.__kernel__.value.ValueHelper;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
+import org.cyk.utility.persistence.server.query.string.LikeStringBuilder;
+import org.cyk.utility.persistence.server.query.string.LikeStringValueBuilder;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
 import org.cyk.utility.persistence.server.query.string.RuntimeQueryStringBuilder;
 import org.cyk.utility.persistence.server.query.string.WhereStringBuilder.Predicate;
@@ -240,9 +246,19 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				,ActionImpl.FIELD_BUDGET_SPECIALIZATION_UNIT_IDENTIFIER);
 	}
 	
-	public static void populatePredicateActivity(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+	private final String ACTIVITY_PREDICATE_SEARCH = parenthesis(or(
+			LikeStringBuilder.getInstance().build("t",ActivityImpl.FIELD_CODE, Parameters.SEARCH)
+			,LikeStringBuilder.getInstance().build("t", ActivityImpl.FIELD_NAME,Parameters.SEARCH)
+	));
+	public void populatePredicateActivity(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ACTION_IDENTIFIER,"t"
 				,ActivityImpl.FIELD_ACTION_IDENTIFIER);
+		
+		if(arguments.getFilterField(Parameters.SEARCH) != null) {
+			predicate.add(ACTIVITY_PREDICATE_SEARCH);
+			String search = ValueHelper.defaultToIfBlank((String) arguments.getFilterFieldValue(Parameters.SEARCH),"");
+			filter.addField(Parameters.SEARCH, LikeStringValueBuilder.getInstance().build(search, null, null));
+		}
 	}
 	
 	public static void populatePredicateResourceActivity(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
