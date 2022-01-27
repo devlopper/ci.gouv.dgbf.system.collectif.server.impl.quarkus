@@ -314,9 +314,9 @@ public class Assertor {
 		arguments.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_IDENTIFIER,identifier);
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(arguments);
 		if(CollectionHelper.isEmpty(expectedIdentifiers)) {
-			assertThat(expenditures).as("Aucune lignes de dépenses trouvées dans l'acte budgétaire identifié par "+identifier).isNull();
+			assertThat(expenditures).as("Aucune dépenses trouvées dans l'acte budgétaire identifié par "+identifier).isNull();
 		}else {
-			assertThat(expenditures).as("Des lignes de dépenses trouvées dans l'acte budgétaire identifié par "+identifier).isNotEmpty();
+			assertThat(expenditures).as("Des dépenses trouvées dans l'acte budgétaire identifié par "+identifier).isNotEmpty();
 			assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly(expectedIdentifiers.toArray(new String[] {}));
 		}
 	}
@@ -327,9 +327,9 @@ public class Assertor {
 		arguments.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,identifier);
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(arguments);
 		if(CollectionHelper.isEmpty(expectedIdentifiers)) {
-			assertThat(expenditures).as("Aucune lignes de dépenses trouvées dans la version de l'acte budgétaire identifié par "+identifier).isNull();
+			assertThat(expenditures).as("Aucune dépenses trouvées dans la version de l'acte budgétaire identifié par "+identifier).isNull();
 		}else {
-			assertThat(expenditures).as("Des lignes de dépenses trouvées dans la version de l'acte budgétaire identifié par "+identifier).isNotEmpty();
+			assertThat(expenditures).as("Des dépenses trouvées dans la version de l'acte budgétaire identifié par "+identifier).isNotEmpty();
 			assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly(expectedIdentifiers.toArray(new String[] {}));
 		}
 	}
@@ -366,9 +366,9 @@ public class Assertor {
 		arguments.addFilterFieldsValues(Parameters.EXPENDITURE_NATURE_IDENTIFIER,identifier);
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(arguments);
 		if(CollectionHelper.isEmpty(expectedIdentifiers)) {
-			assertThat(expenditures).as("Aucune lignes de dépenses trouvées avec la nature de dépense identifiée par "+identifier).isNull();
+			assertThat(expenditures).as("Aucune dépenses trouvées avec la nature de dépense identifiée par "+identifier).isNull();
 		}else {
-			assertThat(expenditures).as("Des lignes de dépenses trouvées avec la nature de dépense identifiée par "+identifier).isNotEmpty();
+			assertThat(expenditures).as("Des dépenses trouvées avec la nature de dépense identifiée par "+identifier).isNotEmpty();
 			assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly(expectedIdentifiers.toArray(new String[] {}));
 		}
 	}

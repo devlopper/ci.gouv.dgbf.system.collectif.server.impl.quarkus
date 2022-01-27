@@ -56,7 +56,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 				for(Object[] array : arrays) {
 					if(identifier.equals(array[0])) {
 						if(value == null || value.length < 2) {
-							throwablesMessages.add(String.format("L'autorisation d'engagement et le crédit de paiement sont obligatoire pour la validation de la ligne %s", identifier));
+							throwablesMessages.add(String.format("L'autorisation d'engagement et le crédit de paiement sont obligatoire pour la validation de la %s %s",ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure.NAME, identifier));
 						}else {
 							addAvailableNotEnoughForAdjustmentIfTrue(identifier, "A.E.", 0, value, array, entryAuthorizationAvailableIndex, paymentCreditAvailableIndex, throwablesMessages);
 							addAvailableNotEnoughForAdjustmentIfTrue(identifier, "C.P.", 1, value, array, entryAuthorizationAvailableIndex, paymentCreditAvailableIndex, throwablesMessages);
@@ -67,7 +67,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		}
 		
 		private static void addAvailableNotEnoughForAdjustmentIfTrue(String identifier,String amountName,Integer amountIndex,Long[] amounts,Object[] array,Integer entryAuthorizationAvailableIndex,Integer paymentCreditAvailableIndex,ThrowablesMessages throwablesMessages) {
-			throwablesMessages.addIfTrue(String.format("La ligne %s à un disponible %s insuffisant(%s,%s)", identifier,amountName,amounts[amountIndex],array[entryAuthorizationAvailableIndex])
+			throwablesMessages.addIfTrue(String.format("La %s %s à un disponible %s insuffisant(%s,%s)",ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure.NAME, identifier,amountName,amounts[amountIndex],array[entryAuthorizationAvailableIndex])
 					, !Boolean.TRUE.equals(isAvailableEnoughForAdjustment((Long)array[entryAuthorizationAvailableIndex], amounts[amountIndex])));
 		}
 		

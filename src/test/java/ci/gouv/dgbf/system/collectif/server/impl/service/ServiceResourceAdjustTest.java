@@ -40,7 +40,7 @@ public class ServiceResourceAdjustTest {
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
         	;
-		assertThat(response.then().extract().asString()).isEqualTo("Nombre de ligne de ressource mise à jour : 1");
+		assertThat(response.then().extract().asString()).isEqualTo("Nombre de Ressource mise à jour : 1");
 		
 		
 		assertor.assertRevenue("1", 3l);

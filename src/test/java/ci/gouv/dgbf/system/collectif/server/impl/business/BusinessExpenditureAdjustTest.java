@@ -67,7 +67,7 @@ public class BusinessExpenditureAdjustTest {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			expenditureBusiness.adjustByEntryAuthorizations(Map.of("identifier_available_not_enough",-2l),"anonymous");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("La ligne identifier_available_not_enough à un disponible A.E. insuffisant(-2,0)\r\nLa ligne identifier_available_not_enough à un disponible C.P. insuffisant(-2,0)");
+		assertThat(exception.getMessage()).isEqualTo("La Dépense identifier_available_not_enough à un disponible A.E. insuffisant(-2,0)\r\nLa Dépense identifier_available_not_enough à un disponible C.P. insuffisant(-2,0)");
 	}
 	
 	@Test
@@ -75,7 +75,7 @@ public class BusinessExpenditureAdjustTest {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			expenditureBusiness.adjust(Map.of("identifier_available_not_enough",new Long[] {-2l,-2l}),"anonymous");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("La ligne identifier_available_not_enough à un disponible A.E. insuffisant(-2,0)\r\nLa ligne identifier_available_not_enough à un disponible C.P. insuffisant(-2,0)");
+		assertThat(exception.getMessage()).isEqualTo("La Dépense identifier_available_not_enough à un disponible A.E. insuffisant(-2,0)\r\nLa Dépense identifier_available_not_enough à un disponible C.P. insuffisant(-2,0)");
 	}
 	
 	@Test

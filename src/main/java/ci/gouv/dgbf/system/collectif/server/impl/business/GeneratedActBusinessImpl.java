@@ -21,6 +21,7 @@ import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.GeneratedActBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActExpenditurePersistence;
@@ -128,7 +129,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 						}
 					}
 				if(regulatoryActExpenditureExist == null)
-					throwablesMessages.add(String.format("L'acte de gestion %s n'a pas de lignes de dépenses", regulatoryAct.getName()));
+					throwablesMessages.add(String.format("L'acte de gestion %s n'a pas de %s", regulatoryAct.getName(),Expenditure.NAME));
 			}
 			throwablesMessages.throwIfNotEmpty();
 			

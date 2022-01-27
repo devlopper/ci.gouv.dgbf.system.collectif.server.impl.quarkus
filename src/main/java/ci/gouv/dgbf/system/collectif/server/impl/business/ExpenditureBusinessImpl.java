@@ -68,8 +68,8 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		});
 
 		// Return of message
-		result.close().setName(String.format("Ajustement de %s dépense(s) par %s",expenditures.size(),auditWho)).log(getClass());
-		result.addMessages(String.format("Nombre de ligne de dépense mise à jour : %s", expenditures.size()));
+		result.close().setName(String.format("Ajustement de %s %s(s) par %s",expenditures.size(),Expenditure.NAME,auditWho)).log(getClass());
+		result.addMessages(String.format("Nombre de %s mise à jour : %s",Expenditure.NAME, expenditures.size()));
 		return result;
 	}
 	

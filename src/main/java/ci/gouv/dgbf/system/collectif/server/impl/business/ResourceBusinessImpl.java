@@ -53,8 +53,8 @@ public class ResourceBusinessImpl extends AbstractSpecificBusinessImpl<Resource>
 		});
 
 		// Return of message
-		result.close().setName(String.format("Ajustement de %s ressource(s) par %s",resources.size(),auditWho)).log(getClass());
-		result.addMessages(String.format("Nombre de ligne de ressource mise à jour : %s", resources.size()));
+		result.close().setName(String.format("Ajustement de %s %s(s) par %s",resources.size(),Resource.NAME,auditWho)).log(getClass());
+		result.addMessages(String.format("Nombre de %s mise à jour : %s",Resource.NAME, resources.size()));
 		return result;
 	}
 }
