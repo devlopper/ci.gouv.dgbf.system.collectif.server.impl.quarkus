@@ -51,7 +51,7 @@ public class PersistenceLegislativeActVersionReadTest {
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne("1_1",List.of(LegislativeActVersionImpl.FIELD_GENERATED_ACT_COUNT));
 		assertThat(legislativeActVersion).isNotNull();
 		assertThat(legislativeActVersion.getIdentifier()).isEqualTo("1_1");
-		assertThat(legislativeActVersion.getGeneratedActCount()).isEqualTo(null);
+		assertThat(legislativeActVersion.getGeneratedActCount()).isEqualTo(Short.valueOf("0"));
 	}
 	
 	@Test

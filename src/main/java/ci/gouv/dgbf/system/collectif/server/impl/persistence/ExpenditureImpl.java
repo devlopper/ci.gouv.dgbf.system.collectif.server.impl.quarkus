@@ -140,7 +140,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String FIELDS_AUDITS_AS_STRINGS = "auditsAsStrings";
 		
 	public static final String ENTITY_NAME = "ExpenditureImpl";
-	public static final String TABLE_NAME = "TA_LIGNE_DEPENSE";
+	public static final String TABLE_NAME = "TA_DEPENSE";
 	
 	public static final String COLUMN_IDENTIFIER = "identifiant";
 	public static final String COLUMN_ACTIVITY_IDENTIFIER = "activite";

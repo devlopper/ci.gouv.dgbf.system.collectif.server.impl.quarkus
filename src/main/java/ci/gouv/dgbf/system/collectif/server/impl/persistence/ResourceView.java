@@ -90,5 +90,5 @@ public class ResourceView extends AbstractIdentifiableSystemScalarStringImpl imp
 	public static final String COLUMN_ECONOMIC_NATURE_CODE_NAME = "nature_economique_code_libelle";
 	
 	public static final String ENTITY_NAME = "ResourceView";
-	public static final String TABLE_NAME = "VMA_LIGNE_RECETTE";
+	public static final String TABLE_NAME = "VMA_RECETTE";
 }

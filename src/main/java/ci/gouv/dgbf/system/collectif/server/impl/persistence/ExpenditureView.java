@@ -160,5 +160,5 @@ public class ExpenditureView extends AbstractIdentifiableSystemScalarStringImpl 
 	public static final String COLUMN_LESSOR_CODE_NAME = "bailleur_code_libelle";
 	
 	public static final String ENTITY_NAME = "ExpenditureView";
-	public static final String TABLE_NAME = "VMA_LIGNE_DEPENSE";
+	public static final String TABLE_NAME = "VMA_DEPENSE";
 }

@@ -26,7 +26,7 @@ public class ExpenditureAvailableView extends AbstractIdentifiableSystemScalarSt
 	public static final String FIELD_PAYMENT_CREDIT = "paymentCredit";
 	
 	public static final String ENTITY_NAME = "ExpenditureAvailableView";
-	public static final String TABLE_NAME = "VA_LIGNE_DEPENSE_DISPONIBLE";
+	public static final String TABLE_NAME = "VA_DEPENSE_DISPONIBLE";
 	
 	public static final String COLUMN_ENTRY_AUTHORIZATION = "AE";
 	public static final String COLUMN_PAYMENT_CREDIT = "CP";

@@ -41,7 +41,7 @@ public class RegulatoryActResourceImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELD_REVENUE_AMOUNT = "revenueAmount";
 	
 	public static final String ENTITY_NAME = "RegulatoryActResourceImpl";
-	public static final String TABLE_NAME = "VMA_ACTE_GESTION_LIGNE_RECETTE";
+	public static final String TABLE_NAME = "VMA_ACTE_GESTION_RECETTE";
 	
 	public static final String COLUMN_ACT_IDENTIFIER = "acte";
 	public static final String COLUMN_YEAR = "exercice";

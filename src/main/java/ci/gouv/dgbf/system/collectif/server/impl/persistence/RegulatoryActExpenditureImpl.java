@@ -47,7 +47,7 @@ public class RegulatoryActExpenditureImpl extends AbstractIdentifiableSystemScal
 	public static final String FIELD_PAYMENT_CREDIT_AMOUNT = "paymentCreditAmount";
 	
 	public static final String ENTITY_NAME = "RegulatoryActExpenditureImpl";
-	public static final String TABLE_NAME = "VMA_ACTE_GESTION_LIGNE_DEPENSE";
+	public static final String TABLE_NAME = "VMA_ACTE_GESTION_DEPENSE";
 	
 	public static final String COLUMN_ACT_IDENTIFIER = "acte";
 	public static final String COLUMN_YEAR = "exercice";

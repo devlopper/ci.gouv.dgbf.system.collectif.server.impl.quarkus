@@ -30,13 +30,6 @@ LEFT JOIN categorie_activite@dblink_elabo_bidf ca on ca.catv_id = ld.catv_id
 LEFT JOIN source_financement@dblink_elabo_bidf sf on sf.sfin_id = fd.sfin_id
 LEFT JOIN bailleur@dblink_elabo_bidf b on b.bai_id = fd.bai_id
 
-CREATE OR REPLACE VIEW VA_LIGNE_DEPENSE_DISPONIBLE AS
-SELECT
-    fd.find_id AS "IDENTIFIANT"
-    ,NVL(vlb.DISPONIBLE_AE,0) AS "DISPONIBLE_AE",NVL(vlb.DISPONIBLE_CP,0) AS "DISPONIBLE_CP"
-FROM financement_depenses@dblink_elabo_bidf fd
-LEFT JOIN vs_ligne_budgetaire@dblink_elabo_bidf vlb on vlb.fin_id = fd.find_id,
-
 CREATE OR REPLACE VIEW VA_LIGNE_DEPENSE_MOUVEMENT AS
 SELECT
 	ld.identifiant AS "IDENTIFIANT"

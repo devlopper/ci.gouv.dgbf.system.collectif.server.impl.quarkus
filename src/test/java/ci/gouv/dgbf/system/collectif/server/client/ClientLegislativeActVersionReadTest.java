@@ -53,9 +53,9 @@ public class ClientLegislativeActVersionReadTest {
 		List<LegislativeActVersion> legislativeActVersions = ResponseHelper.getEntityAsListFromJson(LegislativeActVersion.class,response);
 		assertThat(legislativeActVersions).hasSize(5);
 		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("1_1","1_2","2_1","2_2","2_3");
-		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActCount()).collect(Collectors.toList())).containsExactly(null,null,Short.valueOf("1"),null,null);
-		assertThat(legislativeActVersions.stream().map(e -> e.getActGeneratable()).collect(Collectors.toList())).containsExactly(null,null,Boolean.FALSE,null,null);
-		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActDeletable()).collect(Collectors.toList())).containsExactly(null,null,Boolean.TRUE,null,null);
+		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActCount()).collect(Collectors.toList())).containsExactly(Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("1"),Short.valueOf("0"),Short.valueOf("0"));
+		assertThat(legislativeActVersions.stream().map(e -> e.getActGeneratable()).collect(Collectors.toList())).containsExactly(Boolean.TRUE,Boolean.TRUE,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE);
+		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActDeletable()).collect(Collectors.toList())).containsExactly(Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE);
     }
 	
 	@Test

@@ -91,3 +91,7 @@ FROM SIIBC_FINEXT.bailleur b;
 CREATE OR REPLACE VIEW VA_SOURCE_FINANCEMENT AS
 SELECT sf.uuid AS "IDENTIFIANT",sf.src_code AS "CODE",sf.src_libelle AS "LIBELLE"
 FROM SIIBC_BUDGET.source_financement sf;
+
+CREATE OR REPLACE VIEW VA_DEPENSE_DISPONIBLE AS
+SELECT fd.find_id AS "IDENTIFIANT",0 AS "AE",0 AS "CP"
+FROM financement_depenses@dblink_elabo_bidf fd;

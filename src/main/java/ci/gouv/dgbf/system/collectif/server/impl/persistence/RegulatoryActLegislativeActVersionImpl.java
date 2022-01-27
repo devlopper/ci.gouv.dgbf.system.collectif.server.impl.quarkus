@@ -64,7 +64,7 @@ public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiable
 	public static final String FIELD_ACTS_GENERATED = "actsGenerated";
 	
 	public static final String ENTITY_NAME = "RegulatoryActLegislativeActVersionImpl";
-	public static final String TABLE_NAME = "TA_ACTE_GESTION_VERSION_ACTE";
+	public static final String TABLE_NAME = "TA_ACTE_GESTION_V_COLLECTIF";
 	
 	public static final String COLUMN_REGULATORY_ACT = "ACTE_GESTION";
 	public static final String COLUMN_LEGISLATIVE_ACT_VERSION = "VERSION_ACTE";

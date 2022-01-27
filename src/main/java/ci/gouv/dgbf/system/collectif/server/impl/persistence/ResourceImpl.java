@@ -107,7 +107,7 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	public static final String FIELDS_AUDITS_AS_STRINGS = "auditsAsStrings";
 		
 	public static final String ENTITY_NAME = "ResourceImpl";
-	public static final String TABLE_NAME = "TA_LIGNE_RECETTE";
+	public static final String TABLE_NAME = "TA_RECETTE";
 	
 	public static final String COLUMN_IDENTIFIER = "IDENTIFIANT";
 	public static final String COLUMN_ACTIVITY_IDENTIFIER = "ACTIVITE";
