@@ -45,6 +45,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAudi
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAuditsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplPaymentCreditAdjustmentReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplVersionIdentifierReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplAuditsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedReader;
@@ -71,6 +72,13 @@ public class Assertor {
 		assertThat(arrays).hasSize(1);
 		assertThat(CollectionHelper.getElementAt(arrays, 0)[0]).isEqualTo(identifier);
 		assertThat(CollectionHelper.getElementAt(arrays, 0)[1]).isEqualTo(expectedVersionIdentifier);
+	}
+	
+	public void assertLegislativeActInProgress(String identifier,Boolean expectedInProgress) {
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) actPersistence.readOne(identifier, List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_IN_PROGRESS));
+		assertThat(legislativeAct).isNotNull();
+		assertThat(legislativeAct.getIdentifier()).isEqualTo(identifier);
+		assertThat(legislativeAct.getInProgress()).isEqualTo(expectedInProgress);
 	}
 	
 	public void assertGeneratedActIdentifiersByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier,Collection<String> expectedIdentifiers) {

@@ -49,11 +49,37 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		throwablesMessages.throwIfNotEmpty();
 		
 		legislativeAct.setDefaultVersion(legislativeActVersion);
-		audit(legislativeActVersion, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		audit(legislativeAct, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
 		entityManager.merge(legislativeAct);
 		// Return of message
 		result.close().setName(String.format("Mise à jour de la version par défaut de %s avec %s par %s",LegislativeActVersion.NAME,legislativeAct.getName(),legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Version par défaut de %s : %s",legislativeAct.getName(),legislativeActVersion.getName()));
+		return result;
+	}
+	
+	@Override @Transactional
+	public Result updateInProgress(String legislativeActIdentifier,Boolean inProgress, String auditWho) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		ValidatorImpl.LegislativeAct.validateUpdateInProgressInputs(legislativeActIdentifier,inProgress,auditWho, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		LegislativeActImpl legislativeAct;
+		try {
+			legislativeAct = entityManager.createNamedQuery(LegislativeActImpl.QUERY_READ_BY_IDENTIIFER,LegislativeActImpl.class).setParameter("identifier", legislativeActIdentifier).getSingleResult();
+		}catch(NoResultException exception) {
+			legislativeAct = null;
+		}	
+		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeAct.NAME, legislativeActIdentifier),legislativeAct == null);
+		throwablesMessages.addIfTrue(String.format("%s %sest %s en cours",legislativeAct.getName(),inProgress ? "" : "n'",inProgress ? "déja" : "pas"), legislativeAct.getInProgress() != null && inProgress == legislativeAct.getInProgress());
+		throwablesMessages.throwIfNotEmpty();
+		
+		legislativeAct.setInProgress(inProgress);
+		audit(legislativeAct, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		entityManager.merge(legislativeAct);
+		// Return of message
+		result.close().setName(String.format("Mise à jour de <<en cours>> de %s avec %s par %s",LegislativeActVersion.NAME,legislativeAct.getName(),inProgress,auditWho)).log(getClass());
+		result.addMessages(String.format("<<en cours>> de %s : %s",legislativeAct.getName(),inProgress ? "Oui" : "Non"));
 		return result;
 	}
 	

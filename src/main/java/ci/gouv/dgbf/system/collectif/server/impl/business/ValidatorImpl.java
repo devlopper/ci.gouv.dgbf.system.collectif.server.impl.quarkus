@@ -45,7 +45,11 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			validateAuditWho(auditWho, throwablesMessages);
 		}
 		
-		
+		static void validateUpdateInProgressInputs(String legislativeActIdentifier,Boolean inProgress,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
+			throwablesMessages.addIfTrue("La valeur <<en cours>> est requise", inProgress == null);
+			validateAuditWho(auditWho, throwablesMessages);
+		}
 	}
 	
 	public static interface LegislativeActVersion {

@@ -41,7 +41,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@Transient ExerciseImpl exercise;
 	
 	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
-	@NotNull @Column(name = COLUMN_IN_PROGRESS) Boolean inProgress;
+	@NotNull @Column(name = COLUMN_IN_PROGRESS,nullable = false) Boolean inProgress;
 	@Transient String versionIdentifier;
 	
 	@Override
