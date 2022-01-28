@@ -41,13 +41,14 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 			legislativeAct = entityManager.createNamedQuery(LegislativeActImpl.QUERY_READ_BY_IDENTIIFER,LegislativeActImpl.class).setParameter("identifier", legislativeActIdentifier).getSingleResult();
 		}catch(NoResultException exception) {
 			legislativeAct = null;
-		}
+		}	
 		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeAct.NAME, legislativeActIdentifier),legislativeAct == null);
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) legislativeActVersionPersistence.readOne(legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_NAME));
 		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier),legislativeActVersion == null);
+		throwablesMessages.addIfTrue("La version par défaut existe déja",legislativeAct.getDefaultVersion() != null && legislativeActVersionIdentifier.equals(legislativeAct.getDefaultVersion().getIdentifier()));
 		throwablesMessages.throwIfNotEmpty();
 		
-		legislativeAct.setVersion(legislativeActVersion);
+		legislativeAct.setDefaultVersion(legislativeActVersion);
 		audit(legislativeActVersion, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
 		entityManager.merge(legislativeAct);
 		// Return of message

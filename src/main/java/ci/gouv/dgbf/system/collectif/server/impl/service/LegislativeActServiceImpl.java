@@ -29,7 +29,6 @@ public class LegislativeActServiceImpl extends AbstractSpecificServiceImpl<Legis
 
 	@Override
 	public Response updateDefaultVersion(String identifier, String versionIdentifier, String auditWho) {
-		// TODO Auto-generated method stub
-		return null;
+		return buildResponseOk(business.updateDefaultVersion(identifier, versionIdentifier, auditWho));
 	}
 }

@@ -11,7 +11,7 @@ public class LegislativeActImplVersionIdentifierReader extends AbstractLegislati
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
 		arguments.getProjection(Boolean.TRUE).addFromTuple("t",LegislativeActImpl.FIELD_IDENTIFIER);
 		arguments.getProjection(Boolean.TRUE).addFromTuple("lav",LegislativeActVersionImpl.FIELD_IDENTIFIER);
-		arguments.getTuple(Boolean.TRUE).addJoins("LEFT JOIN LegislativeActVersionImpl lav ON lav = t.version");
+		arguments.getTuple(Boolean.TRUE).addJoins("LEFT JOIN LegislativeActVersionImpl lav ON lav = t.defaultVersion");
 		return arguments;
 	}
 	

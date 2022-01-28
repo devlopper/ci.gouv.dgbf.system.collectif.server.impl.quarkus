@@ -193,6 +193,28 @@ public interface Profiles {
 	}
 
 	public interface Business {
+		public interface LegislativeAct {
+			public class UpdateDefaultVersion implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(UpdateDefaultVersion.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(UpdateDefaultVersion.class);
+				}
+			}
+			
+			public static Set<String> buildTags(Class<?>...classes) {
+				return Business.buildTags(ArrayUtils.addFirst(classes, LegislativeAct.class));
+			}
+			
+			public static Map<String,String> buildConfig(Class<?>...classes) {
+				return Business.buildConfig(ArrayUtils.addFirst(classes, LegislativeAct.class));
+			}
+		}
+		
 		public interface Expenditure {
 			public class Adjust implements QuarkusTestProfile {
 				@Override

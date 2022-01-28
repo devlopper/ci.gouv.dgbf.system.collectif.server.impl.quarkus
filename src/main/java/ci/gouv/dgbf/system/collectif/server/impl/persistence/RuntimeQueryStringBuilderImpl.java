@@ -72,6 +72,9 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 						,LegislativeActVersionImpl.FIELD_ACT,versionIdentifier));
 				arguments.removeFilterFields(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER);
 			}
+			if(arguments.getFilterField(Parameters.EXERCISE_YEAR) != null) {
+				builderArguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = t.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+			}
 		}
 		
 		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(arguments))) {
@@ -154,6 +157,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				arguments.setNumberOfTuples(1);
 			}
 			arguments.removeFilterFields(Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
+		}else if(Boolean.TRUE.equals(legislativeActPersistence.isProcessable(arguments))) {
+			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
+				builderArguments.getOrder(Boolean.TRUE).asc("t", "code");
+			}
 		}
 		
 		super.setOrder(arguments, builderArguments);
@@ -221,7 +228,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			predicate.add(String.format("EXISTS(SELECT bav.identifier FROM %s bav WHERE bav.act.identifier = :%s)",arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER)));
 		}
 		if(arguments.getFilterField(Parameters.EXERCISE_YEAR) != null) {
-			predicate.add(String.format("t.exercise.year = :%s",Parameters.EXERCISE_YEAR));
+			predicate.add(String.format("exercise.year = :%s",Parameters.EXERCISE_YEAR));
 			filter.addField(Parameters.EXERCISE_YEAR, NumberHelper.get(Short.class, arguments.getFilterFieldValue(Parameters.EXERCISE_YEAR)));
 		}
 		Boolean inProgress = arguments.getFilterFieldValueAsBoolean(null,Parameters.LEGISLATIVE_ACT_IN_PROGRESS);
@@ -301,10 +308,9 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	}
 	
 	public static void populatePredicateRegulatoryAct(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
-		//addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.YEAR);
 		String legislativeActVersionIdentifier = (String) arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER);
 		if(StringHelper.isNotBlank(legislativeActVersionIdentifier)) {
-			predicate.add(String.format("EXISTS(SELECT lav.identifier FROM LegislativeActVersionImpl lav JOIN LegislativeActImpl la ON la = lav.act AND lav.identifier = :%s WHERE t.year = la.exercise.year)",Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
+			predicate.add(String.format("EXISTS(SELECT lav.identifier FROM LegislativeActVersionImpl lav JOIN LegislativeActImpl la ON la = lav.act JOIN ExerciseImpl e ON e.identifier = la.exerciseIdentifier AND lav.identifier = :%s WHERE t.year = e.year)",Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
 			filter.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, legislativeActVersionIdentifier);
 		}
 		

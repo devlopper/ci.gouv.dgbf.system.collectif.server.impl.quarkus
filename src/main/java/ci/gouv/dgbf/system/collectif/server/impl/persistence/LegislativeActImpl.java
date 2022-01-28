@@ -37,8 +37,10 @@ import lombok.experimental.Accessors;
 })
 public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeAct,Serializable {
 
-	@ManyToOne @JoinColumn(name = COLUMN_EXERCISE) ExerciseImpl exercise;
-	@ManyToOne @JoinColumn(name = COLUMN_VERSION) LegislativeActVersionImpl version;
+	@Column(name = COLUMN_EXERCISE) String exerciseIdentifier;
+	@Transient ExerciseImpl exercise;
+	
+	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
 	@NotNull @Column(name = COLUMN_IN_PROGRESS) Boolean inProgress;
 	@Transient String versionIdentifier;
 	
@@ -57,8 +59,9 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 		return (LegislativeActImpl) super.setName(name);
 	}
 	
+	public static final String FIELD_EXERCISE_IDENTIFIER = "exerciseIdentifier";
 	public static final String FIELD_EXERCISE = "exercise";
-	public static final String FIELD_VERSION = "version";
+	public static final String FIELD_DEFAULT_VERSION = "defaultVersion";
 	public static final String FIELD_IN_PROGRESS = "inProgress";
 	public static final String FIELD_VERSION_IDENTIFIER = "version_identifier";
 	
@@ -70,7 +73,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String TABLE_NAME = "TA_COLLECTIF";
 	
 	public static final String COLUMN_EXERCISE = "EXERCICE";
-	public static final String COLUMN_VERSION = "VERSION";
+	public static final String COLUMN_DEFAULT_VERSION = "VERSION_PAR_DEFAUT";
 	public static final String COLUMN_IN_PROGRESS = "EN_COURS";
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";
 	public static final String COLUMN_REFERENCE = "REFERENCE";

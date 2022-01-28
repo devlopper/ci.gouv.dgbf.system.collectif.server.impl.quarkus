@@ -45,6 +45,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAudi
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAuditsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplPaymentCreditAdjustmentReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplVersionIdentifierReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplAuditsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImpl;
@@ -64,6 +65,13 @@ public class Assertor {
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
 	@Inject SpecificServiceGetter specificServiceGetter;
 	@Inject LegislativeActVersionController actVersionController;
+	
+	public void assertLegislativeActVersionIdentifier(String identifier,String expectedVersionIdentifier) {
+		Collection<Object[]> arrays = new LegislativeActImplVersionIdentifierReader().readByIdentifiers(List.of(identifier), null);
+		assertThat(arrays).hasSize(1);
+		assertThat(CollectionHelper.getElementAt(arrays, 0)[0]).isEqualTo(identifier);
+		assertThat(CollectionHelper.getElementAt(arrays, 0)[1]).isEqualTo(expectedVersionIdentifier);
+	}
 	
 	public void assertGeneratedActIdentifiersByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier,Collection<String> expectedIdentifiers) {
 		assertIdentifiers(generatedActPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier)), expectedIdentifiers);
