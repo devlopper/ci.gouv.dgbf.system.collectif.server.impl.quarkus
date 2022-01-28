@@ -97,6 +97,7 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 
 	@Override @Transactional
 	public Result import_(String legislativeActVersionIdentifier,String auditWho) {
+		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
 		ValidatorImpl.Expenditure.validateImport(legislativeActVersionIdentifier,auditWho, throwablesMessages);
@@ -104,7 +105,6 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier),legislativeActVersion == null);
 		throwablesMessages.throwIfNotEmpty();
 		
-		Result result = new Result().open();
 		Long count = persistence.count();
 		persistence.import_(legislativeActVersionIdentifier,auditWho, IMPORT_AUDIT_IDENTIFIER, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(LocalDateTime.now())));
 		count = NumberHelper.getLong(NumberHelper.subtract(persistence.count(),count));

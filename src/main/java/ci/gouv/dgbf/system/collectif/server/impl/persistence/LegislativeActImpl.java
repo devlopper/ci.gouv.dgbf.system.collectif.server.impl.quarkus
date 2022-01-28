@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -24,6 +26,9 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) 
 @Entity(name = LegislativeActImpl.ENTITY_NAME) @Access(AccessType.FIELD)
 @Table(name=LegislativeActImpl.TABLE_NAME)
+@NamedQueries(value = {
+		@NamedQuery(name = LegislativeActImpl.QUERY_READ_BY_IDENTIIFER,query = "SELECT t FROM LegislativeActImpl t WHERE t.identifier = :identifier")
+})
 @AttributeOverrides(value= {
 		@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHO__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHAT__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHAT__,nullable = false))
@@ -74,4 +79,6 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
 	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";
 	public static final String COLUMN___AUDIT_WHEN__ = "AUDIT_DATE";
+	
+	public static final String QUERY_READ_BY_IDENTIIFER = "LegislativeActImpl.readByIdentifier";
 }

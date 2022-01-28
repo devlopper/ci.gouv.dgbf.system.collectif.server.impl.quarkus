@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 
 import org.cyk.utility.service.server.AbstractSpecificServiceImpl;
 
@@ -24,5 +25,11 @@ public class LegislativeActServiceImpl extends AbstractSpecificServiceImpl<Legis
 		this.serviceEntityImplClass = LegislativeActDtoImpl.class;
 		this.persistenceEntityClass = LegislativeAct.class;
 		this.persistenceEntityImplClass = LegislativeActImpl.class;
+	}
+
+	@Override
+	public Response updateDefaultVersion(String identifier, String versionIdentifier, String auditWho) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

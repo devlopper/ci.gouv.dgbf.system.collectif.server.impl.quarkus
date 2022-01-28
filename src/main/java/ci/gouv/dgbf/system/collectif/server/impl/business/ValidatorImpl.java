@@ -28,13 +28,24 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	}
 
 	/**/
+
+	static void validateLegislativeActVersionIdentifier(String legislativeActVersionIdentifier,ThrowablesMessages throwablesMessages) {
+		throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
+	}
 	
 	static void validateAuditWho(String auditWho,ThrowablesMessages throwablesMessages) {
 		throwablesMessages.addIfTrue("Le nom d'utilisateur est requis", StringHelper.isBlank(auditWho));
 	}
 	
-	static void validateLegislativeActVersionIdentifier(String legislativeActVersionIdentifier,ThrowablesMessages throwablesMessages) {
-		throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
+	public static interface LegislativeAct {
+		
+		static void validateUpdateDefaultVersionInputs(String legislativeActIdentifier,String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
+			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+		}
+		
+		
 	}
 	
 	public static interface LegislativeActVersion {
