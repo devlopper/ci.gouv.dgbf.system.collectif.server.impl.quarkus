@@ -114,8 +114,8 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		return result;
 	}
 	
-	@Scheduled(every = "30s")
-	void automaticallyImport() {
+	@Scheduled(cron = "{cyk.expenditure.import.cron}")
+	void importAutomatically() {
 		Collection<LegislativeActImpl> legislativeActs = CollectionHelper.cast(LegislativeActImpl.class,legislativeActPersistence.readMany(new QueryExecutorArguments()
 				.addProjectionsFromStrings(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_NAME).addProcessableTransientFieldsNames(LegislativeActImpl.FIELD_VERSION_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_IN_PROGRESS,Boolean.TRUE)));
