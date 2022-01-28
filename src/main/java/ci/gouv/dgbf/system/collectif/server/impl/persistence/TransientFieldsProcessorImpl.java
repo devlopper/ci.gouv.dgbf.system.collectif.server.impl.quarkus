@@ -13,6 +13,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Action;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Activity;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecializationUnit;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct;
@@ -29,6 +30,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 			processExpenditures(CollectionHelper.cast(ExpenditureImpl.class, objects),fieldsNames);
 		else if(Resource.class.equals(klass) || ResourceImpl.class.equals(klass))
 			processResources(CollectionHelper.cast(ResourceImpl.class, objects),fieldsNames);
+		else if(LegislativeAct.class.equals(klass) || LegislativeActImpl.class.equals(klass))
+			processLegislativeActs(CollectionHelper.cast(LegislativeActImpl.class, objects),fieldsNames);
 		else if(LegislativeActVersion.class.equals(klass) || LegislativeActVersionImpl.class.equals(klass))
 			processLegislativeActVersions(CollectionHelper.cast(LegislativeActVersionImpl.class, objects),fieldsNames);
 		else if(Activity.class.equals(klass) || ActivityImpl.class.equals(klass))
@@ -43,6 +46,13 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 			processRegulatoryActs(CollectionHelper.cast(RegulatoryActImpl.class, objects),filter,fieldsNames);
 		else
 			super.__process__(klass,objects,filter, fieldsNames);
+	}
+	
+	public void processLegislativeActs(Collection<LegislativeActImpl> legislativeActs,Collection<String> fieldsNames) {
+		for(String fieldName : fieldsNames) {
+			if(LegislativeActImpl.FIELD_VERSION_IDENTIFIER.equals(fieldName))
+				new LegislativeActImplVersionIdentifierReader().readThenSet(legislativeActs, null);
+		}
 	}
 	
 	public void processLegislativeActVersions(Collection<LegislativeActVersionImpl> legislativeActVersions,Collection<String> fieldsNames) {

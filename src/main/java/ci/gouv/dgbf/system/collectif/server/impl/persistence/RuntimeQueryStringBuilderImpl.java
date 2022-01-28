@@ -224,6 +224,11 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			predicate.add(String.format("t.exercise.year = :%s",Parameters.EXERCISE_YEAR));
 			filter.addField(Parameters.EXERCISE_YEAR, NumberHelper.get(Short.class, arguments.getFilterFieldValue(Parameters.EXERCISE_YEAR)));
 		}
+		Boolean inProgress = arguments.getFilterFieldValueAsBoolean(null,Parameters.LEGISLATIVE_ACT_IN_PROGRESS);
+		if(inProgress != null) {
+			predicate.add(String.format("(t.%s = :%s)",LegislativeActImpl.FIELD_IN_PROGRESS,Parameters.LEGISLATIVE_ACT_IN_PROGRESS));
+			filter.addField(Parameters.LEGISLATIVE_ACT_IN_PROGRESS, inProgress);
+		}
 	}
 	
 	public static void populatePredicateLegislativeActVersion(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {

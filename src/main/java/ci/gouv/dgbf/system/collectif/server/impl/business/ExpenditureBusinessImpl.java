@@ -14,11 +14,15 @@ import javax.transaction.Transactional;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.log.LogHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
+import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
+import org.cyk.utility.persistence.entity.EntityLifeCycleListener;
+import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
@@ -31,6 +35,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import io.quarkus.scheduler.Scheduled;
 
 @ApplicationScoped
@@ -95,25 +100,33 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
 		ValidatorImpl.Expenditure.validateImport(legislativeActVersionIdentifier,auditWho, throwablesMessages);
-		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier), legislativeActVersionPersistence.readOne(legislativeActVersionIdentifier) == null);
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) legislativeActVersionPersistence.readOne(legislativeActVersionIdentifier);
+		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier),legislativeActVersion == null);
 		throwablesMessages.throwIfNotEmpty();
 		
 		Result result = new Result().open();
 		Long count = persistence.count();
-		persistence.import_(legislativeActVersionIdentifier,auditWho, IMPORT_AUDIT_IDENTIFIER, "CREATION", new java.sql.Date(TimeHelper.toMillisecond(LocalDateTime.now())));
+		persistence.import_(legislativeActVersionIdentifier,auditWho, IMPORT_AUDIT_IDENTIFIER, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(LocalDateTime.now())));
 		count = NumberHelper.getLong(NumberHelper.subtract(persistence.count(),count));
 		// Return of message
-		result.close().setName(String.format("Importation de %s %s(s) par %s",count,Expenditure.NAME,auditWho)).log(getClass());
+		result.close().setName(String.format("Importation de %s %s(s) dans %s par %s",count,Expenditure.NAME,legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Nombre de %s importée : %s",Expenditure.NAME, count));
 		return result;
 	}
 	
-	@Scheduled(every = "120s")
+	@Scheduled(every = "30s")
 	void automaticallyImport() {
-		LegislativeActImpl legislativeAct = (LegislativeActImpl) legislativeActPersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActImpl.FIELD_VERSION)
-				.addFilterFieldsValues(Parameters.LATEST_LEGISLATIVE_ACT,Boolean.TRUE));
-		if(legislativeAct == null)
+		Collection<LegislativeActImpl> legislativeActs = CollectionHelper.cast(LegislativeActImpl.class,legislativeActPersistence.readMany(new QueryExecutorArguments()
+				.addProjectionsFromStrings(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_NAME).addProcessableTransientFieldsNames(LegislativeActImpl.FIELD_VERSION_IDENTIFIER)
+				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_IN_PROGRESS,Boolean.TRUE)));
+		if(CollectionHelper.isEmpty(legislativeActs))
 			return;
-		import_("1", "SYSTEME");
+		for(LegislativeActImpl legislativeAct : legislativeActs) {
+			if(StringHelper.isBlank(legislativeAct.getVersionIdentifier())) {
+				LogHelper.logWarning(String.format("Aucune %s ne peut être automatiquement importée dans %s car aucune version par défaut n'a été définie",Expenditure.NAME, legislativeAct.getName()), getClass());
+				continue;
+			}
+			import_(legislativeAct.getVersionIdentifier(), EntityLifeCycleListenerImpl.SYSTEM_USER_NAME);
+		}
 	}
 }

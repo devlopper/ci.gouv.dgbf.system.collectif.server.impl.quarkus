@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
 
@@ -33,6 +34,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 
 	@ManyToOne @JoinColumn(name = COLUMN_EXERCISE) ExerciseImpl exercise;
 	@ManyToOne @JoinColumn(name = COLUMN_VERSION) LegislativeActVersionImpl version;
+	@NotNull @Column(name = COLUMN_IN_PROGRESS) Boolean inProgress;
 	@Transient String versionIdentifier;
 	
 	@Override
@@ -52,6 +54,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	
 	public static final String FIELD_EXERCISE = "exercise";
 	public static final String FIELD_VERSION = "version";
+	public static final String FIELD_IN_PROGRESS = "inProgress";
 	public static final String FIELD_VERSION_IDENTIFIER = "version_identifier";
 	
 	public static final String FIELD_SIGNATORY = "signatory";
@@ -63,6 +66,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	
 	public static final String COLUMN_EXERCISE = "EXERCICE";
 	public static final String COLUMN_VERSION = "VERSION";
+	public static final String COLUMN_IN_PROGRESS = "EN_COURS";
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";
 	public static final String COLUMN_REFERENCE = "REFERENCE";
 	
