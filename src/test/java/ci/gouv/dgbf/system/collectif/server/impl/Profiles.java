@@ -194,6 +194,18 @@ public interface Profiles {
 
 	public interface Business {
 		public interface LegislativeAct {
+			public class Create implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Create.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Create.class);
+				}
+			}
+			
 			public class UpdateDefaultVersion implements QuarkusTestProfile {
 				@Override
 				public Map<String, String> getConfigOverrides() {

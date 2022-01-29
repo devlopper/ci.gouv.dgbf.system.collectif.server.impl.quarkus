@@ -63,7 +63,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String FIELD_EXERCISE = "exercise";
 	public static final String FIELD_DEFAULT_VERSION = "defaultVersion";
 	public static final String FIELD_IN_PROGRESS = "inProgress";
-	public static final String FIELD_VERSION_IDENTIFIER = "version_identifier";
+	public static final String FIELD_VERSION_IDENTIFIER = "versionIdentifier";
 	
 	public static final String FIELD_SIGNATORY = "signatory";
 	public static final String FIELD_REFERENCE = "reference";

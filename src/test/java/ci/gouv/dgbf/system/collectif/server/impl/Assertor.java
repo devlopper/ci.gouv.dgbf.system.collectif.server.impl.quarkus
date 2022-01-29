@@ -67,6 +67,16 @@ public class Assertor {
 	@Inject SpecificServiceGetter specificServiceGetter;
 	@Inject LegislativeActVersionController actVersionController;
 	
+	public void assertLegislativeAct(String identifier,String expectedCode,String expectedName,String expectedExerciseIdentifier) {
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) actPersistence.readOne(identifier, List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_CODE,LegislativeActImpl.FIELD_NAME
+				,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+		assertThat(legislativeAct).isNotNull();
+		assertThat(legislativeAct.getIdentifier()).isEqualTo(identifier);
+		assertThat(legislativeAct.getCode()).isEqualTo(expectedCode);
+		assertThat(legislativeAct.getName()).isEqualTo(expectedName);
+		assertThat(legislativeAct.getExerciseIdentifier()).isEqualTo(expectedExerciseIdentifier);		
+	}
+	
 	public void assertLegislativeActVersionIdentifier(String identifier,String expectedVersionIdentifier) {
 		Collection<Object[]> arrays = new LegislativeActImplVersionIdentifierReader().readByIdentifiers(List.of(identifier), null);
 		assertThat(arrays).hasSize(1);

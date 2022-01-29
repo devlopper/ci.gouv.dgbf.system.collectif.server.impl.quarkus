@@ -2,6 +2,7 @@ package ci.gouv.dgbf.system.collectif.server.impl.business;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,9 @@ import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Validator;
 
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Exercise;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
 import io.quarkus.arc.Unremovable;
 
 @ApplicationScoped @ci.gouv.dgbf.system.collectif.server.api.System @Unremovable
@@ -38,6 +42,14 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	}
 	
 	public static interface LegislativeAct {
+		
+		static Object[] validateCreateInputs(String code, String name, String exerciseIdentifier, String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(exerciseIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.Exercise.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			ExerciseImpl exercise = StringHelper.isBlank(exerciseIdentifier) ? null : (ExerciseImpl) validateExistenceAndReturn(Exercise.class, exerciseIdentifier,List.of(ExerciseImpl.FIELD_IDENTIFIER,ExerciseImpl.FIELD_YEAR)
+					, __inject__(ExercisePersistence.class), throwablesMessages);
+			return new Object[] {exercise};
+		}
 		
 		static void validateUpdateDefaultVersionInputs(String legislativeActIdentifier,String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
