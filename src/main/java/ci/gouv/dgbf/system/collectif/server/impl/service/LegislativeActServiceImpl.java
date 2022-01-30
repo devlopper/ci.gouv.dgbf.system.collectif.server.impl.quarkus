@@ -26,6 +26,11 @@ public class LegislativeActServiceImpl extends AbstractSpecificServiceImpl<Legis
 		this.persistenceEntityClass = LegislativeAct.class;
 		this.persistenceEntityImplClass = LegislativeActImpl.class;
 	}
+	
+	@Override
+	public Response create(String identifier, String name, String exerciseIdentifier, String auditWho) {
+		return buildResponseOk(business.create(identifier, name, exerciseIdentifier, auditWho));
+	}
 
 	@Override
 	public Response updateDefaultVersion(String identifier, String versionIdentifier, String auditWho) {
