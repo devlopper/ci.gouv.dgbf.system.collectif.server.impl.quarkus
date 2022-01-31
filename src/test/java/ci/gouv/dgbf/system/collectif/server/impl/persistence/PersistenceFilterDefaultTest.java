@@ -69,7 +69,7 @@ public class PersistenceFilterDefaultTest {
 	
 	@Test
 	void legislativeActVersion_byLegislativeAct_AB01_isNotEmpty() {
-		assertor.assertLegislativeActVersionByLegislativeAct("AB01", List.of("VAB01_01","VAB01_02"));
+		assertor.assertLegislativeActVersionByLegislativeAct("AB01", List.of("VAB01_02","VAB01_01"));
 	}
 	
 	@Test

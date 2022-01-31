@@ -31,9 +31,10 @@ public class BusinessLegislativeActCreateTest {
 	
 	@Test
 	void create_sameYear() {
-		assertThat(persistence.readOne("2020")).isNotNull();
+		assertThat(persistence.readOne("2020_1")).isNotNull();
+		assertThat(persistence.readOne("2020_2")).isNull();
 		business.create(null, null,"2020", "meliane");
-		assertor.assertLegislativeAct("2020", "2020","Collectif budgétaire 2020","2020");
+		assertor.assertLegislativeAct("2020_2", "2020_2","Collectif budgétaire 2020","2020");
 	}
 	
 	@Test

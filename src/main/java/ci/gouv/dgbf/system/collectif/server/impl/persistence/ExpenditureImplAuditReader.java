@@ -7,12 +7,7 @@ public class ExpenditureImplAuditReader extends ExpenditureImplAuditsAsStringsRe
 	@Override
 	protected void __set__(ExpenditureImpl expenditure, Object[] array) {
 		super.__set__(expenditure, array);
-		expenditure.set__audit__(String.format(FORMAT, expenditure.get__auditFunctionality__(),expenditure.get__auditWho__(),expenditure.get__auditWhenAsString__()));
-		expenditure.set__auditWho__(null);
-		expenditure.set__auditFunctionality__(null);
-		expenditure.set__auditWhat__(null);
-		expenditure.set__auditWhen__(null);
+		__setAudit__(expenditure, array);
 	}
-	
-	public static final String FORMAT = "%s par %s le %s";
+
 }

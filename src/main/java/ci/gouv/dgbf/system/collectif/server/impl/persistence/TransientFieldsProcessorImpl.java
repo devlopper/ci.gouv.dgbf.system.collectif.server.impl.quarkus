@@ -52,6 +52,10 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 		for(String fieldName : fieldsNames) {
 			if(LegislativeActImpl.FIELD_VERSION_IDENTIFIER.equals(fieldName))
 				new LegislativeActImplVersionIdentifierReader().readThenSet(legislativeActs, null);
+			else if(LegislativeActImpl.FIELD_IN_PROGRESS_AS_STRING.equals(fieldName))
+				new LegislativeActImplInProgressAsStringReader().readThenSet(legislativeActs, null);
+			else if(LegislativeActImpl.FIELD___AUDIT__.equals(fieldName))
+				new LegislativeActImplAuditReader().readThenSet(legislativeActs, null);
 		}
 	}
 	

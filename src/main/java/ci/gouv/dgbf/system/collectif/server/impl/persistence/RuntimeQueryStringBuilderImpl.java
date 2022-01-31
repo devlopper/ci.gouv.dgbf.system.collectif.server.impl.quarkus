@@ -153,15 +153,21 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 					builderArguments.getOrder(Boolean.TRUE).asc("t", "identifier");
 			}
 		}else if(legislativeActVersionPersistence.isProcessable(arguments)) {
-			Boolean latest = arguments.getFilterFieldValueAsBoolean(null,Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
-			if(Boolean.TRUE.equals(latest)) {
-				builderArguments.getOrder(Boolean.TRUE).desc("t", LegislativeActVersionImpl.FIELD_NUMBER);
-				arguments.setNumberOfTuples(1);
+			if(!legislativeActVersionPersistence.getQueryIdentifierCountDynamic().equals(arguments.getQuery().getIdentifier())) {
+				Boolean latest = arguments.getFilterFieldValueAsBoolean(null,Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
+				if(Boolean.TRUE.equals(latest)) {
+					builderArguments.getOrder(Boolean.TRUE).desc("t", LegislativeActVersionImpl.FIELD_NUMBER);
+					arguments.setNumberOfTuples(1);
+				}else {
+					if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
+						builderArguments.getOrder(Boolean.TRUE).desc("t", "code");
+					}
+				}
 			}
 			arguments.removeFilterFields(Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
 		}else if(legislativeActPersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
 			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
-				builderArguments.getOrder(Boolean.TRUE).asc("t", "code");
+				builderArguments.getOrder(Boolean.TRUE).desc("t", "code");
 			}
 		}else if(exercisePersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
 			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {

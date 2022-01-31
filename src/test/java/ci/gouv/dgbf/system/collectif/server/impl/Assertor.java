@@ -47,6 +47,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntr
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplPaymentCreditAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplVersionIdentifierReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplAuditsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImpl;
@@ -75,6 +76,17 @@ public class Assertor {
 		assertThat(legislativeAct.getCode()).isEqualTo(expectedCode);
 		assertThat(legislativeAct.getName()).isEqualTo(expectedName);
 		assertThat(legislativeAct.getExerciseIdentifier()).isEqualTo(expectedExerciseIdentifier);		
+	}
+	
+	public void assertLegislativeActVersion(String identifier,String expectedCode,String expectedName,Byte expectedNumber,String expectedActIdentifier) {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) actVersionPersistence.readOne(identifier, List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME
+				,LegislativeActVersionImpl.FIELD_NUMBER,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getIdentifier()).isEqualTo(identifier);
+		assertThat(legislativeActVersion.getCode()).isEqualTo(expectedCode);
+		assertThat(legislativeActVersion.getName()).isEqualTo(expectedName);
+		assertThat(legislativeActVersion.getNumber()).isEqualTo(expectedNumber);
+		assertThat(legislativeActVersion.getActIdentifier()).isEqualTo(expectedActIdentifier);
 	}
 	
 	public void assertLegislativeActVersionIdentifier(String identifier,String expectedVersionIdentifier) {

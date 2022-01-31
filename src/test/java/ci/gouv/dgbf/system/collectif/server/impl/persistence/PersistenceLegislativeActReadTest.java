@@ -47,7 +47,7 @@ public class PersistenceLegislativeActReadTest {
 	void readMany_2021() {
 		Collection<LegislativeAct> legislativeActs = persistence.readMany(new QueryExecutorArguments().addFilterField(Parameters.EXERCISE_YEAR, 2021));
 		assertThat(legislativeActs).isNotNull();
-		assertThat(legislativeActs.stream().map(x ->x.getIdentifier()).collect(Collectors.toList())).containsExactly("1","2");
+		assertThat(legislativeActs.stream().map(x ->x.getIdentifier()).collect(Collectors.toList())).containsExactly("2","1");
 	}
 	
 	@Test

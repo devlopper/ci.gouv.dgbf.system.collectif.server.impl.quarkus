@@ -69,11 +69,12 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	public static interface LegislativeActVersion {
 		
 		static Object[] validateCreateInputs(String code,String name,Byte number,String legislativeActIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
-			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
 			validateAuditWho(auditWho, throwablesMessages);
 			
 			LegislativeActImpl legislativeAct = StringHelper.isBlank(legislativeActIdentifier) ? null
-					: (LegislativeActImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.class, legislativeActIdentifier,List.of(LegislativeActImpl.FIELD_IDENTIFIER)
+					: (LegislativeActImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.class, legislativeActIdentifier,List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_CODE
+							,LegislativeActImpl.FIELD_NAME)
 					, __inject__(LegislativeActPersistence.class), throwablesMessages);
 			return new Object[] {legislativeAct};
 		}

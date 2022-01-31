@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 
 import org.cyk.utility.service.server.AbstractSpecificServiceImpl;
 
@@ -24,5 +25,10 @@ public class LegislativeActVersionServiceImpl extends AbstractSpecificServiceImp
 		this.serviceEntityImplClass = LegislativeActVersionDtoImpl.class;
 		this.persistenceEntityClass = LegislativeActVersion.class;
 		this.persistenceEntityImplClass = LegislativeActVersionImpl.class;
+	}
+	
+	@Override
+	public Response create(String identifier, String name, Byte number, String actIdentifier, String auditWho) {
+		return buildResponseOk(business.create(identifier, name, number, actIdentifier, auditWho));
 	}
 }

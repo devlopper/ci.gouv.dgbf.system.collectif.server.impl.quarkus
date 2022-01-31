@@ -19,7 +19,14 @@ import lombok.experimental.Accessors;
 public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements LegislativeActDto,Serializable {
 
 	@JsonbProperty(value = JSON_EXERCISE) ExerciseDtoImpl exercise;
-	
+	@JsonbProperty(value = JSON_EXERCISE_IDENTIFIER) String exerciseIdentifier;
+	@JsonbProperty(value = JSON_EXERCISE_YEAR) Short exerciseYear;
+	@JsonbProperty(value = JSON_IN_PROGRESS) private Boolean inProgress;
+	@JsonbProperty(value = JSON_IN_PROGRESS_AS_STRING) private String inProgressAsString;
+	@JsonbProperty(value = JSON_ENTRY_AUTHORIZATION) EntryAuthorizationDtoImpl entryAuthorization;	
+	@JsonbProperty(value = JSON_PAYMENT_CREDIT) PaymentCreditDtoImpl paymentCredit;		
+	@JsonbProperty(value = JSON___AUDIT__) private String __audit__;
+
 	@Override @JsonbProperty(value = JSON_IDENTIFIER)
 	public LegislativeActDtoImpl setIdentifier(String identifier) {
 		return (LegislativeActDtoImpl) super.setIdentifier(identifier);
@@ -57,6 +64,11 @@ public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStrin
     			,JSON_CODE,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_CODE
     			,JSON_NAME,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_NAME
     			,JSON_EXERCISE,LegislativeActImpl.FIELD_EXERCISE
+    			,JSON_EXERCISE_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER
+    			,JSON_EXERCISE_YEAR,LegislativeActImpl.FIELD_EXERCISE_YEAR
+    			,JSON___AUDIT__,LegislativeActImpl.FIELD___AUDIT__
+    			,JSONS_STRINGS,LegislativeActImpl.FIELDS_STRINGS
+    			,JSONS_AMOUTNS,LegislativeActImpl.FIELDS_AMOUNTS
     			));
 		AbstractServiceImpl.setProjections(LegislativeActDtoImpl.class, map);
 	}

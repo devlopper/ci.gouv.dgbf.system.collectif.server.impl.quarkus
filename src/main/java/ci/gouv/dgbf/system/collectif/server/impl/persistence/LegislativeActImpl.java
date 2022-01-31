@@ -7,6 +7,7 @@ import javax.persistence.AccessType;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -14,6 +15,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
@@ -39,13 +41,22 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 
 	@Column(name = COLUMN_EXERCISE) String exerciseIdentifier;
 	@Transient ExerciseImpl exercise;
+	@Transient Short exerciseYear;
 	
 	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
 	@NotNull @Column(name = COLUMN_IN_PROGRESS,nullable = false) Boolean inProgress;
+	@Transient String inProgressAsString;
 	@Transient String versionIdentifier;
 	
-	@Column(name = COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT) Long expectedEntryAuthorizationAdjustment;
-	@Column(name = COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT) Long expectedPaymentCreditAdjustment;
+	@Valid
+	@Embedded
+	@AttributeOverrides({@AttributeOverride(name = EntryAuthorizationImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT,nullable = true))})
+	EntryAuthorizationImpl entryAuthorization;
+	
+	@Valid
+	@Embedded
+	@AttributeOverrides({@AttributeOverride(name = PaymentCreditImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT,nullable = true))})
+	PaymentCreditImpl paymentCredit;
 	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {
@@ -63,12 +74,16 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	}
 	
 	public static final String FIELD_EXERCISE_IDENTIFIER = "exerciseIdentifier";
+	public static final String FIELD_EXERCISE_YEAR = "exerciseYear";
 	public static final String FIELD_EXERCISE = "exercise";
 	public static final String FIELD_DEFAULT_VERSION = "defaultVersion";
 	public static final String FIELD_IN_PROGRESS = "inProgress";
+	public static final String FIELD_IN_PROGRESS_AS_STRING = "inProgressAsString";
 	public static final String FIELD_VERSION_IDENTIFIER = "versionIdentifier";
-	public static final String FIELD_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT = "expectedEntryAuthorizationAdjustment";
-	public static final String FIELD_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT = "expectedPaymentCreditAdjustment";
+	public static final String FIELD_ENTRY_AUTHORIZATION = "entryAuthorization";
+	public static final String FIELD_PAYMENT_CREDIT = "paymentCredit";
+	public static final String FIELDS_STRINGS = "strings";
+	public static final String FIELDS_AMOUNTS = "amounts";
 	
 	public static final String FIELD_SIGNATORY = "signatory";
 	public static final String FIELD_REFERENCE = "reference";
