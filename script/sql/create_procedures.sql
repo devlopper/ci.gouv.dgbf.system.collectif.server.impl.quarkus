@@ -13,7 +13,7 @@ BEGIN
 		WHERE l.exercice = (
     		SELECT e.annee
     		FROM TA_VERSION_COLLECTIF v
-    		JOIN TA_COLLECTIF c ON c.version = v.identifiant
+    		JOIN TA_COLLECTIF c ON c.version_par_defaut = v.identifiant
     		JOIN VMA_EXERCICE e ON e.identifiant = c.exercice
     		WHERE v.identifiant = version_collectif
 		))
@@ -38,7 +38,7 @@ BEGIN
     	WHERE l.exercice = (
     		SELECT e.annee
     		FROM TA_VERSION_COLLECTIF v
-    		JOIN TA_COLLECTIF c ON c.version = v.identifiant
+    		JOIN TA_COLLECTIF c ON c.version_par_defaut = v.identifiant
     		JOIN VMA_EXERCICE e ON e.identifiant = c.exercice
     		WHERE v.identifiant = version_collectif
 		))

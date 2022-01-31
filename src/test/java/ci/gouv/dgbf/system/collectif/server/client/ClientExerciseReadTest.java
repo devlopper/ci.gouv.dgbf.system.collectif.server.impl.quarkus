@@ -37,7 +37,7 @@ public class ClientExerciseReadTest {
 		
 		List<Exercise> exercises = ResponseHelper.getEntityAsListFromJson(Exercise.class,response);
 		assertThat(exercises).hasSize(3);
-		assertThat(exercises.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2020","2021","2022");
+		assertThat(exercises.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022","2021","2020");
     }
 	
 	@Test

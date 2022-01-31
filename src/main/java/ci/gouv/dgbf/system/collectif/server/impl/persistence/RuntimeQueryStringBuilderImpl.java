@@ -28,6 +28,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.ActionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ActivityPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecializationUnitPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.EconomicNaturePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.FundingSourcePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActExpenditurePersistence;
@@ -45,6 +46,7 @@ import io.quarkus.arc.Unremovable;
 @ApplicationScoped @ci.gouv.dgbf.system.collectif.server.api.System @Unremovable
 public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.AbstractImpl implements Serializable {
 
+	@Inject ExercisePersistence exercisePersistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
@@ -150,16 +152,20 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				else
 					builderArguments.getOrder(Boolean.TRUE).asc("t", "identifier");
 			}
-		}else if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(arguments))) {
+		}else if(legislativeActVersionPersistence.isProcessable(arguments)) {
 			Boolean latest = arguments.getFilterFieldValueAsBoolean(null,Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
 			if(Boolean.TRUE.equals(latest)) {
 				builderArguments.getOrder(Boolean.TRUE).desc("t", LegislativeActVersionImpl.FIELD_NUMBER);
 				arguments.setNumberOfTuples(1);
 			}
 			arguments.removeFilterFields(Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
-		}else if(Boolean.TRUE.equals(legislativeActPersistence.isProcessable(arguments))) {
+		}else if(legislativeActPersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
 			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
 				builderArguments.getOrder(Boolean.TRUE).asc("t", "code");
+			}
+		}else if(exercisePersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
+			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
+				builderArguments.getOrder(Boolean.TRUE).desc("t", ExerciseImpl.FIELD_YEAR);
 			}
 		}
 		

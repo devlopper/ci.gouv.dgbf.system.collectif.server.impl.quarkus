@@ -13,6 +13,7 @@ import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
+import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
@@ -20,6 +21,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
@@ -41,10 +43,15 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		throwablesMessages.throwIfNotEmpty();
 		//All inputs are fine
 		LegislativeActImpl legislativeAct = new LegislativeActImpl().setCode(code).setName(name).setExerciseIdentifier(exerciseIdentifier).setInProgress(Boolean.FALSE).setExercise((ExerciseImpl) instances[0]);
-		if(StringHelper.isBlank(legislativeAct.getCode()))
-			legislativeAct.setCode(legislativeAct.getExercise().getYear().toString());
-		if(StringHelper.isBlank(legislativeAct.getName()))
-			legislativeAct.setName(LegislativeAct.NAME+" "+legislativeAct.getExercise().getYear());
+		if(StringHelper.isBlank(legislativeAct.getCode())) {
+			Long count = persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.EXERCISE_YEAR,legislativeAct.getExercise().getYear()));
+			if(count == null)
+				count = 0l;
+			legislativeAct.setCode(String.format(CODE_FORMAT, legislativeAct.getExercise().getYear(),++count));
+		}
+		if(StringHelper.isBlank(legislativeAct.getName())) {
+			legislativeAct.setName(String.format(NAME_FORMAT, legislativeAct.getExercise().getYear()));
+		}
 		legislativeAct.setIdentifier(legislativeAct.getCode());
 		audit(legislativeAct, CREATE_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
 		entityManager.persist(legislativeAct);
@@ -105,4 +112,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeAct.NAME, legislativeActIdentifier),legislativeAct == null);
 		return legislativeAct;
 	}
+	
+	private static final String CODE_FORMAT = "%s_%s";
+	private static final String NAME_FORMAT = LegislativeAct.NAME+" %s";
 }
