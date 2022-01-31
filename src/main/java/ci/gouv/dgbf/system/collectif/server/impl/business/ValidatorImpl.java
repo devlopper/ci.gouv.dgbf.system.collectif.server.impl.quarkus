@@ -18,7 +18,9 @@ import org.cyk.utility.business.Validator;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Exercise;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import io.quarkus.arc.Unremovable;
 
 @ApplicationScoped @ci.gouv.dgbf.system.collectif.server.api.System @Unremovable
@@ -65,6 +67,16 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	}
 	
 	public static interface LegislativeActVersion {
+		
+		static Object[] validateCreateInputs(String code,String name,Byte number,String legislativeActIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			
+			LegislativeActImpl legislativeAct = StringHelper.isBlank(legislativeActIdentifier) ? null
+					: (LegislativeActImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.class, legislativeActIdentifier,List.of(LegislativeActImpl.FIELD_IDENTIFIER)
+					, __inject__(LegislativeActPersistence.class), throwablesMessages);
+			return new Object[] {legislativeAct};
+		}
 		
 		static void validateGenerateInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(identifier));

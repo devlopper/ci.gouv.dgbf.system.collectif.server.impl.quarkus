@@ -60,7 +60,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	}
 	
 	@Override
-	public LegislativeActVersion setAct(LegislativeAct act) {
+	public LegislativeActVersionImpl setAct(LegislativeAct act) {
 		this.act = (LegislativeActImpl) act;
 		return this;
 	}

@@ -44,6 +44,9 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@NotNull @Column(name = COLUMN_IN_PROGRESS,nullable = false) Boolean inProgress;
 	@Transient String versionIdentifier;
 	
+	@Column(name = COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT) Long expectedEntryAuthorizationAdjustment;
+	@Column(name = COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT) Long expectedPaymentCreditAdjustment;
+	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {
 		return (LegislativeActImpl) super.setIdentifier(identifier);
@@ -64,6 +67,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String FIELD_DEFAULT_VERSION = "defaultVersion";
 	public static final String FIELD_IN_PROGRESS = "inProgress";
 	public static final String FIELD_VERSION_IDENTIFIER = "versionIdentifier";
+	public static final String FIELD_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT = "expectedEntryAuthorizationAdjustment";
+	public static final String FIELD_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT = "expectedPaymentCreditAdjustment";
 	
 	public static final String FIELD_SIGNATORY = "signatory";
 	public static final String FIELD_REFERENCE = "reference";
@@ -75,6 +80,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN_EXERCISE = "EXERCICE";
 	public static final String COLUMN_DEFAULT_VERSION = "VERSION_PAR_DEFAUT";
 	public static final String COLUMN_IN_PROGRESS = "EN_COURS";
+	public static final String COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT = "AJUSTEMENT_AE_ATTENDU";
+	public static final String COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT = "AJUSTEMENT_CP_ATTENDU";
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";
 	public static final String COLUMN_REFERENCE = "REFERENCE";
 	
