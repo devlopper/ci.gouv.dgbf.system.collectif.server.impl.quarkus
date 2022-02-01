@@ -46,7 +46,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAudi
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplPaymentCreditAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplVersionIdentifierReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplDefaultVersionIdentifierReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplAuditsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedReader;
@@ -78,6 +78,21 @@ public class Assertor {
 		assertThat(legislativeAct.getExerciseIdentifier()).isEqualTo(expectedExerciseIdentifier);		
 	}
 	
+	public void assertLegislativeActMovementIncluded(String identifier,Long entryAuthorization,Long paymentCredit) {
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) actPersistence.readOne(new QueryExecutorArguments()
+				.setQuery(new Query().setIdentifier(actPersistence.getQueryIdentifierReadDynamicOne()).setTupleClass(LegislativeActImpl.class))
+				.addFilterField("identifier", identifier).addProjectionsFromStrings(LegislativeActImpl.FIELDS_AMOUNTS_MOVEMENT_INCLUDED)
+				);
+
+		assertThat(legislativeAct).as("collectif").isNotNull();
+		
+		assertThat(legislativeAct.getEntryAuthorization()).as("AE").isNotNull();
+		assertThat(legislativeAct.getEntryAuthorization().getMovementIncluded()).as("AE mouvement inclus").isEqualTo(entryAuthorization);
+		
+		assertThat(legislativeAct.getPaymentCredit()).as("CP").isNotNull();
+		assertThat(legislativeAct.getPaymentCredit().getMovementIncluded()).as("CP mouvement inclus").isEqualTo(paymentCredit);
+	}
+	
 	public void assertLegislativeActVersion(String identifier,String expectedCode,String expectedName,Byte expectedNumber,String expectedActIdentifier) {
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) actVersionPersistence.readOne(identifier, List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME
 				,LegislativeActVersionImpl.FIELD_NUMBER,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER));
@@ -90,7 +105,7 @@ public class Assertor {
 	}
 	
 	public void assertLegislativeActVersionIdentifier(String identifier,String expectedVersionIdentifier) {
-		Collection<Object[]> arrays = new LegislativeActImplVersionIdentifierReader().readByIdentifiers(List.of(identifier), null);
+		Collection<Object[]> arrays = new LegislativeActImplDefaultVersionIdentifierReader().readByIdentifiers(List.of(identifier), null);
 		assertThat(arrays).hasSize(1);
 		assertThat(CollectionHelper.getElementAt(arrays, 0)[0]).isEqualTo(identifier);
 		assertThat(CollectionHelper.getElementAt(arrays, 0)[1]).isEqualTo(expectedVersionIdentifier);
@@ -111,7 +126,6 @@ public class Assertor {
 		assertIdentifiers(generatedActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.GENERATED_ACT_IDENTIFIER,generatedActIdentifier)), expectedIdentifiers);
 	}
 	
-	@Test
 	public void assertExpenditureMovementIncluded(String identifier,Long entryAuthorization,Long paymentCredit) {
 		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(expenditurePersistence.getQueryIdentifierReadDynamicOne()).setTupleClass(ExpenditureImpl.class))

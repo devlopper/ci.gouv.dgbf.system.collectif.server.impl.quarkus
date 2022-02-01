@@ -7,7 +7,6 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.object.AbstractObject;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Amounts;
@@ -18,8 +17,7 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) @MappedSuperclass
 public abstract class AbstractAmountsImpl extends AbstractObject implements Amounts,Serializable  {
 
-	@NotNull @Column(name = COLUMN_ADJUSTMENT,nullable = false)
-	Long adjustment = 0l;
+	@NotNull @Column(name = COLUMN_ADJUSTMENT,nullable = false) Long adjustment = 0l;
 	
 	@Transient Long initial = 0l;
 	@Transient Long movement = 0l;
@@ -29,21 +27,6 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 	@Transient Long available = 0l;	
 	@Transient Long actualPlusAdjustment = 0l;
 	@Transient Long actualMinusMovementIncludedPlusAdjustment = 0l;
-
-	public AbstractAmountsImpl computeMovement() {
-		movement = NumberHelper.getLong(NumberHelper.subtract(actual,initial));
-		return this;
-	}
-	
-	public AbstractAmountsImpl computeActualPlusAdjustment() {
-		actualPlusAdjustment = NumberHelper.getLong(NumberHelper.add(actual,adjustment));
-		return this;
-	}
-	
-	public AbstractAmountsImpl computeActualMinusMovementIncludedPlusAdjustment() {
-		actualMinusMovementIncludedPlusAdjustment = NumberHelper.getLong(NumberHelper.subtract(actualPlusAdjustment,movementIncluded));
-		return this;
-	}
 	
 	public static final String FIELD_INITIAL = "initial";
 	public static final String FIELD_MOVEMENT = "movement";

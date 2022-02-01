@@ -50,10 +50,16 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 	
 	public void processLegislativeActs(Collection<LegislativeActImpl> legislativeActs,Collection<String> fieldsNames) {
 		for(String fieldName : fieldsNames) {
-			if(LegislativeActImpl.FIELD_VERSION_IDENTIFIER.equals(fieldName))
-				new LegislativeActImplVersionIdentifierReader().readThenSet(legislativeActs, null);
+			if(LegislativeActImpl.FIELD_DEFAULT_VERSION_IDENTIFIER.equals(fieldName))
+				new LegislativeActImplDefaultVersionIdentifierReader().readThenSet(legislativeActs, null);
 			else if(LegislativeActImpl.FIELD_IN_PROGRESS_AS_STRING.equals(fieldName))
 				new LegislativeActImplInProgressAsStringReader().readThenSet(legislativeActs, null);
+			else if(LegislativeActImpl.FIELDS_STRINGS.equals(fieldName))
+				new LegislativeActImplAsStringsReader().readThenSet(legislativeActs, null);
+			else if(LegislativeActImpl.FIELDS_AMOUNTS.equals(fieldName))
+				LegislativeActPersistenceImpl.readAmounts(legislativeActs);
+			else if(LegislativeActImpl.FIELDS_AMOUNTS_MOVEMENT_INCLUDED.equals(fieldName))
+				new LegislativeActImplAmountsMovementIncludedReader().readThenSet(legislativeActs, null);
 			else if(LegislativeActImpl.FIELD___AUDIT__.equals(fieldName))
 				new LegislativeActImplAuditReader().readThenSet(legislativeActs, null);
 		}

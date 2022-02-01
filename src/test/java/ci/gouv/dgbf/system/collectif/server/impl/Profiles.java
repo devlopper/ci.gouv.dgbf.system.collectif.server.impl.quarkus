@@ -130,6 +130,18 @@ public interface Profiles {
 				}
 			}
 			
+			public class Amount implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Amount.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Amount.class);
+				}
+			}
+			
 			public static Set<String> buildTags(Class<?>...classes) {
 				return Persistence.buildTags(ArrayUtils.addFirst(classes, LegislativeAct.class));
 			}

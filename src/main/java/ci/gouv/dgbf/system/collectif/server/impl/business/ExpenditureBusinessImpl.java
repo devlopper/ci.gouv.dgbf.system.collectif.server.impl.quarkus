@@ -117,16 +117,16 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	@Scheduled(cron = "{cyk.expenditure.import.cron}")
 	void importAutomatically() {
 		Collection<LegislativeActImpl> legislativeActs = CollectionHelper.cast(LegislativeActImpl.class,legislativeActPersistence.readMany(new QueryExecutorArguments()
-				.addProjectionsFromStrings(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_NAME).addProcessableTransientFieldsNames(LegislativeActImpl.FIELD_VERSION_IDENTIFIER)
+				.addProjectionsFromStrings(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_NAME).addProcessableTransientFieldsNames(LegislativeActImpl.FIELD_DEFAULT_VERSION_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_IN_PROGRESS,Boolean.TRUE)));
 		if(CollectionHelper.isEmpty(legislativeActs))
 			return;
 		for(LegislativeActImpl legislativeAct : legislativeActs) {
-			if(StringHelper.isBlank(legislativeAct.getVersionIdentifier())) {
+			if(StringHelper.isBlank(legislativeAct.getDefaultVersionIdentifier())) {
 				LogHelper.logWarning(String.format("Aucune %s ne peut être automatiquement importée dans %s car aucune version par défaut n'a été définie",Expenditure.NAME, legislativeAct.getName()), getClass());
 				continue;
 			}
-			import_(legislativeAct.getVersionIdentifier(), EntityLifeCycleListenerImpl.SYSTEM_USER_NAME);
+			import_(legislativeAct.getDefaultVersionIdentifier(), EntityLifeCycleListenerImpl.SYSTEM_USER_NAME);
 		}
 	}
 }

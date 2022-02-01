@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
-public class LegislativeActImplVersionIdentifierReader extends AbstractLegislativeActImplReader implements Serializable {
+public class LegislativeActImplDefaultVersionIdentifierReader extends AbstractLegislativeActImplReader implements Serializable {
 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
@@ -19,7 +19,7 @@ public class LegislativeActImplVersionIdentifierReader extends AbstractLegislati
 	protected void __set__(LegislativeActImpl legislativeAct, Object[] array) {
 		Integer index = 0;
 		legislativeAct.setIdentifier(getAsString(array, index++));
-		legislativeAct.setVersionIdentifier(getAsString(array, index++));
+		legislativeAct.setDefaultVersionIdentifier(getAsString(array, index++));
 		__set__(legislativeAct, array, index);
 	}
 	

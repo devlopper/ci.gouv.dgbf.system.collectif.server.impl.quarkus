@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
 
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditureAmountsEntryAuthorizationPaymentCredit;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,16 +38,19 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHEN__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
-public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeAct,Serializable {
+public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeAct,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
 	@Column(name = COLUMN_EXERCISE) String exerciseIdentifier;
 	@Transient ExerciseImpl exercise;
 	@Transient Short exerciseYear;
+	@Transient String exerciseAsString;
 	
 	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
+	@Transient String defaultVersionAsString;
+	@Transient String defaultVersionIdentifier;
+	
 	@NotNull @Column(name = COLUMN_IN_PROGRESS,nullable = false) Boolean inProgress;
 	@Transient String inProgressAsString;
-	@Transient String versionIdentifier;
 	
 	@Valid
 	@Embedded
@@ -73,17 +77,30 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 		return (LegislativeActImpl) super.setName(name);
 	}
 	
+	public EntryAuthorizationImpl getEntryAuthorization(Boolean instantiateIfNull) {
+		if(entryAuthorization == null && Boolean.TRUE.equals(instantiateIfNull))
+			entryAuthorization = new EntryAuthorizationImpl();
+		return entryAuthorization;
+	}
+	
+	public PaymentCreditImpl getPaymentCredit(Boolean instantiateIfNull) {
+		if(paymentCredit == null && Boolean.TRUE.equals(instantiateIfNull))
+			paymentCredit = new PaymentCreditImpl();
+		return paymentCredit;
+	}
+	
 	public static final String FIELD_EXERCISE_IDENTIFIER = "exerciseIdentifier";
 	public static final String FIELD_EXERCISE_YEAR = "exerciseYear";
 	public static final String FIELD_EXERCISE = "exercise";
 	public static final String FIELD_DEFAULT_VERSION = "defaultVersion";
 	public static final String FIELD_IN_PROGRESS = "inProgress";
 	public static final String FIELD_IN_PROGRESS_AS_STRING = "inProgressAsString";
-	public static final String FIELD_VERSION_IDENTIFIER = "versionIdentifier";
+	public static final String FIELD_DEFAULT_VERSION_IDENTIFIER = "defaultVersionIdentifier";
 	public static final String FIELD_ENTRY_AUTHORIZATION = "entryAuthorization";
 	public static final String FIELD_PAYMENT_CREDIT = "paymentCredit";
 	public static final String FIELDS_STRINGS = "strings";
 	public static final String FIELDS_AMOUNTS = "amounts";
+	public static final String FIELDS_AMOUNTS_MOVEMENT_INCLUDED = "amountsMovementIncluded";
 	
 	public static final String FIELD_SIGNATORY = "signatory";
 	public static final String FIELD_REFERENCE = "reference";

@@ -27,6 +27,7 @@ import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarString
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.EntryAuthorization;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditureAmountsEntryAuthorizationPaymentCredit;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.PaymentCredit;
 import lombok.Getter;
@@ -62,7 +63,7 @@ import lombok.experimental.Accessors;
 			}
 		)
 	})
-public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Expenditure,Serializable {
+public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Expenditure,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
 	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false) String activityIdentifier;
 	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false) String economicNatureIdentifier;

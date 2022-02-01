@@ -21,6 +21,8 @@ public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStrin
 	@JsonbProperty(value = JSON_EXERCISE) ExerciseDtoImpl exercise;
 	@JsonbProperty(value = JSON_EXERCISE_IDENTIFIER) String exerciseIdentifier;
 	@JsonbProperty(value = JSON_EXERCISE_YEAR) Short exerciseYear;
+	@JsonbProperty(value = JSON_EXERCISE_AS_STRING) String exerciseAsString;
+	@JsonbProperty(value = JSON_DEFAULT_VERSION_AS_STRING) String defaultVersionAsString;
 	@JsonbProperty(value = JSON_IN_PROGRESS) private Boolean inProgress;
 	@JsonbProperty(value = JSON_IN_PROGRESS_AS_STRING) private String inProgressAsString;
 	@JsonbProperty(value = JSON_ENTRY_AUTHORIZATION) EntryAuthorizationDtoImpl entryAuthorization;	
