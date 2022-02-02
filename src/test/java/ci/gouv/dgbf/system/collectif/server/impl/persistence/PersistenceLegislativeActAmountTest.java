@@ -50,7 +50,7 @@ public class PersistenceLegislativeActAmountTest {
 	void readExpenditureOne_amounts_1() {
 		LegislativeActImpl legislativeAct = (LegislativeActImpl) actPersistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(actPersistence.getQueryIdentifierReadDynamicOne()))
-				.addFilterField("identifier", "2021_1").addProjectionsFromStrings(LegislativeActImpl.FIELDS_AMOUNTS)
+				.addFilterField("identifier", "2021_1").addProjectionsFromStrings(LegislativeActImpl.FIELDS_AMOUNTS,LegislativeActImpl.FIELD___AUDIT__)
 				);
 		assertThat(legislativeAct).isNotNull();
 		
@@ -61,6 +61,8 @@ public class PersistenceLegislativeActAmountTest {
 		assertThat(legislativeAct.getEntryAuthorization().getAdjustment()).isEqualTo(0l);
 		assertThat(legislativeAct.getEntryAuthorization().getActualPlusAdjustment()).isEqualTo(19l);
 		assertThat(legislativeAct.getEntryAuthorization().getMovementIncluded()).isEqualTo(0l);
+		assertThat(legislativeAct.getEntryAuthorization().getExpectedAdjustment()).isEqualTo(10l);
+		assertThat(legislativeAct.getEntryAuthorization().getExpectedAdjustmentMinusAdjustment()).isEqualTo(10l);
 		
 		assertThat(legislativeAct.getPaymentCredit()).isNotNull();
 		assertThat(legislativeAct.getPaymentCredit().getInitial()).isEqualTo(3l);
@@ -69,6 +71,8 @@ public class PersistenceLegislativeActAmountTest {
 		assertThat(legislativeAct.getPaymentCredit().getAdjustment()).isEqualTo(7l);
 		assertThat(legislativeAct.getPaymentCredit().getActualPlusAdjustment()).isEqualTo(12l);
 		assertThat(legislativeAct.getPaymentCredit().getMovementIncluded()).isEqualTo(0l);
+		assertThat(legislativeAct.getPaymentCredit().getExpectedAdjustment()).isEqualTo(20l);
+		assertThat(legislativeAct.getPaymentCredit().getExpectedAdjustmentMinusAdjustment()).isEqualTo(13l);
 	}
 	/*
 	@Test

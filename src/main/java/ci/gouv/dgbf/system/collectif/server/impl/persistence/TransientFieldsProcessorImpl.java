@@ -77,6 +77,13 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 				new LegislativeActVersionImplGeneratedCountReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE.equals(fieldName))
 				new LegislativeActVersionImplGeneratedCountActGeneratableGeneratedActDeletableReader().readThenSet(legislativeActVersions, null);
+			
+			else if(LegislativeActVersionImpl.FIELDS_STRINGS.equals(fieldName))
+				new LegislativeActVersionImplAsStringsReader().readThenSet(legislativeActVersions, null);
+			else if(LegislativeActVersionImpl.FIELDS_AMOUNTS.equals(fieldName))
+				LegislativeActVersionPersistenceImpl.readAmounts(legislativeActVersions);
+			else if(LegislativeActVersionImpl.FIELD___AUDIT__.equals(fieldName))
+				new LegislativeActVersionImplAuditReader().readThenSet(legislativeActVersions, null);
 		}
 	}
 	

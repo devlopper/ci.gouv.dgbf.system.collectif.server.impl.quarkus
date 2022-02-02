@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
 
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditureAmountsEntryAuthorizationPaymentCredit;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import lombok.Getter;
@@ -32,7 +33,7 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHEN__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
-public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeActVersion,Serializable {
+public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeActVersion,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) LegislativeActImpl act;
 	@Transient String actIdentifier;
@@ -42,8 +43,12 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@Transient String creationDateAsString;
 	@Transient Short generatedActCount;
 	@Transient Boolean actGeneratable;
+	@Transient String actGeneratableAsString;
 	@Transient Boolean generatedActDeletable;
-
+	@Transient String generatedActDeletableAsString;
+	@Transient EntryAuthorizationImpl entryAuthorization;
+	@Transient PaymentCreditImpl paymentCredit;
+	
 	@Override
 	public LegislativeActVersionImpl setIdentifier(String identifier) {
 		return (LegislativeActVersionImpl) super.setIdentifier(identifier);
@@ -65,6 +70,18 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 		return this;
 	}
 	
+	public EntryAuthorizationImpl getEntryAuthorization(Boolean instantiateIfNull) {
+		if(entryAuthorization == null && Boolean.TRUE.equals(instantiateIfNull))
+			entryAuthorization = new EntryAuthorizationImpl();
+		return entryAuthorization;
+	}
+	
+	public PaymentCreditImpl getPaymentCredit(Boolean instantiateIfNull) {
+		if(paymentCredit == null && Boolean.TRUE.equals(instantiateIfNull))
+			paymentCredit = new PaymentCreditImpl();
+		return paymentCredit;
+	}
+	
 	public static final String FIELD_ACT = "act";
 	public static final String FIELD_ACT_IDENTIFIER = "actIdentifier";
 	public static final String FIELD_ACT_AS_STRING = "actAsString";
@@ -78,7 +95,9 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELDS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE = "generatedActCountActGeneratableGeneratedActDeletable";
 	public static final String FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER = "actAsStringCodeNameNumberCreationDateAsString";
 	public static final String FIELDS_CODE_NAME_NUMBER = "codeNameNumberCreationDateAsString";
-
+	public static final String FIELDS_STRINGS = "strings";
+	public static final String FIELDS_AMOUNTS = "amounts";
+	
 	public static final String ENTITY_NAME = "LegislativeActVersionImpl";
 	public static final String TABLE_NAME = "TA_VERSION_COLLECTIF";
 	

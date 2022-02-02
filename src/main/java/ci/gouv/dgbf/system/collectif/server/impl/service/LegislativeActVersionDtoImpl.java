@@ -21,13 +21,16 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
 	@JsonbProperty(value = JSON_IDENTIFIER) private String identifier;
 	@JsonbProperty(value = JSON_CODE) private String code;
 	@JsonbProperty(value = JSON_NAME) private String name;
-	@JsonbProperty(value = JSON_LEGISLATIVE_ACT_IDENTIFIER) String actIdentifier;
 	@JsonbProperty(value = JSON_LEGISLATIVE_ACT) LegislativeActDtoImpl act;
+	@JsonbProperty(value = JSON_LEGISLATIVE_ACT_IDENTIFIER) String actIdentifier;
+	@JsonbProperty(value = JSON_LEGISLATIVE_ACT_AS_STRING) String actAsString;
 	@JsonbProperty(value = JSON_GENERATED_ACT_COUNT) Short generatedActCount;
 	@JsonbProperty(value = JSON_ACT_GENERATABLE) private Boolean actGeneratable;
 	@JsonbProperty(value = JSON_GENERATED_ACT_DELETABLE) private Boolean generatedActDeletable;
-	//@JsonbProperty(value = JSON_BUDGETARY_ACT) Byte number;
-	//@JsonbProperty(value = JSON_BUDGETARY_ACT) LocalDateTime creationDate;
+	@JsonbProperty(value = JSON_NUMBER) Byte number;
+	@JsonbProperty(value = JSON_ENTRY_AUTHORIZATION) EntryAuthorizationDtoImpl entryAuthorization;	
+	@JsonbProperty(value = JSON_PAYMENT_CREDIT) PaymentCreditDtoImpl paymentCredit;		
+	@JsonbProperty(value = JSON___AUDIT__) String __audit__;	
 	
 	@Override @JsonbProperty(value = JSON_LEGISLATIVE_ACT)
 	public LegislativeActVersionDto setAct(LegislativeActDto act) {
@@ -44,6 +47,8 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
     			,LegislativeActVersionDto.JSON_LEGISLATIVE_ACT_IDENTIFIER,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER
     			,LegislativeActVersionDto.JSON_GENERATED_ACT_COUNT,LegislativeActVersionImpl.FIELD_GENERATED_ACT_COUNT
     			,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE,LegislativeActVersionImpl.FIELDS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE
+    			,LegislativeActVersionDto.JSONS_STRINGS,LegislativeActVersionImpl.FIELDS_STRINGS
+    			,LegislativeActVersionDto.JSONS_AMOUTNS,LegislativeActVersionImpl.FIELDS_AMOUNTS
     			));
 	}
 }

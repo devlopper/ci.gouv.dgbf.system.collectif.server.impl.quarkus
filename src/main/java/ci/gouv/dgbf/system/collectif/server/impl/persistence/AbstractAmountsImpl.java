@@ -18,6 +18,8 @@ import lombok.experimental.Accessors;
 public abstract class AbstractAmountsImpl extends AbstractObject implements Amounts,Serializable  {
 
 	@NotNull @Column(name = COLUMN_ADJUSTMENT,nullable = false) Long adjustment = 0l;
+	@Transient Long expectedAdjustment = 0l;
+	@Transient Long expectedAdjustmentMinusAdjustment = 0l;
 	
 	@Transient Long initial = 0l;
 	@Transient Long movement = 0l;
@@ -34,7 +36,9 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 	public static final String FIELD_ACTUAL = "actual";
 	public static final String FIELD_ACTUAL_MINUS_MOVEMENT_INCLUDED = "actualMinusMovementIncluded";
 	public static final String FIELD_AVAILABLE = "available";
-	public static final String FIELD_ADJUSTMENT = "adjustment";	
+	public static final String FIELD_ADJUSTMENT = "adjustment";
+	public static final String FIELD_EXPECTED_ADJUSTMENT = "expectedAdjustment";
+	public static final String FIELD_EXPECTED_ADJUSTMENT_MINUS_ADJUSTMENT = "expectedAdjustmentMinusAdjustment";
 	public static final String FIELD_INITIAL_PLUS_ADJUSTMENT = "initialPlusAdjustment";	
 	public static final String FIELD_ACTUAL_PLUS_ADJUSTMENT = "actualPlusAdjustment";
 	public static final String FIELD_ACTUAL_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT = "actualMinusMovementIncludedPlusAdjustment";

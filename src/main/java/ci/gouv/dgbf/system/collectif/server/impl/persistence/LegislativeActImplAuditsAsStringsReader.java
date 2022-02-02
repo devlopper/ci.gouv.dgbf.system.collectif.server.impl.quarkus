@@ -5,9 +5,9 @@ import java.io.Serializable;
 public class LegislativeActImplAuditsAsStringsReader extends LegislativeActImplAuditsReader implements Serializable {
 
 	@Override
-	protected void __set__(LegislativeActImpl expenditure, Object[] array) {
-		super.__set__(expenditure, array);
-		__setAuditsAsStrings__(expenditure, array);
+	protected void __set__(LegislativeActImpl legislativeAct, Object[] array) {
+		super.__set__(legislativeAct, array);
+		__setAuditsAsStrings__(legislativeAct, array);
 	}
 	
 }

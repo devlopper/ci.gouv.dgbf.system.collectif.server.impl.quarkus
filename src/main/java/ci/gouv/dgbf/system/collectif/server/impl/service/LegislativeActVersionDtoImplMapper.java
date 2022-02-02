@@ -1,6 +1,8 @@
 package ci.gouv.dgbf.system.collectif.server.impl.service;
 
 import org.cyk.utility.mapping.Mapper;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.MappingTarget;
 
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
@@ -12,4 +14,8 @@ public interface LegislativeActVersionDtoImplMapper extends Mapper<LegislativeAc
 	
 	LegislativeActImpl map(LegislativeActDtoImpl entity);
 	
+	@AfterMapping
+	default void listenAfterMap(LegislativeActVersionImpl source, @MappingTarget LegislativeActVersionDtoImpl target) {
+		target.set__audit__(source.get__audit__());
+	}
 }
