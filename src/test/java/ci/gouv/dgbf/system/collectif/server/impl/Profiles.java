@@ -64,6 +64,18 @@ public interface Profiles {
 				}
 			}
 			
+			public class Import implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Import.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Import.class);
+				}
+			}
+			
 			public static Set<String> buildTags(Class<?>...classes) {
 				return Persistence.buildTags(ArrayUtils.addFirst(classes, Expenditure.class));
 			}

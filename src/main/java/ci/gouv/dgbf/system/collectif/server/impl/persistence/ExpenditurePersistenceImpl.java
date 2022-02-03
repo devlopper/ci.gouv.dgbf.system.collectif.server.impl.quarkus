@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.persistence.server.AbstractSpecificPersistenceImpl;
@@ -39,6 +40,15 @@ public class ExpenditurePersistenceImpl extends AbstractSpecificPersistenceImpl<
 				,ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT,auditWhat
 				,ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN,auditWhen));
 		procedureExecutor.execute(arguments);
+	}
+	
+	public Collection<ExpenditureView> readImportableByActVersionIdentifierUsingNamedQuery(String legislativeActVersionIdentifier,Integer firstTupleindex,Integer numberOfTuples) {
+		TypedQuery<ExpenditureView> query = entityManager.createNamedQuery(ExpenditureView.QUERY_READ_IMPORTABLE_BY_ACT_VERSION_IDENTIFIER, ExpenditureView.class).setParameter("legislativeActVersionIdentifier", legislativeActVersionIdentifier);
+		if(firstTupleindex != null)
+			query.setFirstResult(firstTupleindex);
+		if(numberOfTuples != null)
+			query.setMaxResults((firstTupleindex == null ? 0 : firstTupleindex) + numberOfTuples);
+		return query.getResultList();
 	}
 		
 	public static void readAmounts(Collection<ExpenditureImpl> expenditures) {

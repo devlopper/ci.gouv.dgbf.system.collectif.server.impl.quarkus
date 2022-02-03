@@ -1,3 +1,11 @@
+--Liste des dépense
+CREATE OR REPLACE VIEW VA_DEPENSE AS
+SELECT depense.*,exercice.annee AS "EXERCICE"
+FROM TA_DEPENSE depense
+JOIN TA_VERSION_COLLECTIF version_collectif ON version_collectif.identifiant = depense.version_collectif
+JOIN TA_COLLECTIF collectif ON collectif.identifiant = version_collectif.collectif
+JOIN VMA_EXERCICE exercice ON exercice.identifiant = collectif.exercice;
+
 -- Liste des dépenses importables
 CREATE OR REPLACE VIEW VA_DEPENSE_IMPORTABLE AS
 SELECT l.*

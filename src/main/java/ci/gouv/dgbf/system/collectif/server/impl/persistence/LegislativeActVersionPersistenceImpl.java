@@ -6,6 +6,7 @@ import java.util.Collection;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.persistence.server.AbstractSpecificPersistenceImpl;
@@ -21,6 +22,15 @@ public class LegislativeActVersionPersistenceImpl extends AbstractSpecificPersis
 	public LegislativeActVersionPersistenceImpl() {
 		entityClass = LegislativeActVersion.class;
 		entityImplClass = LegislativeActVersionImpl.class;
+	}
+	
+	@Override
+	public LegislativeActVersion readUsingNamedQueryReadByIdentifier(String identifier) {
+		try {
+			return entityManager.createNamedQuery(LegislativeActVersionImpl.QUERY_READ_BY_IDENTIIFER,LegislativeActVersionImpl.class).setParameter(LegislativeActVersionImpl.FIELD_IDENTIFIER, identifier).getSingleResult();
+		}catch(NoResultException exception) {
+			return null;
+		}	
 	}
 	
 	public static void readAmounts(Collection<LegislativeActVersionImpl> legislativeActVersions) {
