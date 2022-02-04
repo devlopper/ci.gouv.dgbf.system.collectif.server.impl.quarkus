@@ -62,6 +62,24 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 	}
 	
 	@Override @Transactional
+	public Result updateDefaultVersion(String legislativeActVersionIdentifier, String auditWho) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		Object[] instances = ValidatorImpl.LegislativeAct.validateUpdateDefaultVersionInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
+		LegislativeActImpl legislativeAct = legislativeActVersion.getAct();	
+		legislativeAct.setDefaultVersion(legislativeActVersion);
+		audit(legislativeAct, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		entityManager.merge(legislativeAct);
+		// Return of message
+		result.close().setName(String.format("Mise à jour de la version par défaut de %s avec %s par %s",legislativeAct.getName(),legislativeActVersion.getName(),auditWho)).log(getClass());
+		result.addMessages(String.format("Version par défaut de %s : %s",legislativeAct.getName(),legislativeActVersion.getName()));
+		return result;
+	}
+	
+	@Override @Transactional
 	public Result updateDefaultVersion(String legislativeActIdentifier,String legislativeActVersionIdentifier, String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();

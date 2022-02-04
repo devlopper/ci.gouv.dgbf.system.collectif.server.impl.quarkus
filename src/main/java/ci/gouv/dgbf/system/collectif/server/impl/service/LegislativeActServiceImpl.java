@@ -33,8 +33,8 @@ public class LegislativeActServiceImpl extends AbstractSpecificServiceImpl<Legis
 	}
 
 	@Override
-	public Response updateDefaultVersion(String identifier, String versionIdentifier, String auditWho) {
-		return buildResponseOk(business.updateDefaultVersion(identifier, versionIdentifier, auditWho));
+	public Response updateDefaultVersion(String versionIdentifier, String auditWho) {
+		return buildResponseOk(business.updateDefaultVersion(versionIdentifier, auditWho));
 	}
 
 	@Override

@@ -52,7 +52,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		result.addMessages(String.format("Création de %s",legislativeActVersion.getName()));
 		return result;
 	}
-
+	
 	private static final String CODE_FORMAT = "%s_%s";
 	private static final String NAME_FORMAT = "Version %s %s";
 }
