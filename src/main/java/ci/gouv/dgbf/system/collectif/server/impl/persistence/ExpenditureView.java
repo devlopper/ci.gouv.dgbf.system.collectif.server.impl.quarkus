@@ -9,8 +9,6 @@ import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringImpl;
@@ -22,14 +20,10 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) 
 @Entity(name = ExpenditureView.ENTITY_NAME) @Access(AccessType.FIELD)
 @Table(name=ExpenditureView.TABLE_NAME)
-@NamedQueries(value = {
-		@NamedQuery(name = ExpenditureView.QUERY_READ_IMPORTABLE_BY_ACT_VERSION_IDENTIFIER
-			,query = "SELECT t FROM ExpenditureView t WHERE CONCAT(t.exercise,t.activityIdentifier,t.economicNatureIdentifier,t.fundingSourceIdentifier,t.lessorIdentifier) NOT IN (SELECT CONCAT(e.year,p.activityIdentifier,p.economicNatureIdentifier,p.fundingSourceIdentifier,p.lessorIdentifier) FROM ExpenditureImpl p JOIN LegislativeActVersionImpl lav ON lav = p.actVersion JOIN LegislativeActImpl la ON la = lav.act JOIN ExerciseImpl e ON e.identifier = la.exerciseIdentifier WHERE lav.identifier = :legislativeActVersionIdentifier)")
-})
 @org.hibernate.annotations.Immutable
 public class ExpenditureView extends AbstractIdentifiableSystemScalarStringImpl implements Serializable {
 
-	@Column(name = COLUMN_EXERCISE) String exercise;
+	@Column(name = COLUMN_EXERCISE) Short exercise;
 	
 	@Column(name = COLUMN_NATURE_IDENTIFIER) String natureIdentifier;
 	@Column(name = COLUMN_NATURE_CODE) String natureCode;
@@ -173,6 +167,4 @@ public class ExpenditureView extends AbstractIdentifiableSystemScalarStringImpl 
 	
 	public static final String ENTITY_NAME = "ExpenditureView";
 	public static final String TABLE_NAME = "VMA_DEPENSE";
-	
-	public static final String QUERY_READ_IMPORTABLE_BY_ACT_VERSION_IDENTIFIER = "ExpenditureView.readImportableByActVersionIdentifier";
 }

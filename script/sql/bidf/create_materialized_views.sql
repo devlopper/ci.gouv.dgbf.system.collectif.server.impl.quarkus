@@ -115,8 +115,10 @@ CREATE INDEX VMA_ACTIVITE_RECETTE_K_U_ID ON VMA_ACTIVITE (USB_IDENTIFIANT ASC);
 
 DROP MATERIALIZED VIEW VMA_DEPENSE;
 CREATE MATERIALIZED VIEW VMA_DEPENSE REFRESH NEXT SYSDATE + 1/(24) COMPLETE AS
-SELECT ld.exo_num||a.ads_code||ne.nat_code||sf.sfin_code||b.bai_code AS "IDENTIFIANT"
-,ld.ldep_id AS "LDEP_ID",fd.find_id AS "FIND_ID",ld.exo_num AS "EXERCICE"
+SELECT version_collectif.identifiant||a.ads_code||ne.nat_code||sf.sfin_code||b.bai_code AS "IDENTIFIANT"
+,version_collectif.identifiant AS "VERSION_COLLECTIF"
+,ld.exo_num||a.ads_id||ne.nat_id||sf.sfin_id||b.bai_id AS "E_A_NE_SF_B"
+,ld.ldep_id AS "LDEP_ID",fd.find_id AS "FIND_ID",TO_NUMBER(ld.exo_num) AS "EXERCICE"
 ,a.ads_id AS "ACTIVITE_IDENTIFIANT",a.ads_code AS "ACTIVITE_CODE",a.ads_code||' '||a.ads_liblg AS "ACTIVITE_CODE_LIBELLE"
 ,ne.nat_id AS "NATURE_ECONOMIQUE_IDENTIFIANT",ne.nat_code AS "NATURE_ECONOMIQUE_CODE",ne.nat_code||' '||ne.nat_liblg AS "NATURE_ECONOMIQUE_CODE_LIBELLE"
 ,sf.sfin_id AS "SOURCE_FINANCEMENT_IDENTIFIANT",sf.sfin_code AS "SOURCE_FINANCEMENT_CODE",sf.sfin_code||' '||sf.sfin_liblg AS "SF_CODE_LIBELLE"
@@ -136,7 +138,10 @@ LEFT JOIN source_financement@dblink_elabo_bidf sf ON sf.sfin_id = fd.sfin_id
 LEFT JOIN bailleur@dblink_elabo_bidf b ON b.bai_id = fd.bai_id
 LEFT JOIN action@dblink_elabo_bidf ac ON ac.adp_id = a.adp_id
 LEFT JOIN unite_spec_bud@dblink_elabo_bidf u ON u.usb_id = ac.usb_id
-LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = u.secb_id;
+LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = u.secb_id
+JOIN VMA_EXERCICE exercice ON exercice.annee = TO_NUMBER(ld.exo_num)
+JOIN TA_COLLECTIF collectif ON collectif.exercice = exercice.identifiant
+JOIN TA_VERSION_COLLECTIF version_collectif ON version_collectif.collectif = collectif.identifiant;
 ALTER TABLE VMA_DEPENSE ADD CONSTRAINT VMA_DEPENSE_PK PRIMARY KEY (IDENTIFIANT);
 CREATE INDEX VMA_DEPENSE_K_EXERCICE ON VMA_DEPENSE (EXERCICE ASC);
 CREATE INDEX VMA_DEPENSE_K_ACTIVITE ON VMA_DEPENSE (ACTIVITE_IDENTIFIANT ASC);
