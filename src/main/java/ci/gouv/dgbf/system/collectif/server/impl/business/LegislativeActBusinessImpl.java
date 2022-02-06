@@ -15,6 +15,7 @@ import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
@@ -32,6 +33,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 	@Inject LegislativeActPersistence persistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject ExercisePersistence exercisePersistence;
+	@Inject LegislativeActVersionBusiness legislativeActVersionBusiness;
 	
 	@Override @Transactional
 	public Result create(String code, String name, String exerciseIdentifier, String auditWho) {
@@ -52,8 +54,20 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 			legislativeAct.setName(String.format(NAME_FORMAT, legislativeAct.getExercise().getYear()));
 		}
 		legislativeAct.setIdentifier(legislativeAct.getCode());
-		audit(legislativeAct, CREATE_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		String auditFunctionality = CREATE_AUDIT_IDENTIFIER;
+		LocalDateTime auditNow = LocalDateTime.now();
+		audit(legislativeAct , auditWho,auditFunctionality, auditNow);
 		entityManager.persist(legislativeAct);
+		
+		legislativeActVersionBusiness.create(null, null, null, legislativeAct.getIdentifier(), auditWho,auditFunctionality, auditNow,entityManager);
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) legislativeActVersionPersistence
+				.readOne(new QueryExecutorArguments().setEntityManager(entityManager).addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER).addFilterField(Parameters.LEGISLATIVE_ACT_IDENTIFIER, legislativeAct.getIdentifier()));
+		legislativeAct.setDefaultVersion(legislativeActVersion);
+		Long inProgressCount = persistence.count(new QueryExecutorArguments().setEntityManager(entityManager).addFilterField(Parameters.LEGISLATIVE_ACT_IN_PROGRESS, Boolean.TRUE));
+		if(inProgressCount == null || inProgressCount == 0)
+			legislativeAct.setInProgress(Boolean.TRUE);
+		entityManager.merge(legislativeAct);
+		
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeAct.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Création de %s",legislativeAct.getName()));

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.persistence.EntityManager;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.klass.ClassHelper;
@@ -82,14 +83,14 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	
 	public static interface LegislativeActVersion {
 		
-		static Object[] validateCreateInputs(String code,String name,Byte number,String legislativeActIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+		static Object[] validateCreateInputs(String code,String name,Byte number,String legislativeActIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
 			validateAuditWho(auditWho, throwablesMessages);
 			
 			LegislativeActImpl legislativeAct = StringHelper.isBlank(legislativeActIdentifier) ? null
 					: (LegislativeActImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.class, legislativeActIdentifier,List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_CODE
 							,LegislativeActImpl.FIELD_NAME)
-					, __inject__(LegislativeActPersistence.class), throwablesMessages);
+					, __inject__(LegislativeActPersistence.class), throwablesMessages,entityManager);
 			return new Object[] {legislativeAct};
 		}
 		

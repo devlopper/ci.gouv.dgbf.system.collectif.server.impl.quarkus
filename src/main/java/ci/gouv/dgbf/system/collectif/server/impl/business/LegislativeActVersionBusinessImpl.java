@@ -11,6 +11,7 @@ import javax.transaction.Transactional;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.__kernel__.value.ValueHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -29,11 +30,11 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 	@Inject LegislativeActVersionPersistence persistence;
 
 	@Override @Transactional
-	public Result create(String code, String name, Byte number, String legislativeActIdentifier, String auditWho) {
+	public Result create(String code, String name, Byte number, String legislativeActIdentifier, String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
-		Object[] instances = ValidatorImpl.LegislativeActVersion.validateCreateInputs(code, name, number,legislativeActIdentifier, auditWho, throwablesMessages);
+		Object[] instances = ValidatorImpl.LegislativeActVersion.validateCreateInputs(code, name, number,legislativeActIdentifier, auditWho, throwablesMessages,entityManager);
 		throwablesMessages.throwIfNotEmpty();
 		//All inputs are fine
 		LegislativeActVersionImpl legislativeActVersion = new LegislativeActVersionImpl().setCode(code).setName(name).setNumber(number).setAct((LegislativeActImpl) instances[0]);
@@ -45,12 +46,19 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		if(StringHelper.isBlank(legislativeActVersion.getName()))
 			legislativeActVersion.setName(String.format(NAME_FORMAT, legislativeActVersion.getNumber(),legislativeActVersion.getAct().getName()));
 		legislativeActVersion.setIdentifier(legislativeActVersion.getCode());
-		audit(legislativeActVersion, CREATE_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		audit(legislativeActVersion, ValueHelper.defaultToIfBlank(auditFunctionality, CREATE_AUDIT_IDENTIFIER), auditWho, ValueHelper.defaultToIfBlank(auditWhen, LocalDateTime.now()));
+		if(entityManager == null)
+			entityManager = this.entityManager;
 		entityManager.persist(legislativeActVersion);
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Création de %s",legislativeActVersion.getName()));
 		return result;
+	}
+	
+	@Override
+	public Result create(String code, String name, Byte number, String legislativeActIdentifier, String auditWho) {
+		return create(code, name, number, legislativeActIdentifier, auditWho, CREATE_AUDIT_IDENTIFIER, LocalDateTime.now(),entityManager);
 	}
 	
 	private static final String CODE_FORMAT = "%s_%s";
