@@ -23,24 +23,24 @@ public class BusinessLegislativeActUpdateDefaultVersionTest {
 	@Test
 	void updateDefaultVersion() {
 		assertor.assertLegislativeActVersionIdentifier("1", "1_1");
-		business.updateDefaultVersion("1", "1_2", "meliane");
+		business.updateDefaultVersion("1_2", "meliane");
 		assertor.assertLegislativeActVersionIdentifier("1", "1_2");
 	}
 	
 	@Test
 	void updateDefaultVersion_null() {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
-			business.updateDefaultVersion(null,null,null);
+			business.updateDefaultVersion(null,null);
 	    });
-		assertThat(exception.getMessage()).isEqualTo("L'identifiant de Collectif budgétaire est requis\r\nL'identifiant de Version collectif budgétaire est requis\r\nLe nom d'utilisateur est requis");
+		assertThat(exception.getMessage()).isEqualTo("L'identifiant de Version collectif budgétaire est requis\r\nLe nom d'utilisateur est requis");
 	}
 	
 	@Test
 	void updateDefaultVersion_same() {
 		assertor.assertLegislativeActVersionIdentifier("2", "2_1");
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
-			business.updateDefaultVersion("2", "2_1", "meliane");
+			business.updateDefaultVersion("2_1", "meliane");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("La version par défaut existe déja");
+		assertThat(exception.getMessage()).isEqualTo("1 est déja la version par défaut de Collectif Budgétaire 2021 du 01/07/2021");
 	}
 }

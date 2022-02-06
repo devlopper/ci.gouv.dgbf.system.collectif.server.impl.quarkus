@@ -62,14 +62,15 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 							,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT)
 					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
-			throwablesMessages.addIfTrue(String.format("%s %s n'est pas lié à un collectif",ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, legislativeActVersion.getName()), legislativeActVersion.getAct() == null);	
+			if(legislativeActVersion != null) {
+				throwablesMessages.addIfTrue(String.format("%s %s n'est pas lié à un collectif",ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, legislativeActVersion.getName())
+						, legislativeActVersion.getAct() == null);
+				if(legislativeActVersion.getAct().getDefaultVersion() != null) {
+					throwablesMessages.addIfTrue(String.format("%s est déja la version par défaut de %s", legislativeActVersion.getAct().getDefaultVersion().getName(),legislativeActVersion.getAct().getName())
+							, legislativeActVersionIdentifier.equals(legislativeActVersion.getAct().getDefaultVersion().getIdentifier()));
+				}
+			}
 			return new Object[] {legislativeActVersion};
-		}
-		
-		static void validateUpdateDefaultVersionInputs(String legislativeActIdentifier,String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
-			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
-			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
 		}
 		
 		static void validateUpdateInProgressInputs(String legislativeActIdentifier,Boolean inProgress,String auditWho,ThrowablesMessages throwablesMessages) {

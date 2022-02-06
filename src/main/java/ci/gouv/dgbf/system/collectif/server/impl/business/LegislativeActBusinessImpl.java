@@ -2,7 +2,6 @@ package ci.gouv.dgbf.system.collectif.server.impl.business;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -75,30 +74,6 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		entityManager.merge(legislativeAct);
 		// Return of message
 		result.close().setName(String.format("Mise à jour de la version par défaut de %s avec %s par %s",legislativeAct.getName(),legislativeActVersion.getName(),auditWho)).log(getClass());
-		result.addMessages(String.format("Version par défaut de %s : %s",legislativeAct.getName(),legislativeActVersion.getName()));
-		return result;
-	}
-	
-	@Override @Transactional
-	public Result updateDefaultVersion(String legislativeActIdentifier,String legislativeActVersionIdentifier, String auditWho) {
-		Result result = new Result().open();
-		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
-		// Validation of inputs
-		ValidatorImpl.LegislativeAct.validateUpdateDefaultVersionInputs(legislativeActIdentifier,legislativeActVersionIdentifier,auditWho, throwablesMessages);
-		throwablesMessages.throwIfNotEmpty();
-		
-		LegislativeActImpl legislativeAct = validateAndReturnUsingNamedQueryReadByIdentifierLegislativeAct(legislativeActIdentifier,throwablesMessages);
-		
-		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) legislativeActVersionPersistence.readOne(legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_NAME));
-		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier),legislativeActVersion == null);
-		throwablesMessages.addIfTrue("La version par défaut existe déja",legislativeAct.getDefaultVersion() != null && legislativeActVersionIdentifier.equals(legislativeAct.getDefaultVersion().getIdentifier()));
-		throwablesMessages.throwIfNotEmpty();
-		
-		legislativeAct.setDefaultVersion(legislativeActVersion);
-		audit(legislativeAct, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
-		entityManager.merge(legislativeAct);
-		// Return of message
-		result.close().setName(String.format("Mise à jour de la version par défaut de %s avec %s par %s",LegislativeActVersion.NAME,legislativeAct.getName(),legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Version par défaut de %s : %s",legislativeAct.getName(),legislativeActVersion.getName()));
 		return result;
 	}
