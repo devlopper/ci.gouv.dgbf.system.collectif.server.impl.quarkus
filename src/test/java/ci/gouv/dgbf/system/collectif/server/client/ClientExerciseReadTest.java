@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.DependencyInjection;
@@ -15,19 +14,17 @@ import org.junit.jupiter.api.Test;
 
 import ci.gouv.dgbf.system.collectif.server.api.service.ExerciseDto;
 import ci.gouv.dgbf.system.collectif.server.client.rest.Exercise;
-import ci.gouv.dgbf.system.collectif.server.impl.Assertor;
+import ci.gouv.dgbf.system.collectif.server.impl.AbstractClientTest;
 import ci.gouv.dgbf.system.collectif.server.impl.Profiles;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(Profiles.Client.Exercise.Read.class)
-public class ClientExerciseReadTest {
+public class ClientExerciseReadTest extends AbstractClientTest {
 
-	@Inject Assertor assertor;
-	
 	@Test
-    public void get_many() {
+    public void get_many() {		
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(Exercise.class).get(null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());

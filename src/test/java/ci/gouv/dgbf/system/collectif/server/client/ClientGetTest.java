@@ -24,16 +24,15 @@ import ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersionCon
 import ci.gouv.dgbf.system.collectif.server.client.rest.RegulatoryAct;
 import ci.gouv.dgbf.system.collectif.server.client.rest.RegulatoryActController;
 import ci.gouv.dgbf.system.collectif.server.client.rest.Section;
-import ci.gouv.dgbf.system.collectif.server.impl.Assertor;
+import ci.gouv.dgbf.system.collectif.server.impl.AbstractClientTest;
 import ci.gouv.dgbf.system.collectif.server.impl.Profiles;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(Profiles.Client.Default.class)
-public class ClientGetTest {
+public class ClientGetTest extends AbstractClientTest{
 
-	@Inject Assertor assertor;
 	@Inject LegislativeActVersionController actVersionController;
 	@Inject BudgetSpecializationUnitController budgetSpecializationUnitController;
 	@Inject ActivityController activityController;

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.DependencyInjection;
@@ -18,7 +17,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
 import ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure;
-import ci.gouv.dgbf.system.collectif.server.impl.Assertor;
+import ci.gouv.dgbf.system.collectif.server.impl.AbstractClientTest;
 import ci.gouv.dgbf.system.collectif.server.impl.Profiles;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import io.quarkus.test.junit.QuarkusTest;
@@ -27,10 +26,8 @@ import io.quarkus.test.junit.TestProfile;
 @QuarkusTest
 @TestProfile(Profiles.Client.Default.class)
 @TestMethodOrder(value = MethodOrderer.OrderAnnotation.class)
-public class ClientExpenditureOrderedTest {
+public class ClientExpenditureOrderedTest extends AbstractClientTest{
 
-	@Inject Assertor assertor;
-	
 	@Test @Order(1)
     public void get_many() {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(Expenditure.class).get(null,null, null, null, null, null, null);

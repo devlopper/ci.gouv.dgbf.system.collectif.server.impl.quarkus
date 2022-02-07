@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.DependencyInjection;
@@ -15,17 +14,15 @@ import org.junit.jupiter.api.Test;
 
 import ci.gouv.dgbf.system.collectif.server.api.service.ResourceDto;
 import ci.gouv.dgbf.system.collectif.server.client.rest.Resource;
-import ci.gouv.dgbf.system.collectif.server.impl.Assertor;
+import ci.gouv.dgbf.system.collectif.server.impl.AbstractClientTest;
 import ci.gouv.dgbf.system.collectif.server.impl.Profiles;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(Profiles.Client.Resource.Read.class)
-public class ClientResourceReadTest {
+public class ClientResourceReadTest extends AbstractClientTest{
 
-	@Inject Assertor assertor;
-	
 	@Test
     public void get_many() {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(Resource.class).get(null,null, null, null, null, null, null);

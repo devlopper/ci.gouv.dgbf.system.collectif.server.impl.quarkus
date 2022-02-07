@@ -10,16 +10,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import ci.gouv.dgbf.system.collectif.server.client.rest.GeneratedActController;
-import ci.gouv.dgbf.system.collectif.server.impl.Assertor;
+import ci.gouv.dgbf.system.collectif.server.impl.AbstractClientTest;
 import ci.gouv.dgbf.system.collectif.server.impl.Profiles;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(Profiles.Client.GeneratedAct.Generate.class)
-public class ClientGeneratedActGenerateTest {
+public class ClientGeneratedActGenerateTest extends AbstractClientTest{
 
-	@Inject Assertor assertor;
 	@Inject GeneratedActController controller;
 	
 	@Test

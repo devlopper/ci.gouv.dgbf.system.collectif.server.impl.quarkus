@@ -13,16 +13,15 @@ import org.junit.jupiter.api.Test;
 import ci.gouv.dgbf.system.collectif.server.client.rest.Resource;
 import ci.gouv.dgbf.system.collectif.server.client.rest.ResourceController;
 import ci.gouv.dgbf.system.collectif.server.client.rest.Revenue;
-import ci.gouv.dgbf.system.collectif.server.impl.Assertor;
+import ci.gouv.dgbf.system.collectif.server.impl.AbstractClientTest;
 import ci.gouv.dgbf.system.collectif.server.impl.Profiles;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(Profiles.Client.Resource.Adjust.class)
-public class ClientResourceAdjustTest {
+public class ClientResourceAdjustTest extends AbstractClientTest{
 
-	@Inject Assertor assertor;
 	@Inject ResourceController controller;
 	
 	@Test

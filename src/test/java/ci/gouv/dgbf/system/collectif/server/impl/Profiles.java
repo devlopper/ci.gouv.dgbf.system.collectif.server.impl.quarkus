@@ -1,19 +1,14 @@
 package ci.gouv.dgbf.system.collectif.server.impl;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.cyk.utility.__kernel__.array.ArrayHelper;
-import org.cyk.utility.__kernel__.string.StringHelper;
+import org.cyk.quarkus.extension.test.Profile;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 
-public interface Profiles {
+public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 	
 	public interface Persistence {
 		
@@ -220,11 +215,11 @@ public interface Profiles {
 		}
 		
 		public static Set<String> buildTags(Class<?>...classes) {
-			return Profiles.buildTags(ArrayUtils.addFirst(classes, Persistence.class));
+			return Profile.buildTags(ArrayUtils.addFirst(classes, Persistence.class));
 		}
 		
 		public static Map<String,String> buildConfig(Class<?>...classes) {
-			return Profiles.buildConfig(classes);
+			return Profile.buildConfig(classes);
 		}
 	}
 
@@ -398,11 +393,11 @@ public interface Profiles {
 		}
 		
 		public static Set<String> buildTags(Class<?>...classes) {
-			return Profiles.buildTags(ArrayUtils.addFirst(classes, Business.class));
+			return Profile.buildTags(ArrayUtils.addFirst(classes, Business.class));
 		}
 		
 		public static Map<String,String> buildConfig(Class<?>...classes) {
-			return Profiles.buildConfig(classes);
+			return Profile.buildConfig(classes);
 		}
 	}
 
@@ -540,11 +535,11 @@ public interface Profiles {
 		}
 		
 		public static Set<String> buildTags(Class<?>...classes) {
-			return Profiles.buildTags(ArrayUtils.addFirst(classes, Service.class));
+			return Profile.buildTags(ArrayUtils.addFirst(classes, Service.class));
 		}
 		
 		public static Map<String,String> buildConfig(Class<?>...classes) {
-			return Profiles.buildConfig(classes);
+			return Profile.buildConfig(classes);
 		}
 	}
 	
@@ -696,33 +691,12 @@ public interface Profiles {
 		}
 		
 		public static Set<String> buildTags(Class<?>...classes) {
-			return Profiles.buildTags(ArrayUtils.addFirst(classes, Client.class));
+			return Profile.buildTags(ArrayUtils.addFirst(classes, Client.class));
 		}
 		
 		public static Map<String,String> buildConfig(Class<?>...classes) {
-			return Profiles.buildConfig(classes);
+			return Profile.buildConfig(classes);
 		}
 	}
 	
-	/**/
-	
-	public static Set<String> buildTags(Set<Class<?>> classes) {
-		Set<String> tags = classes.stream().map(klass -> klass.getSimpleName().toLowerCase()).collect(Collectors.toSet());
-		tags.add(StringHelper.concatenate(tags, "."));
-		return tags;
-	}
-	
-	public static Set<String> buildTags(Class<?>...classes) {
-		return buildTags(ArrayHelper.isEmpty(classes) ? null : Set.of(classes));
-	}
-	
-	public static Map<String,String> buildConfig(Set<Class<?>> classes) {
-		Map<String, String> config = new HashMap<>();
-		config.put("quarkus.hibernate-orm.sql-load-script", String.format("sql/%s.sql", classes.stream().map(klass -> klass.getSimpleName().toLowerCase()).collect(Collectors.joining("-"))));
-		return config;
-	}
-	
-	public static Map<String,String> buildConfig(Class<?>...classes) {
-		return buildConfig(ArrayHelper.isEmpty(classes) ? null : new LinkedHashSet<Class<?>>(List.of(classes)));
-	}
 }
