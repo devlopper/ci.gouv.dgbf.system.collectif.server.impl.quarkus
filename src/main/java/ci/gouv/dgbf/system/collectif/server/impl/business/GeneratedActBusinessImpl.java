@@ -26,6 +26,8 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersisten
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
@@ -36,6 +38,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersist
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.GeneratedActExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.GeneratedActImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActExpenditureImpl;
 
@@ -45,6 +48,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	@Inject EntityManager entityManager;
 	@Inject GeneratedActPersistence persistence;
 	@Inject GeneratedActExpenditurePersistence generatedActExpenditurePersistence;
+	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject RegulatoryActPersistence regulatoryActPersistence;
@@ -100,47 +104,138 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	
 	@Override @Transactional
 	public Result generateByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
-		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
-		LegislativeActVersion legislativeActVersion = validate(legislativeActVersionIdentifier, auditWho,Boolean.TRUE, throwablesMessages);
-		
 		Result result = new Result().open();
-		
-		LocalDateTime auditWhen = LocalDateTime.now();
-		generateAdjustmentAct(legislativeActVersion,throwablesMessages,GENERATE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER,auditWho,auditWhen);
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		Object[] instances = ValidatorImpl.GeneratedAct.generateByLegislativeActVersionIdentifierInputs(legislativeActVersionIdentifier, auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
-		Long includedRegulatoryActCount = regulatoryActPersistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
-				,Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE));
-		LogHelper.logInfo(String.format("Nombre d'actes inclus : %s", includedRegulatoryActCount), getClass());
-		if(NumberHelper.isGreaterThanZero(includedRegulatoryActCount)) {
-			Collection<RegulatoryAct> regulatoryActs = regulatoryActPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
-					,Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE));
-			Collection<RegulatoryActExpenditure> regulatoryActExpenditures = regulatoryActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_IDENTIFIERS
-					,FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs)).addProjectionsFromStrings(RegulatoryActExpenditureImpl.FIELD_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER
-							,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER
-							,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ENTRY_AUTHORIZATION_AMOUNT,RegulatoryActExpenditureImpl.FIELD_PAYMENT_CREDIT_AMOUNT));
-			for(RegulatoryAct regulatoryAct : regulatoryActs) {
-				Boolean regulatoryActExpenditureExist = null;
-				if(regulatoryActExpenditures != null)
-					for(RegulatoryActExpenditure regulatoryActExpenditure : regulatoryActExpenditures) {
-						if(regulatoryActExpenditure.getActIdentifier().equals(regulatoryAct.getIdentifier())) {
-							regulatoryActExpenditureExist = Boolean.TRUE;
-							break;
-						}
-					}
-				if(regulatoryActExpenditureExist == null)
-					throwablesMessages.add(String.format("L'acte de gestion %s n'a pas de %s", regulatoryAct.getName(),Expenditure.NAME));
-			}
-			throwablesMessages.throwIfNotEmpty();
-			
-			generateCancelationsRepositioningsActs(legislativeActVersion, regulatoryActs,regulatoryActExpenditures, throwablesMessages, auditWho, auditWho, auditWhen);
-		}
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
+		ValidatorImpl.GeneratedAct.generateByLegislativeActVersionIdentifier(legislativeActVersion, auditWho, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
 		
-		Long count = includedRegulatoryActCount*2+1;
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) legislativeActPersistence.readOne(legislativeActVersion.getActIdentifier(), List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_ACT_GENERATION_MODE));
+		
+		LocalDateTime auditWhen = LocalDateTime.now();
+		
+		Collection<RegulatoryAct> regulatoryActs = regulatoryActPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
+				,Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE));
+		
+		Collection<RegulatoryActExpenditure> regulatoryActExpenditures = regulatoryActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_IDENTIFIERS
+				,FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs)).addProjectionsFromStrings(RegulatoryActExpenditureImpl.FIELD_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER
+						,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER
+						,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ENTRY_AUTHORIZATION_AMOUNT,RegulatoryActExpenditureImpl.FIELD_PAYMENT_CREDIT_AMOUNT));
+		
+		for(RegulatoryAct regulatoryAct : regulatoryActs) {
+			Boolean regulatoryActExpenditureExist = null;
+			if(regulatoryActExpenditures != null)
+				for(RegulatoryActExpenditure regulatoryActExpenditure : regulatoryActExpenditures) {
+					if(regulatoryActExpenditure.getActIdentifier().equals(regulatoryAct.getIdentifier())) {
+						regulatoryActExpenditureExist = Boolean.TRUE;
+						break;
+					}
+				}
+			if(regulatoryActExpenditureExist == null)
+				throwablesMessages.add(String.format("L'acte de gestion %s n'a pas de %s", regulatoryAct.getName(),Expenditure.NAME));
+		}
+		throwablesMessages.throwIfNotEmpty();
+		
+		Integer count = generateActsByMode(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, legislativeAct.getActGenerationMode(), throwablesMessages, auditWho, auditWho, auditWhen);		
+		throwablesMessages.throwIfNotEmpty();
+		
 		// Return of message
 		result.close().setName(String.format("Génération de %s acte(s) de la version du collectif %s par %s",count,legislativeActVersionIdentifier,auditWho)).log(getClass());
 		result.addMessages(String.format("Nombre d'actes générés : %s", count));
 		return result;
+	}
+	
+	/* Acts Generation Methods */
+	
+	private Integer generateActsByMode(LegislativeActVersionImpl legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures,LegislativeAct.ActGenerationMode generationMode
+			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+		if(generationMode == null)
+			generationMode = LegislativeAct.ActGenerationMode.DEFAULT;
+		if(LegislativeAct.ActGenerationMode.CANCELATION_ADJUSTMENT.equals(generationMode)) {
+			generateCancelationsActs(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages, auditFunctionality, auditWho, auditWhen);
+			generateCollectiveAct(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages, auditFunctionality, auditWho, auditWhen);
+			return NumberHelper.getInteger(NumberHelper.add(CollectionHelper.getSize(regulatoryActs),1));
+		}else if(LegislativeAct.ActGenerationMode.CANCELATION_REPOSITIONING_ADJUSTMENT.equals(generationMode)) {
+			generateCancelationsRepositioningsActs(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages, auditFunctionality, auditWho, auditWhen);
+			generateAdjustmentAct(legislativeActVersion, throwablesMessages, auditFunctionality, auditWho, auditWhen);
+		}else if(LegislativeAct.ActGenerationMode.ADJUSTMENT.equals(generationMode)) {
+			throwablesMessages.add(String.format("%s pas encore implémenté",generationMode.getValue()));
+		}
+		return null;
+	}
+	
+	private void generateCancelationsActs(LegislativeActVersionImpl legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures
+			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+		regulatoryActs.forEach(regulatoryAct -> {
+			GeneratedActImpl act = new GeneratedActImpl();
+			act.setIdentifier(String.format(CANCELATION_ACT_IDENTIFIER_FORMAT,legislativeActVersion.getIdentifier(),regulatoryAct.getIdentifier()));
+			act.setLegislativeActVersion((LegislativeActVersionImpl) legislativeActVersion);
+			act.setType(GeneratedAct.Type.CANCELATION);
+			act.setActSourceIdentifier(regulatoryAct.getIdentifier());
+			act.setApplied(Boolean.FALSE);
+			act.setCode(String.format(CANCELATION_ACT_CODE_FORMAT,legislativeActVersion.getCode(),regulatoryAct.getCode()));
+			act.setName(String.format(CANCELATION_ACT_NAME_FORMAT, GeneratedAct.Type.CANCELATION.getValue(),regulatoryAct.getName()));
+			audit(act, auditFunctionality, auditWho, auditWhen);
+			entityManager.persist(act);
+			Collection<RegulatoryActExpenditureImpl> actRegulatoryActExpenditures = CollectionHelper.cast(RegulatoryActExpenditureImpl.class
+					, regulatoryActExpenditures.stream().filter(regulatoryActExpenditure -> regulatoryActExpenditure.getActIdentifier().equals(regulatoryAct.getIdentifier())).collect(Collectors.toList()));
+			if(CollectionHelper.isNotEmpty(actRegulatoryActExpenditures)) {
+				actRegulatoryActExpenditures.forEach(regulatoryActExpenditure -> {
+					GeneratedActExpenditureImpl generatedActExpenditure = new GeneratedActExpenditureImpl().setIdentifier(act.getIdentifier()+"_"+regulatoryActExpenditure.getIdentifier()).setAct(act)
+							.setActivityIdentifier(regulatoryActExpenditure.getActivityIdentifier()).setEconomicNatureIdentifier(regulatoryActExpenditure.getEconomicNatureIdentifier())
+							.setFundingSourceIdentifier(regulatoryActExpenditure.getFundingSourceIdentifier()).setLessorIdentifier(regulatoryActExpenditure.getLessorIdentifier())
+							.setEntryAuthorizationAmount(regulatoryActExpenditure.getEntryAuthorizationAmount()).setPaymentCreditAmount(regulatoryActExpenditure.getPaymentCreditAmount());
+					audit(generatedActExpenditure, auditFunctionality, auditWho, auditWhen);
+					entityManager.persist(generatedActExpenditure);
+				});
+			}
+		});	
+	}
+	
+	private Integer generateCollectiveAct(LegislativeActVersionImpl legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures
+			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+		Long count = expenditurePersistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
+				,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
+		LogHelper.logInfo(String.format("Nombre de dépenses ajustées ou ayant leur mouvements inclus : %s", count), getClass());
+		if(NumberHelper.isEqualToZero(count))
+			return null;
+		GeneratedActImpl act = new GeneratedActImpl();
+		act.setIdentifier(legislativeActVersion.getIdentifier());
+		act.setLegislativeActVersion((LegislativeActVersionImpl) legislativeActVersion);
+		act.setType(GeneratedAct.Type.ADJUSTMENT);
+		act.setActSourceIdentifier(legislativeActVersion.getIdentifier());
+		act.setApplied(Boolean.FALSE);
+		act.setCode(legislativeActVersion.getCode());
+		act.setName(legislativeActVersion.getName());
+		audit(act, auditFunctionality, auditWho, auditWhen);
+		entityManager.persist(act);
+		
+		Integer batchSize = 100;
+		List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(), batchSize);		
+		LogHelper.logInfo(String.format("Traitement par lot de %s. Nombre de lot = %s", batchSize,batchSizes.size()), getClass());
+		for(Integer index =0; index < batchSizes.size(); index = index + 1) {
+			Collection<ExpenditureImpl> expenditures = CollectionHelper.cast(ExpenditureImpl.class, expenditurePersistence.readMany(new QueryExecutorArguments()
+					.addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER,ExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,ExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,ExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER
+							,ExpenditureImpl.FIELD_LESSOR_IDENTIFIER).addProcessableTransientFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS)
+					.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier(),Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE,Parameters.GENERATED_ACT_EXPENDITURE_EXISTS,Boolean.FALSE)
+					.setNumberOfTuples(batchSizes.get(index))));
+			LogHelper.logInfo(String.format("Traitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expenditures)), getClass());
+			if(CollectionHelper.isEmpty(expenditures))
+				break;
+			expenditures.forEach(expenditure -> {
+				GeneratedActExpenditureImpl generatedActExpenditure = new GeneratedActExpenditureImpl().setIdentifier(act.getIdentifier()+"_"+expenditure.getIdentifier()).setAct(act).setActivityIdentifier(expenditure.getActivityIdentifier())
+						.setEconomicNatureIdentifier(expenditure.getEconomicNatureIdentifier()).setFundingSourceIdentifier(expenditure.getFundingSourceIdentifier()).setLessorIdentifier(expenditure.getLessorIdentifier())
+						.setEntryAuthorizationAmount(expenditure.getEntryAuthorization().getActualMinusMovementIncludedPlusAdjustment())
+						.setPaymentCreditAmount(expenditure.getPaymentCredit().getActualMinusMovementIncludedPlusAdjustment());
+				audit(generatedActExpenditure, auditFunctionality, auditWho, auditWhen);
+				entityManager.persist(generatedActExpenditure);
+			});
+		}
+		
+		return 1;
 	}
 	
 	private void generateAdjustmentAct(LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
@@ -211,4 +306,8 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 			});
 		}
 	}
+	
+	private static final String CANCELATION_ACT_IDENTIFIER_FORMAT = "A_%s_%s";
+	private static final String CANCELATION_ACT_CODE_FORMAT = CANCELATION_ACT_IDENTIFIER_FORMAT;
+	private static final String CANCELATION_ACT_NAME_FORMAT = "%s %s";
 }

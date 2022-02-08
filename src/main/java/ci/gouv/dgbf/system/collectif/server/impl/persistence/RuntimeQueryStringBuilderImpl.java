@@ -4,6 +4,7 @@ import static org.cyk.utility.persistence.query.Language.parenthesis;
 import static org.cyk.utility.persistence.query.Language.Where.or;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.value.ValueHelper;
 import org.cyk.utility.persistence.query.Filter;
+import org.cyk.utility.persistence.query.Language;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.query.string.LikeStringBuilder;
 import org.cyk.utility.persistence.server.query.string.LikeStringValueBuilder;
@@ -81,6 +83,12 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		
 		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ExpenditureImpl.ENTITY_NAME));
+			if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
+				builderArguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
+				builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
+				builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+			}
+			
 			/*String identifier = (String) arguments.getFilterFieldValue(Parameters.SECTION_IDENTIFIER);
 			if(StringHelper.isNotBlank(identifier)) {
 				builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier AND v.sectionIdentifier = '%s'",ExpenditureView.ENTITY_NAME
@@ -205,11 +213,31 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LESSOR_IDENTIFIER,"v"
 				,ExpenditureView.FIELD_LESSOR_IDENTIFIER);
 		
-		Boolean adjustmentEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_EQUAL_ZERO);
+		Boolean adjustmentsNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO);
+		if(adjustmentsNotEqualZero != null)
+			predicate.add(buildPredicateExpenditureAdjustmentsEqualZeroPredicate(!adjustmentsNotEqualZero));
+		
+		Boolean includedMovementNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO);
+		if(includedMovementNotEqualZero != null)
+			predicate.add(buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!includedMovementNotEqualZero));
+		
+		Boolean adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO);
+		if(adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero != null) {
+			predicate.add(Language.parenthesis(Language.Where.or(buildPredicateExpenditureAdjustmentsEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero)
+					,buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero))));
+		}
+		/*
+		addPredicateExpenditureAdjustmentsEqualZero(predicate,  adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero == null ? null : !adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero);
+		
+		addPredicateExpenditureAdjustmentsEqualZero(predicate,  arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_EQUAL_ZERO));
+		
+		addPredicateExpenditureMovementIncludedEqualZero(predicate, adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero == null ? null : !adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero);
+		*/
+		/*Boolean adjustmentEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_EQUAL_ZERO);
 		if(adjustmentEqualZero != null) {
 			predicate.add(String.format("(t.%1$s.%3$s %4$s 0 %5$s t.%2$s.%3$s %4$s 0)",ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT,AbstractExpenditureAmountsImpl.FIELD_ADJUSTMENT
 					,adjustmentEqualZero ? "=" : "<>",adjustmentEqualZero ? "AND" : "OR"));
-		}
+		}*/
 		
 		Boolean generatedActExpenditureExists = arguments.getFilterFieldValueAsBoolean(null,Parameters.GENERATED_ACT_EXPENDITURE_EXISTS);
 		if(generatedActExpenditureExists != null) {
@@ -219,6 +247,23 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		}
 	}
 	
+	private static String buildPredicateExpenditureAdjustmentsEqualZeroPredicate(Boolean isEqualToZero) {
+		return String.format("(t.%1$s.%3$s %4$s 0 %5$s t.%2$s.%3$s %4$s 0)",ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT,AbstractExpenditureAmountsImpl.FIELD_ADJUSTMENT
+				,isEqualToZero ? "=" : "<>",isEqualToZero ? "AND" : "OR");
+	}
+	
+	private static final String PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT = 
+			"((SELECT SUM(rae.%2$s) FROM %1$s ralav JOIN %3$s rae ON rae.%4$s = ralav.%5$s.identifier AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s JOIN RegulatoryActImpl ra ON ra.identifier = rae.actIdentifier AND ra.year = exercise.year WHERE ralav.%11$s IS TRUE) %6$s 0)";
+	private static String buildPredicateExpenditureMovementIncludedEqualZeroPredicate(Boolean isEqualToZero) {
+		Collection<String> strings = new ArrayList<>();
+		for(String field : RegulatoryActExpenditureImpl.ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT) {
+			strings.add(String.format(PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,field,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER
+					,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,Language.formatOperatorEqual(isEqualToZero),RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
+					,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_INCLUDED));
+		}
+		return strings.stream().collect(Collectors.joining(" AND "));
+	}
+		
 	public static void populatePredicateResource(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_IDENTIFIER,"t"
 				,FieldHelper.join(ExpenditureImpl.FIELD_ACT_VERSION,LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_IDENTIFIER));

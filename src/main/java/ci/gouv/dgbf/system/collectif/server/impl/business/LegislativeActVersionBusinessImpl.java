@@ -61,6 +61,18 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		return create(code, name, number, legislativeActIdentifier, auditWho, CREATE_AUDIT_IDENTIFIER, LocalDateTime.now(),entityManager);
 	}
 	
+	/*@Override
+	public Result generateActs(String identifier, String auditWho) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		Object[] instances = ValidatorImpl.LegislativeActVersion.validateGenerateActsInputs(identifier, auditWho, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		//All inputs are fine
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
+		return null;
+	}*/
+	
 	private static final String CODE_FORMAT = "%s_%s";
 	private static final String NAME_FORMAT = "Version %s %s";
 }

@@ -43,7 +43,11 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) LegislativeActImpl act;
 	@Transient String actIdentifier;
 	@Transient String actAsString;
+	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
+	
+	//@Column(name = COLUMN_ACT_GENERATION_MODE) ActGenerationMode actGenerationMode;
+	
 	@Transient LocalDateTime creationDate;
 	@Transient String creationDateAsString;
 	@Transient Short generatedActCount;
@@ -87,6 +91,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 		return paymentCredit;
 	}
 	
+	//public static final String FIELD_ACT_GENERATION_MODE = "actGenerationMode";
 	public static final String FIELD_ACT = "act";
 	public static final String FIELD_ACT_IDENTIFIER = "actIdentifier";
 	public static final String FIELD_ACT_AS_STRING = "actAsString";
@@ -106,6 +111,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String ENTITY_NAME = "LegislativeActVersionImpl";
 	public static final String TABLE_NAME = "TA_VERSION_COLLECTIF";
 	
+	//public static final String COLUMN_ACT_GENERATION_MODE = "MODE_GENERATION_ACTE";
 	public static final String COLUMN_ACT = "COLLECTIF";
 	public static final String COLUMN_NUMBER = "NUMERO";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";

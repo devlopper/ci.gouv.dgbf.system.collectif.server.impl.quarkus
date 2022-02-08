@@ -36,12 +36,10 @@ public class ServiceGeneratedActGenerateTest {
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
         	;
-		assertThat(response.then().extract().asString()).isEqualTo("Nombre d'actes générés : 3");
+		assertThat(response.then().extract().asString()).isEqualTo("Nombre d'actes générés : 2");
 		
-		
-		assertor.assertGeneratedActIdentifiersByLegislativeActVersionIdentifier("1", List.of("1","1_1","A_1_1"));
-		assertor.assertGeneratedActExpenditureIdentifiersByGeneratedActIdentifier("1", List.of("1_2","1_3","1_4"));
-		assertor.assertGeneratedActExpenditureIdentifiersByGeneratedActIdentifier("1_1", List.of("1_1_1_1","1_1_1_2"));
+		assertor.assertGeneratedActIdentifiersByLegislativeActVersionIdentifier("1", List.of("1","A_1_1"));
+		assertor.assertGeneratedActExpenditureIdentifiersByGeneratedActIdentifier("1", List.of("1_1","1_2","1_3","1_4"));
 		assertor.assertGeneratedActExpenditureIdentifiersByGeneratedActIdentifier("A_1_1", List.of("A_1_1_1_1","A_1_1_1_2"));
 		
 		assertor.assertGeneratedActIdentifiersByLegislativeActVersionIdentifier("3", List.of("3"));
@@ -56,6 +54,6 @@ public class ServiceGeneratedActGenerateTest {
 			//.log().all()
         	.statusCode(Response.Status.BAD_REQUEST.getStatusCode())
         	;
-		assertThat(response.then().extract().asString()).isEqualTo("L'identifiant de la version du collectif est requis\r\nLe nom d'utilisateur est requis");
+		assertThat(response.then().extract().asString()).isEqualTo("L'identifiant de Version collectif budgétaire est requis\r\nLe nom d'utilisateur est requis");
 	}
 }

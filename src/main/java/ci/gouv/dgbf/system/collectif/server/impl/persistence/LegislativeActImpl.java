@@ -62,6 +62,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@AttributeOverrides({@AttributeOverride(name = PaymentCreditImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT,nullable = true))})
 	PaymentCreditImpl paymentCredit;
 	
+	@Column(name = COLUMN_ACT_GENERATION_MODE) ActGenerationMode actGenerationMode;
+	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {
 		return (LegislativeActImpl) super.setIdentifier(identifier);
@@ -89,6 +91,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 		return paymentCredit;
 	}
 	
+	public static final String FIELD_ACT_GENERATION_MODE = "actGenerationMode";
 	public static final String FIELD_EXERCISE_IDENTIFIER = "exerciseIdentifier";
 	public static final String FIELD_EXERCISE_YEAR = "exerciseYear";
 	public static final String FIELD_EXERCISE = "exercise";
@@ -109,6 +112,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String ENTITY_NAME = "LegislativeActImpl";
 	public static final String TABLE_NAME = "TA_COLLECTIF";
 	
+	public static final String COLUMN_ACT_GENERATION_MODE = "MODE_GENERATION_ACTE";
 	public static final String COLUMN_EXERCISE = "EXERCICE";
 	public static final String COLUMN_DEFAULT_VERSION = "VERSION_PAR_DEFAUT";
 	public static final String COLUMN_IN_PROGRESS = "EN_COURS";

@@ -35,6 +35,18 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		}
 		
 		public interface Expenditure {
+			public class Read implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Read.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Read.class);
+				}
+			}
+			
 			public class Default implements QuarkusTestProfile {
 				@Override
 				public Map<String, String> getConfigOverrides() {

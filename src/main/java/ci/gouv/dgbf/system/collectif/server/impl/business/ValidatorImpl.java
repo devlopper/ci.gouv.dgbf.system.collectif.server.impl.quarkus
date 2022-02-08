@@ -16,11 +16,14 @@ import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Validator;
+import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Exercise;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
@@ -112,6 +115,17 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		static void validateGenerate(Collection<Object[]> arrays,Boolean existingIgnorable,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateAuditWho(auditWho, throwablesMessages);
 		}
+		
+		static Object[] validateGenerateActsInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(identifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			
+			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(identifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, identifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
+			return new Object[] {legislativeActVersion};
+		}
 	}
 
 	public static interface Expenditure {
@@ -188,6 +202,21 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	}
 	
 	public static interface GeneratedAct {
+		
+		static Object[] generateByLegislativeActVersionIdentifierInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(identifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(identifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, identifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
+			return new Object[] {legislativeActVersion};
+		}
+		
+		static void generateByLegislativeActVersionIdentifier(LegislativeActVersionImpl legislativeActVersion,String auditWho,ThrowablesMessages throwablesMessages) {
+			Long generatedCount = __inject__(GeneratedActPersistence.class).count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()));			
+			throwablesMessages.addIfTrue(String.format("La génération des actes de %s a déja été faite", legislativeActVersion.getName()),NumberHelper.isGreaterThanZero(generatedCount));
+		}
 		
 		static void validateGenerateInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));

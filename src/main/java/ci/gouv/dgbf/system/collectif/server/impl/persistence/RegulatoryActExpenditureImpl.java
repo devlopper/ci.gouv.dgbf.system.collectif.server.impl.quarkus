@@ -57,4 +57,6 @@ public class RegulatoryActExpenditureImpl extends AbstractIdentifiableSystemScal
 	public static final String COLUMN_LESSOR_IDENTIFIER = "bailleur";
 	public static final String COLUMN_ENTRY_AUTHORIZATION_AMOUNT = "montant_ae";
 	public static final String COLUMN_PAYMENT_CREDIT_AMOUNT = "montant_cp";
+	
+	public static final String[] ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT = {FIELD_ENTRY_AUTHORIZATION_AMOUNT,FIELD_PAYMENT_CREDIT_AMOUNT};
 }
