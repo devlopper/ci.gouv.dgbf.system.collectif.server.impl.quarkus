@@ -47,8 +47,6 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 			legislativeActVersion.setName(String.format(NAME_FORMAT, legislativeActVersion.getNumber(),legislativeActVersion.getAct().getName()));
 		legislativeActVersion.setIdentifier(legislativeActVersion.getCode());
 		audit(legislativeActVersion, ValueHelper.defaultToIfBlank(auditFunctionality, CREATE_AUDIT_IDENTIFIER), auditWho, ValueHelper.defaultToIfBlank(auditWhen, LocalDateTime.now()));
-		if(entityManager == null)
-			entityManager = this.entityManager;
 		entityManager.persist(legislativeActVersion);
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeActVersion.getName(),auditWho)).log(getClass());

@@ -14,6 +14,7 @@ import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
+import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
@@ -34,6 +35,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject ExercisePersistence exercisePersistence;
 	@Inject LegislativeActVersionBusiness legislativeActVersionBusiness;
+	@Inject ExpenditureBusiness expenditureBusiness;
 	
 	@Override @Transactional
 	public Result create(String code, String name, String exerciseIdentifier, String auditWho) {
@@ -55,11 +57,11 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		}
 		legislativeAct.setIdentifier(legislativeAct.getCode());
 		String auditFunctionality = CREATE_AUDIT_IDENTIFIER;
-		LocalDateTime auditNow = LocalDateTime.now();
-		audit(legislativeAct , auditWho,auditFunctionality, auditNow);
+		LocalDateTime auditWhen = LocalDateTime.now();
+		audit(legislativeAct , auditWho,auditFunctionality, auditWhen);
 		entityManager.persist(legislativeAct);
 		
-		legislativeActVersionBusiness.create(null, null, null, legislativeAct.getIdentifier(), auditWho,auditFunctionality, auditNow,entityManager);
+		legislativeActVersionBusiness.create(null, null, null, legislativeAct.getIdentifier(), auditWho,auditFunctionality, auditWhen,entityManager);
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) legislativeActVersionPersistence
 				.readOne(new QueryExecutorArguments().setEntityManager(entityManager).addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER).addFilterField(Parameters.LEGISLATIVE_ACT_IDENTIFIER, legislativeAct.getIdentifier()));
 		legislativeAct.setDefaultVersion(legislativeActVersion);
@@ -67,6 +69,8 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		if(inProgressCount == null || inProgressCount == 0)
 			legislativeAct.setInProgress(Boolean.TRUE);
 		entityManager.merge(legislativeAct);
+		
+		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion, auditWho,auditFunctionality,auditWhen,entityManager);
 		
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeAct.getName(),auditWho)).log(getClass());

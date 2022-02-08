@@ -3,8 +3,10 @@ package ci.gouv.dgbf.system.collectif.server.impl.business;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -94,25 +96,39 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		return adjust(entryAuthorizations == null ? null : Optional.ofNullable(entryAuthorizations).get().entrySet().stream()
 				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> new Long[] {entry.getValue(),entry.getValue()})),auditWho,ADJUST_BY_ENTRY_AUTHORIZATIONS_AUDIT_IDENTIFIER);
 	}
-
+	
 	@Override @Transactional
-	public Result import_(String legislativeActVersionIdentifier,String auditWho) {
+	public Result import_(String legislativeActVersionIdentifier, String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
-		ValidatorImpl.Expenditure.validateImport(legislativeActVersionIdentifier,auditWho, throwablesMessages);
-		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) legislativeActVersionPersistence.readUsingNamedQueryReadByIdentifier(legislativeActVersionIdentifier);
+		ValidatorImpl.Expenditure.validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
+		LegislativeActVersionImpl legislativeActVersion = entityManager.find(LegislativeActVersionImpl.class, legislativeActVersionIdentifier);// (LegislativeActVersionImpl) legislativeActVersionPersistence.readUsingNamedQueryReadByIdentifier(legislativeActVersionIdentifier,entityManager);
+		
 		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier),legislativeActVersion == null);
 		throwablesMessages.throwIfNotEmpty();
 		
-		Long count = persistence.count();
+		throwablesMessages.addIfTrue(String.format("%s de %s en cours d'importation",Expenditure.NAME ,legislativeActVersion.getName()), INPORT_RUNNING.contains(legislativeActVersionIdentifier));
+		throwablesMessages.throwIfNotEmpty();
 		
-		persistence.import_(legislativeActVersionIdentifier,auditWho, IMPORT_AUDIT_IDENTIFIER, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(LocalDateTime.now())));
+		Long count = persistence.count();
+		import_(legislativeActVersion, auditWho, IMPORT_AUDIT_IDENTIFIER, LocalDateTime.now(), entityManager);
 		count = NumberHelper.getLong(NumberHelper.subtract(persistence.count(),count));
+		
 		// Return of message
 		result.close().setName(String.format("Importation de %s %s(s) dans %s par %s",count,Expenditure.NAME,legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Nombre de %s importée : %s",Expenditure.NAME, count));
 		return result;
+	}
+	
+	public void import_(LegislativeActVersionImpl legislativeActVersion, String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {
+		if(StringHelper.isBlank(auditFunctionality))
+			auditFunctionality = IMPORT_AUDIT_IDENTIFIER;
+		if(auditWhen == null)
+			auditWhen = LocalDateTime.now();
+		INPORT_RUNNING.add(legislativeActVersion.getIdentifier());
+		persistence.import_(legislativeActVersion.getIdentifier(),auditWho, auditFunctionality, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(auditWhen)),entityManager);
+		INPORT_RUNNING.remove(legislativeActVersion.getIdentifier());
 	}
 	
 	@Scheduled(cron = "{cyk.expenditure.import.cron}")
@@ -130,4 +146,8 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 			import_(legislativeAct.getDefaultVersionIdentifier(), EntityLifeCycleListenerImpl.SYSTEM_USER_NAME);
 		}
 	}
+	
+	/**/
+	
+	private static final Set<String> INPORT_RUNNING = new HashSet<>();
 }

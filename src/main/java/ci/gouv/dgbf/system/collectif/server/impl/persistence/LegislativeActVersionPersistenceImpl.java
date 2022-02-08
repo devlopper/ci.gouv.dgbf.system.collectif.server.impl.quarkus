@@ -25,9 +25,9 @@ public class LegislativeActVersionPersistenceImpl extends AbstractSpecificPersis
 	}
 	
 	@Override
-	public LegislativeActVersion readUsingNamedQueryReadByIdentifier(String identifier) {
+	public LegislativeActVersion readUsingNamedQueryReadByIdentifier(String identifier,EntityManager entityManager) {
 		try {
-			return entityManager.createNamedQuery(LegislativeActVersionImpl.QUERY_READ_BY_IDENTIIFER,LegislativeActVersionImpl.class).setParameter(LegislativeActVersionImpl.FIELD_IDENTIFIER, identifier).getSingleResult();
+			return (entityManager == null ? this.entityManager : entityManager).createNamedQuery(LegislativeActVersionImpl.QUERY_READ_BY_IDENTIIFER,LegislativeActVersionImpl.class).setParameter(LegislativeActVersionImpl.FIELD_IDENTIFIER, identifier).getSingleResult();
 		}catch(NoResultException exception) {
 			return null;
 		}	
