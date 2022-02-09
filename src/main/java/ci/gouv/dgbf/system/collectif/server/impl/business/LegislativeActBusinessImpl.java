@@ -61,9 +61,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		audit(legislativeAct , auditWho,auditFunctionality, auditWhen);
 		entityManager.persist(legislativeAct);
 		
-		legislativeActVersionBusiness.create(null, null, null, legislativeAct.getIdentifier(), auditWho,auditFunctionality, auditWhen,entityManager);
-		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) legislativeActVersionPersistence
-				.readOne(new QueryExecutorArguments().setEntityManager(entityManager).addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER).addFilterField(Parameters.LEGISLATIVE_ACT_IDENTIFIER, legislativeAct.getIdentifier()));
+		LegislativeActVersionImpl legislativeActVersion = ((LegislativeActVersionBusinessImpl)legislativeActVersionBusiness).create(null, null, null, legislativeAct, auditWho,auditFunctionality, auditWhen,entityManager);;
 		legislativeAct.setDefaultVersion(legislativeActVersion);
 		Long inProgressCount = persistence.count(new QueryExecutorArguments().setEntityManager(entityManager).addFilterField(Parameters.LEGISLATIVE_ACT_IN_PROGRESS, Boolean.TRUE));
 		if(inProgressCount == null || inProgressCount == 0)
@@ -101,14 +99,10 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
-		ValidatorImpl.LegislativeAct.validateUpdateInProgressInputs(legislativeActIdentifier,inProgress,auditWho, throwablesMessages);
+		Object[] instances = ValidatorImpl.LegislativeAct.validateUpdateInProgressInputs(legislativeActIdentifier,inProgress,auditWho, throwablesMessages,entityManager);
 		throwablesMessages.throwIfNotEmpty();
 		
-		LegislativeActImpl legislativeAct = validateAndReturnUsingNamedQueryReadByIdentifierLegislativeAct(legislativeActIdentifier,throwablesMessages);
-		
-		throwablesMessages.addIfTrue(String.format("%s %sest %s en cours",legislativeAct.getName(),inProgress ? "" : "n'",inProgress ? "déja" : "pas"), legislativeAct.getInProgress() != null && inProgress == legislativeAct.getInProgress());
-		throwablesMessages.throwIfNotEmpty();
-		
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) instances[0];
 		legislativeAct.setInProgress(inProgress);
 		audit(legislativeAct, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
 		entityManager.merge(legislativeAct);
@@ -116,12 +110,6 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		result.close().setName(String.format("Mise à jour de <<en cours>> de %s avec %s par %s",LegislativeActVersion.NAME,legislativeAct.getName(),inProgress,auditWho)).log(getClass());
 		result.addMessages(String.format("<<en cours>> de %s : %s",legislativeAct.getName(),inProgress ? "Oui" : "Non"));
 		return result;
-	}
-	
-	LegislativeActImpl validateAndReturnUsingNamedQueryReadByIdentifierLegislativeAct(String legislativeActIdentifier,ThrowablesMessages throwablesMessages) {
-		LegislativeActImpl legislativeAct = (LegislativeActImpl) persistence.readUsingNamedQueryReadByIdentifier(legislativeActIdentifier);
-		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeAct.NAME, legislativeActIdentifier),legislativeAct == null);
-		return legislativeAct;
 	}
 	
 	private static final String CODE_FORMAT = "%s_%s";

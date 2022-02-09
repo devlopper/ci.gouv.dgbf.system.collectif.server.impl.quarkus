@@ -103,7 +103,7 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
 		ValidatorImpl.Expenditure.validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
-		LegislativeActVersionImpl legislativeActVersion = entityManager.find(LegislativeActVersionImpl.class, legislativeActVersionIdentifier);// (LegislativeActVersionImpl) legislativeActVersionPersistence.readUsingNamedQueryReadByIdentifier(legislativeActVersionIdentifier,entityManager);
+		LegislativeActVersionImpl legislativeActVersion = entityManager.find(LegislativeActVersionImpl.class, legislativeActVersionIdentifier);
 		
 		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier),legislativeActVersion == null);
 		throwablesMessages.throwIfNotEmpty();

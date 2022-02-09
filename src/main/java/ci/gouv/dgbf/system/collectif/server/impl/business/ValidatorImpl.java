@@ -73,10 +73,14 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			return new Object[] {legislativeActVersion};
 		}
 		
-		static void validateUpdateInProgressInputs(String legislativeActIdentifier,Boolean inProgress,String auditWho,ThrowablesMessages throwablesMessages) {
+		static Object[] validateUpdateInProgressInputs(String legislativeActIdentifier,Boolean inProgress,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
+			LegislativeActImpl legislativeAct = StringHelper.isBlank(legislativeActIdentifier) ? null : validateExistenceAndReturn(LegislativeActImpl.class, legislativeActIdentifier,null,null, throwablesMessages,entityManager);
 			throwablesMessages.addIfTrue("La valeur <<en cours>> est requise", inProgress == null);
+			if(legislativeAct != null)
+				throwablesMessages.addIfTrue(String.format("%s %sest %s en cours",legislativeAct.getName(),inProgress ? "" : "n'",inProgress ? "déja" : "pas"), legislativeAct.getInProgress() != null && inProgress == legislativeAct.getInProgress());
 			validateAuditWho(auditWho, throwablesMessages);
+			return new Object[] {legislativeAct};
 		}
 	}
 	
