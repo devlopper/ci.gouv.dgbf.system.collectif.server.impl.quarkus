@@ -31,7 +31,6 @@ import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
@@ -102,13 +101,12 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
-		ValidatorImpl.Expenditure.validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
-		LegislativeActVersionImpl legislativeActVersion = entityManager.find(LegislativeActVersionImpl.class, legislativeActVersionIdentifier);
-		
-		throwablesMessages.addIfTrue(String.format("%s identifiée par %s n'existe pas",LegislativeActVersion.NAME, legislativeActVersionIdentifier),legislativeActVersion == null);
+		Object[] instances = ValidatorImpl.Expenditure.validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
 		throwablesMessages.throwIfNotEmpty();
 		
-		throwablesMessages.addIfTrue(String.format("%s de %s en cours d'importation",Expenditure.NAME ,legislativeActVersion.getName()), INPORT_RUNNING.contains(legislativeActVersionIdentifier));
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
+		
+		ValidatorImpl.Expenditure.validateImport(legislativeActVersion, auditWho, throwablesMessages, entityManager);
 		throwablesMessages.throwIfNotEmpty();
 		
 		Long count = persistence.count();
@@ -126,9 +124,9 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 			auditFunctionality = IMPORT_AUDIT_IDENTIFIER;
 		if(auditWhen == null)
 			auditWhen = LocalDateTime.now();
-		INPORT_RUNNING.add(legislativeActVersion.getIdentifier());
+		IMPORT_RUNNING.add(legislativeActVersion.getIdentifier());
 		persistence.import_(legislativeActVersion.getIdentifier(),auditWho, auditFunctionality, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(auditWhen)),entityManager);
-		INPORT_RUNNING.remove(legislativeActVersion.getIdentifier());
+		IMPORT_RUNNING.remove(legislativeActVersion.getIdentifier());
 	}
 	
 	@Scheduled(cron = "{cyk.expenditure.import.cron}")
@@ -149,5 +147,5 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	
 	/**/
 	
-	private static final Set<String> INPORT_RUNNING = new HashSet<>();
+	public static final Set<String> IMPORT_RUNNING = new HashSet<>();
 }

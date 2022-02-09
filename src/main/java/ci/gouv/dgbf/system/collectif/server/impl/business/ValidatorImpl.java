@@ -75,11 +75,11 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] validateUpdateInProgressInputs(String legislativeActIdentifier,Boolean inProgress,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActImpl legislativeAct = StringHelper.isBlank(legislativeActIdentifier) ? null : validateExistenceAndReturn(LegislativeActImpl.class, legislativeActIdentifier,null,null, throwablesMessages,entityManager);
 			throwablesMessages.addIfTrue("La valeur <<en cours>> est requise", inProgress == null);
 			if(legislativeAct != null)
-				throwablesMessages.addIfTrue(String.format("%s %sest %s en cours",legislativeAct.getName(),inProgress ? "" : "n'",inProgress ? "déja" : "pas"), legislativeAct.getInProgress() != null && inProgress == legislativeAct.getInProgress());
-			validateAuditWho(auditWho, throwablesMessages);
+				throwablesMessages.addIfTrue(String.format("%s %sest %s en cours",legislativeAct.getName(),inProgress ? "" : "n'",inProgress ? "déja" : "pas"), legislativeAct.getInProgress() != null && inProgress == legislativeAct.getInProgress());			
 			return new Object[] {legislativeAct};
 		}
 	}
@@ -163,9 +163,19 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			throwablesMessages.addIfTrue("Nom d'utilisateur requis",StringHelper.isBlank(auditWho));		
 		}
 		
-		static void validateImportInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+		static Object[] validateImportInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);		
+			validateAuditWho(auditWho, throwablesMessages);
+			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_NAME)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
+			return new Object[] {legislativeActVersion};
+		}
+		
+		static void validateImport(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+			throwablesMessages.addIfTrue(String.format("%s de %s en cours d'importation",ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure.NAME ,legislativeActVersion.getName())
+					,ExpenditureBusinessImpl.IMPORT_RUNNING.contains(legislativeActVersion.getIdentifier()));
 		}
 	}
 	
