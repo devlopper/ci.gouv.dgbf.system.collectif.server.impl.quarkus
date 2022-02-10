@@ -66,6 +66,9 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	
 	@Column(name = COLUMN_ACT_GENERATION_MODE) @Enumerated(EnumType.STRING) ActGenerationMode actGenerationMode;
 	
+	@Column(name = COLUMN_AVAILABLE_MONITORABLE) Boolean availableMonitorable;
+	@Transient String availableMonitorableAsString;
+	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {
 		return (LegislativeActImpl) super.setIdentifier(identifier);
@@ -103,6 +106,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String FIELD_DEFAULT_VERSION_IDENTIFIER = "defaultVersionIdentifier";
 	public static final String FIELD_ENTRY_AUTHORIZATION = "entryAuthorization";
 	public static final String FIELD_PAYMENT_CREDIT = "paymentCredit";
+	public static final String FIELD_AVAILABLE_MONITORABLE = "availableMonitorable";
+	public static final String FIELDS_AMOUNTS_AVAILABLE = "amountsAvailable";
 	public static final String FIELDS_STRINGS = "strings";
 	public static final String FIELDS_AMOUNTS = "amounts";
 	public static final String FIELDS_AMOUNTS_MOVEMENT_INCLUDED = "amountsMovementIncluded";
@@ -122,6 +127,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT = "AJUSTEMENT_CP_ATTENDU";
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";
 	public static final String COLUMN_REFERENCE = "REFERENCE";
+	public static final String COLUMN_AVAILABLE_MONITORABLE = "DISPONIBLE_SURVEILLABLE";
 	
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";

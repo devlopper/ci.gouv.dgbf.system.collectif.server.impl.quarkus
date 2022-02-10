@@ -60,6 +60,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 				LegislativeActPersistenceImpl.readAmounts(legislativeActs);
 			else if(LegislativeActImpl.FIELDS_AMOUNTS_MOVEMENT_INCLUDED.equals(fieldName))
 				new LegislativeActImplAmountsMovementIncludedReader().readThenSet(legislativeActs, null);
+			else if(LegislativeActImpl.FIELDS_AMOUNTS_AVAILABLE.equals(fieldName))
+				new LegislativeActImplAmountsAvailableReader().readThenSet(legislativeActs, null);
 			else if(LegislativeActImpl.FIELD___AUDIT__.equals(fieldName))
 				new LegislativeActImplAuditReader().readThenSet(legislativeActs, null);
 		}
@@ -82,6 +84,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 				new LegislativeActVersionImplAsStringsReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_AMOUNTS.equals(fieldName))
 				LegislativeActVersionPersistenceImpl.readAmounts(legislativeActVersions);
+			else if(LegislativeActVersionImpl.FIELDS_AMOUNTS_AVAILABLE.equals(fieldName))
+				new LegislativeActVersionImplAmountsAvailableReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELD___AUDIT__.equals(fieldName))
 				new LegislativeActVersionImplAuditReader().readThenSet(legislativeActVersions, null);
 		}

@@ -135,7 +135,13 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		}
 		
 		static void validateAdjustmentsAvailable(Map<String,Long[]> adjustments,Collection<Object[]> arrays,Integer entryAuthorizationAvailableIndex,Integer paymentCreditAvailableIndex,ThrowablesMessages throwablesMessages) {
+			if(MapHelper.isEmpty(adjustments) || CollectionHelper.isEmpty(arrays))
+				return;
+			//Collection<Object[]> availablesMonitorables = new ExpenditureImplAvailableMonitorableIsNotFalseReader().readByIdentifiers(new ArrayList<String>(adjustments.keySet()), null);
+			//Collection<String> availablesMonitorablesIdentifiers = CollectionHelper.isEmpty(availablesMonitorables) ? null : availablesMonitorables.stream().map(array -> (String)array[0]).collect(Collectors.toList());
 			adjustments.forEach((identifier,value)->{
+				//if(availablesMonitorablesIdentifiers == null || !availablesMonitorablesIdentifiers.contains(identifier))
+				//	return;
 				for(Object[] array : arrays) {
 					if(identifier.equals(array[0])) {
 						if(value == null || value.length < 2) {

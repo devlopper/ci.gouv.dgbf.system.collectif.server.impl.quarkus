@@ -107,6 +107,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELDS_CODE_NAME_NUMBER = "codeNameNumberCreationDateAsString";
 	public static final String FIELDS_STRINGS = "strings";
 	public static final String FIELDS_AMOUNTS = "amounts";
+	public static final String FIELDS_AMOUNTS_AVAILABLE = "amountsAvailable";
 	
 	public static final String ENTITY_NAME = "LegislativeActVersionImpl";
 	public static final String TABLE_NAME = "TA_VERSION_COLLECTIF";

@@ -18,7 +18,7 @@ public class ExpenditureImplAmountsAvailableReader extends AbstractExpenditureIm
 	@Override
 	protected void __set__(ExpenditureImpl expenditure, Object[] array) {
 		Integer index = 1;
-		for(AbstractExpenditureAmountsImpl amounts : new AbstractExpenditureAmountsImpl[] {expenditure.getEntryAuthorization(Boolean.TRUE),expenditure.getPaymentCredit(Boolean.TRUE)})
-			amounts.setAvailable(getAsLong(array, index++));
+		expenditure.getEntryAuthorization(Boolean.TRUE).setAvailable(getAsLong(array, index++));
+		expenditure.getPaymentCredit(Boolean.TRUE).setAvailable(getAsLong(array, index++));
 	}
 }

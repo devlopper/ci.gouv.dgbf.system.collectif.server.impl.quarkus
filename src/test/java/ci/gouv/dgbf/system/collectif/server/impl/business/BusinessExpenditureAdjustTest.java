@@ -38,6 +38,15 @@ public class BusinessExpenditureAdjustTest {
 	}
 	
 	@Test
+	void adjust_availableNotMonitorable() {
+		assertor.assertEntryAuthorization("2022_1_1_1", 0l);
+		assertor.assertPaymentCredit("2022_1_1_1", 0l);
+		expenditureBusiness.adjust(Map.of("2022_1_1_1",new Long[] {-1l,-2l}),"meliane");
+		assertor.assertEntryAuthorization("2022_1_1_1", -1l);
+		assertor.assertPaymentCredit("2022_1_1_1", -2l);
+	}
+	
+	@Test
 	void adjustByEntryAuthorizations() {
 		assertor.assertEntryAuthorization("2", 0l);
 		assertor.assertPaymentCredit("2", 0l);
