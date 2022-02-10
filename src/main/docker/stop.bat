@@ -1,1 +1,1 @@
-docker stop file-server-quarkus
+docker rm $(docker stop $(docker ps -a -q --filter ancestor=mic-collectif-api))

@@ -1,1 +1,1 @@
-docker run -i --rm -p 8080:8080 -p 5005:5005 -e JAVA_ENABLE_DEBUG="true" --name file-server-quarkus -e DATASOURCE_JDBC_URL=jdbc:mysql://172.30.118.97:3306/file -e DATASOURCE_USER=root -e DATASOURCE_PASS=root -e FILES_DIRECTORY=/opt/data -v /c/Users/CYK/pdfs:/opt/data quarkus/file-server-impl-jvm
+docker run -i --rm -p 8180:8080 -p 5005:5005 -e JAVA_ENABLE_DEBUG="true" -e "SIIB_DB_HOST=172.24.64.1" -e "SIIB_DB_PORT=1521" -e "SIIB_DB_SID=XE" -e "SIIB_DB_USER=SIIBC_Collectif" -e "SIIB_DB_PASSWORD=collectif" mic-collectif-api:latest

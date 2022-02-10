@@ -125,8 +125,13 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		if(auditWhen == null)
 			auditWhen = LocalDateTime.now();
 		IMPORT_RUNNING.add(legislativeActVersion.getIdentifier());
-		persistence.import_(legislativeActVersion.getIdentifier(),auditWho, auditFunctionality, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(auditWhen)),entityManager);
-		IMPORT_RUNNING.remove(legislativeActVersion.getIdentifier());
+		try {
+			persistence.import_(legislativeActVersion.getIdentifier(),auditWho, auditFunctionality, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(auditWhen)),entityManager);
+		} catch (Exception exception) {
+			throw new RuntimeException(exception);
+		}finally {
+			IMPORT_RUNNING.remove(legislativeActVersion.getIdentifier());
+		}
 	}
 	
 	@Scheduled(cron = "{cyk.expenditure.import.cron}")

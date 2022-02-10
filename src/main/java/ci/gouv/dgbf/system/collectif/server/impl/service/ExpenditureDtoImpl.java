@@ -99,6 +99,7 @@ public class ExpenditureDtoImpl extends AbstractIdentifiableSystemScalarStringAu
     			,JSON_BUDGET_SPECIALIZATION_UNIT_AS_STRING,ExpenditureImpl.FIELD_BUDGET_SPECIALIZATION_UNIT_AS_STRING
     			,JSONS_STRINGS,ExpenditureImpl.FIELDS_STRINGS
     			,JSONS_AMOUTNS,ExpenditureImpl.FIELDS_AMOUNTS
+    			,JSONS_AMOUTNS_WITHOUT_AVAILABLE,ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_AVAILABLE
     			,JSON___AUDIT__,ExpenditureImpl.FIELD___AUDIT__
     			));
 		AbstractServiceImpl.setProjections(ExpenditureDtoImpl.class, map);

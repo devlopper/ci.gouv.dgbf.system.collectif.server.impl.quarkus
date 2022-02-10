@@ -9,6 +9,8 @@ import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -62,7 +64,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@AttributeOverrides({@AttributeOverride(name = PaymentCreditImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT,nullable = true))})
 	PaymentCreditImpl paymentCredit;
 	
-	@Column(name = COLUMN_ACT_GENERATION_MODE) ActGenerationMode actGenerationMode;
+	@Column(name = COLUMN_ACT_GENERATION_MODE) @Enumerated(EnumType.STRING) ActGenerationMode actGenerationMode;
 	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {

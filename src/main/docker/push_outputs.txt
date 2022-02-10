@@ -1,0 +1,61 @@
+Publishing with time stamp : v0.0.0-0220221306 
+The push refers to repository [10.3.4.18:5000/mic-cloture-api]
+Publishing with time stamp : v0.0.0-0220221312 
+The push refers to repository [10.3.4.18:5000/mic-cloture-api]
+Publishing with time stamp : v0.0.0-0220221317 
+The push refers to repository [10.3.4.18:5000/mic-collectif-api]
+b0eceadd441a: Preparing
+fb81b5fa9791: Preparing
+94bc50612b39: Preparing
+35c1a3e14664: Preparing
+d7dd9b60abe8: Preparing
+1323ffbff4dd: Preparing
+744c86b54390: Preparing
+1323ffbff4dd: Waiting
+744c86b54390: Waiting
+94bc50612b39: Pushed
+fb81b5fa9791: Pushed
+1323ffbff4dd: Mounted from mic-cloture-api
+b0eceadd441a: Pushed
+744c86b54390: Mounted from mic-cloture-api
+d7dd9b60abe8: Pushed
+35c1a3e14664: Pushed
+v0.0.0-0220221317: digest: sha256:5552edec0c3d6287788cdc4befed832ea2ba816e25e72e750e8ff155d6a37a7e size: 1790
+Publishing with time stamp : v0.0.0-0220221410 
+The push refers to repository [10.3.4.18:5000/mic-collectif-api]
+49a98a8cd2af: Preparing
+fd160456cd50: Preparing
+2c49847c4a51: Preparing
+cf15c15aa96d: Preparing
+d7dd9b60abe8: Preparing
+1323ffbff4dd: Preparing
+744c86b54390: Preparing
+1323ffbff4dd: Waiting
+744c86b54390: Waiting
+d7dd9b60abe8: Layer already exists
+1323ffbff4dd: Layer already exists
+744c86b54390: Layer already exists
+fd160456cd50: Pushed
+2c49847c4a51: Pushed
+49a98a8cd2af: Pushed
+cf15c15aa96d: Pushed
+v0.0.0-0220221410: digest: sha256:f07c38b6d546a0b64e0fca3dcbeebb0605f00818b5e2752fb75dfaa8874148b3 size: 1790
+Publishing with time stamp : v0.0.0-0220220922 
+The push refers to repository [10.3.4.18:5000/mic-collectif-api]
+365d03f916c7: Preparing
+67e42b094bc1: Preparing
+45f92bcc0df8: Preparing
+84dbb32fa8f9: Preparing
+d7dd9b60abe8: Preparing
+1323ffbff4dd: Preparing
+744c86b54390: Preparing
+744c86b54390: Waiting
+1323ffbff4dd: Waiting
+d7dd9b60abe8: Layer already exists
+1323ffbff4dd: Layer already exists
+744c86b54390: Layer already exists
+45f92bcc0df8: Pushed
+67e42b094bc1: Pushed
+365d03f916c7: Pushed
+84dbb32fa8f9: Pushed
+v0.0.0-0220220922: digest: sha256:161ddf774ed9961254594b7ade7365aa5ef4182da520fb349fdd738a8a3fab67 size: 1790
