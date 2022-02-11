@@ -43,6 +43,7 @@ import lombok.experimental.Accessors;
 })
 @NamedQueries(value = {
 		@NamedQuery(name = ExpenditureImpl.QUERY_READ_BY_IDENTIIFERS,query = "SELECT t FROM ExpenditureImpl t WHERE t.identifier IN :identifiers")
+		,@NamedQuery(name = ExpenditureImpl.QUERY_READ_BY_ACT_VERSION_IDENTIFIER,query = "SELECT t FROM ExpenditureImpl t WHERE t.actVersion.identifier = :actVersionIdentifier ORDER BY t.identifier ASC")
 })
 @AttributeOverrides(value= {
 		@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
@@ -129,6 +130,13 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 		return this;
 	}
 	
+	public static Boolean areEqualByActivityEconomicNatureFundingSourceLessor(ExpenditureImpl expenditure1,ExpenditureImpl expenditure2) {
+		if(expenditure1 == null || expenditure2 == null)
+			return null;
+		return expenditure1.getActivityIdentifier().equals(expenditure2.getActivityIdentifier()) && expenditure1.getEconomicNatureIdentifier().equals(expenditure2.getEconomicNatureIdentifier())
+				&& expenditure1.getFundingSourceIdentifier().equals(expenditure2.getFundingSourceIdentifier()) && expenditure1.getLessorIdentifier().equals(expenditure2.getLessorIdentifier());
+	}
+	
 	public static final String FIELD_ACTIVITY_IDENTIFIER = "activityIdentifier";
 	public static final String FIELD_ECONOMIC_NATURE_IDENTIFIER = "economicNatureIdentifier";
 	public static final String FIELD_FUNDING_SOURCE_IDENTIFIER = "fundingSourceIdentifier";
@@ -169,6 +177,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String COLUMN___AUDIT_WHEN__ = "AUDIT_DATE";
 	
 	public static final String QUERY_READ_BY_IDENTIIFERS = "ExpenditureImpl.readByIdentifiers";
+	public static final String QUERY_READ_BY_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readByActVersionIdentifier";
 	
 	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
 	

@@ -295,6 +295,30 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 				}
 			}
 			
+			public class Copy implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Copy.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Copy.class);
+				}
+			}
+			
+			public class Duplicate implements QuarkusTestProfile {
+				@Override
+				public Map<String, String> getConfigOverrides() {
+					return buildConfig(Duplicate.class);
+				}
+				
+				@Override
+				public Set<String> tags() {
+					return buildTags(Duplicate.class);
+				}
+			}
+			
 			public static Set<String> buildTags(Class<?>...classes) {
 				return Business.buildTags(ArrayUtils.addFirst(classes, LegislativeActVersion.class));
 			}

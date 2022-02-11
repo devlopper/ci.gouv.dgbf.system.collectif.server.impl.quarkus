@@ -213,6 +213,26 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LESSOR_IDENTIFIER,"v"
 				,ExpenditureView.FIELD_LESSOR_IDENTIFIER);
 		
+		if(arguments.getFilterFieldValue(Parameters.ACTIVITIES_IDENTIFIERS) != null) {
+			predicate.add("t.activityIdentifier IN :activitiesIdentifiers");
+			filter.addField("activitiesIdentifiers", arguments.getFilterFieldValue(Parameters.ACTIVITIES_IDENTIFIERS));
+		}
+		
+		if(arguments.getFilterFieldValue(Parameters.ECONOMIC_NATURES_IDENTIFIERS) != null) {
+			predicate.add("t.economicNatureIdentifier IN :economicNaturesIdentifiers");
+			filter.addField("economicNaturesIdentifiers", arguments.getFilterFieldValue(Parameters.ECONOMIC_NATURES_IDENTIFIERS));
+		}
+		
+		if(arguments.getFilterFieldValue(Parameters.FUNDING_SOURCES_IDENTIFIERS) != null) {
+			predicate.add("t.fundingSourceIdentifier IN :fundingSourcesIdentifiers");
+			filter.addField("fundingSourcesIdentifiers", arguments.getFilterFieldValue(Parameters.FUNDING_SOURCES_IDENTIFIERS));
+		}
+		
+		if(arguments.getFilterFieldValue(Parameters.LESSORS_IDENTIFIERS) != null) {
+			predicate.add("t.lessorIdentifier IN :lessorsIdentifiers");
+			filter.addField("lessorsIdentifiers", arguments.getFilterFieldValue(Parameters.LESSORS_IDENTIFIERS));
+		}
+		
 		Boolean adjustmentsNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO);
 		if(adjustmentsNotEqualZero != null)
 			predicate.add(buildPredicateExpenditureAdjustmentsEqualZeroPredicate(!adjustmentsNotEqualZero));

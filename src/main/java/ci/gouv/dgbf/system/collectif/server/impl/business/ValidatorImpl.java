@@ -126,6 +126,39 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
 			return new Object[] {legislativeActVersion};
 		}
+		
+		static Object[] validateDuplicateInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+			validateIdentifier(identifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			
+			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(identifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, identifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages,entityManager);
+			return new Object[] {legislativeActVersion};
+		}
+		
+		static Object[] validateCopyInputs(String sourceIdentifier,String destinationIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+			validateIdentifier(sourceIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateIdentifier(destinationIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			
+			LegislativeActVersionImpl legislativeActVersionSource = StringHelper.isBlank(sourceIdentifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, sourceIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages,entityManager);
+			
+			LegislativeActVersionImpl legislativeActVersionDestination = StringHelper.isBlank(destinationIdentifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, destinationIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages,entityManager);
+	
+			throwablesMessages.addIfTrue(String.format("Les %s (%s,%s) doivent appartenir au même %s", ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME_PLURAL,sourceIdentifier,destinationIdentifier
+					,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME), legislativeActVersionSource != null && legislativeActVersionDestination != null 
+					&& !legislativeActVersionSource.getActIdentifier().equals(legislativeActVersionDestination.getActIdentifier()));
+				
+			return new Object[] {legislativeActVersionSource,legislativeActVersionDestination};
+		}
 	}
 
 	public static interface Expenditure {
