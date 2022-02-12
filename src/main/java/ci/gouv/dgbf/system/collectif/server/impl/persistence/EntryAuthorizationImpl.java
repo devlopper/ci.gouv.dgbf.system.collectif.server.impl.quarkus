@@ -12,6 +12,16 @@ import lombok.Setter;
 @Getter @Setter
 public class EntryAuthorizationImpl extends AbstractExpenditureAmountsImpl implements EntryAuthorization,Serializable {
 
+	@Override
+	public EntryAuthorizationImpl setInitial(Long initial) {
+		return (EntryAuthorizationImpl) super.setInitial(initial);
+	}
+	
+	@Override
+	public EntryAuthorizationImpl setActual(Long actual) {
+		return (EntryAuthorizationImpl) super.setActual(actual);
+	}
+	
 	private static final String COLUMN_SUFFIX = "_AE";
 	
 	public static final String COLUMN_ADJUSTMENT = AbstractAmountsImpl.COLUMN_ADJUSTMENT+COLUMN_SUFFIX;

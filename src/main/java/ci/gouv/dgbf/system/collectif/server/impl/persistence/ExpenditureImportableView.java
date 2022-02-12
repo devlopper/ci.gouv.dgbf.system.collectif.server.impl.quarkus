@@ -18,7 +18,9 @@ import lombok.experimental.Accessors;
 @Table(name = ExpenditureImportableView.TABLE_NAME)
 @org.hibernate.annotations.Immutable
 @NamedQueries(value = {
-		@NamedQuery(name = ExpenditureImportableView.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER,query = "SELECT t FROM ExpenditureImportableView t WHERE t.legislativeActVersionIdentifier = :legislativeActVersionIdentifier ORDER BY t.identifier ASC")
+		@NamedQuery(name = ExpenditureImportableView.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER,query = "SELECT t.identifier,t.activityIdentifier,t.economicNatureIdentifier,t.fundingSourceIdentifier,t.lessorIdentifier"
+				+ ",t.entryAuthorization.initial,t.entryAuthorization.actual,t.paymentCredit.initial,t.paymentCredit.actual "
+				+ "FROM ExpenditureImportableView t WHERE t.legislativeActVersionIdentifier = :legislativeActVersionIdentifier ORDER BY t.identifier ASC")
 		,@NamedQuery(name = ExpenditureImportableView.QUERY_COUNT_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER,query = "SELECT COUNT(t.identifier) FROM ExpenditureImportableView t WHERE t.legislativeActVersionIdentifier = :legislativeActVersionIdentifier")
 })
 public class ExpenditureImportableView extends AbstractExpenditureView implements Serializable {

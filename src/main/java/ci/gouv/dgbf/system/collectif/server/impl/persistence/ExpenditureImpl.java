@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -108,7 +109,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	}
 	
 	@Override
-	public Expenditure setEntryAuthorization(EntryAuthorization entryAuthorization) {
+	public ExpenditureImpl setEntryAuthorization(EntryAuthorization entryAuthorization) {
 		this.entryAuthorization = (EntryAuthorizationImpl) entryAuthorization;
 		return this;
 	}
@@ -120,7 +121,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	}
 	
 	@Override
-	public Expenditure setPaymentCredit(PaymentCredit paymentCredit) {
+	public ExpenditureImpl setPaymentCredit(PaymentCredit paymentCredit) {
 		this.paymentCredit = (PaymentCreditImpl) paymentCredit;
 		return this;
 	}
@@ -132,9 +133,24 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	}
 	
 	@Override
-	public Expenditure setActVersion(LegislativeActVersion actVersion) {
+	public ExpenditureImpl setActVersion(LegislativeActVersion actVersion) {
 		this.actVersion = (LegislativeActVersionImpl) actVersion;
 		return this;
+	}
+	
+	@Override
+	public ExpenditureImpl set__auditWho__(String __auditWho__) {
+		return (ExpenditureImpl) super.set__auditWho__(__auditWho__);
+	}
+	
+	@Override
+	public ExpenditureImpl set__auditFunctionality__(String __auditFunctionality__) {
+		return (ExpenditureImpl) super.set__auditFunctionality__(__auditFunctionality__);
+	}
+	
+	@Override
+	public ExpenditureImpl set__auditWhen__(LocalDateTime __auditWhen__) {
+		return (ExpenditureImpl) super.set__auditWhen__(__auditWhen__);
 	}
 	
 	public ExpenditureImpl copyAmounts(ExpenditureImportableView expenditure) {

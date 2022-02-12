@@ -12,6 +12,16 @@ import lombok.Setter;
 @Getter @Setter
 public class PaymentCreditImpl extends AbstractExpenditureAmountsImpl implements PaymentCredit,Serializable {
 
+	@Override
+	public PaymentCreditImpl setInitial(Long initial) {
+		return (PaymentCreditImpl) super.setInitial(initial);
+	}
+	
+	@Override
+	public PaymentCreditImpl setActual(Long actual) {
+		return (PaymentCreditImpl) super.setActual(actual);
+	}
+	
 	private static final String COLUMN_SUFFIX = "_CP";
 	
 	public static final String COLUMN_ADJUSTMENT = AbstractAmountsImpl.COLUMN_ADJUSTMENT+COLUMN_SUFFIX;
