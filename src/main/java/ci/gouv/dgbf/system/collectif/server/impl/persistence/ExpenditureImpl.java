@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringAuditedImpl;
+import org.cyk.utility.persistence.server.view.MaterializedViewManager;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.EntryAuthorization;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
@@ -62,7 +63,13 @@ import lombok.experimental.Accessors;
 				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT , mode = ParameterMode.IN,type = String.class)
 				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN , mode = ParameterMode.IN,type = java.sql.Date.class)
 			}
-		)
+		),@NamedStoredProcedureQuery(
+				name = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME
+				,procedureName = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME
+				,parameters = {
+					@StoredProcedureParameter(name = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_TABLE , mode = ParameterMode.IN,type = String.class)
+				}
+			)
 	})
 public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Expenditure,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
@@ -130,6 +137,16 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 		return this;
 	}
 	
+	public ExpenditureImpl copyAmounts(ExpenditureImportableView expenditure) {
+		if(expenditure == null || (expenditure.entryAuthorization == null && expenditure.paymentCredit == null))
+			return this;
+		if(expenditure.entryAuthorization != null)
+			getEntryAuthorization(Boolean.TRUE).copy(expenditure.entryAuthorization);
+		if(expenditure.paymentCredit != null)
+			getPaymentCredit(Boolean.TRUE).copy(expenditure.paymentCredit);
+		return this;
+	}
+	
 	public static Boolean areEqualByActivityEconomicNatureFundingSourceLessor(ExpenditureImpl expenditure1,ExpenditureImpl expenditure2) {
 		if(expenditure1 == null || expenditure2 == null)
 			return null;
@@ -161,6 +178,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 		
 	public static final String ENTITY_NAME = "ExpenditureImpl";
 	public static final String TABLE_NAME = "TA_DEPENSE";
+	public static final String VIEW_NAME = "VMA_DEPENSE";
 	
 	public static final String COLUMN_IDENTIFIER = "identifiant";
 	public static final String COLUMN_ACTIVITY_IDENTIFIER = "activite";
@@ -182,6 +200,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
 	
 	public static final String STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT = "PA_IMPORTER_DEPENSE";
+	
 	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "p_version_collectif";
 	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHO = "audit_acteur";
 	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_FUNCTIONALITY = "audit_fonctionnalite";

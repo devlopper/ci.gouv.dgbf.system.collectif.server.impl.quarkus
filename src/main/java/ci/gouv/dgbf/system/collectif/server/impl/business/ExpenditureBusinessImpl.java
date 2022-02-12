@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -14,19 +15,21 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
+import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.log.LogHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
-import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
-import org.cyk.utility.persistence.entity.EntityLifeCycleListener;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
+import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
+import org.cyk.utility.persistence.server.view.MaterializedViewManager;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
@@ -34,11 +37,15 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersisten
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAvailableMonitorableIsNotFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportableView;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditView;
 import io.quarkus.scheduler.Scheduled;
 
 @ApplicationScoped
@@ -48,6 +55,7 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	@Inject ExpenditurePersistence persistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
+	@Inject @Hibernate MaterializedViewManager materializedViewManager;
 	
 	@Override @Transactional
 	public Result adjust(Map<String, Long[]> adjustments,String auditWho) {
@@ -130,15 +138,62 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		if(StringHelper.isBlank(auditFunctionality))
 			auditFunctionality = IMPORT_AUDIT_IDENTIFIER;
 		if(auditWhen == null)
-			auditWhen = LocalDateTime.now();
+			auditWhen = LocalDateTime.now();		
 		IMPORT_RUNNING.add(legislativeActVersion.getIdentifier());
 		try {
-			persistence.import_(legislativeActVersion.getIdentifier(),auditWho, auditFunctionality, EntityLifeCycleListener.Event.CREATE.getValue(), new java.sql.Date(TimeHelper.toMillisecond(auditWhen)),entityManager);
+			materializedViewManager.actualize(ExpenditureView.class);
+			Long count = entityManager.createNamedQuery(ExpenditureImportableView.QUERY_COUNT_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER, Long.class).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getSingleResult();
+			Integer batchSize = 1000;
+			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(), batchSize);		
+			if(CollectionHelper.isNotEmpty(batchSizes)) {
+				LogHelper.logInfo(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,batchSize,batchSizes.size()), getClass());
+				for(Integer index =0; index < batchSizes.size(); index = index + 1) {
+					Collection<ExpenditureImportableView> expenditures = entityManager.createNamedQuery(ExpenditureImportableView.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER,ExpenditureImportableView.class)
+							.setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).setMaxResults(batchSizes.get(index)).getResultList();
+					LogHelper.logInfo(String.format("\tTraitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expenditures)), getClass());
+					if(CollectionHelper.isEmpty(expenditures))
+						continue;
+					Collection<ExpenditureImportableView> importables = new ArrayList<>();
+					for(ExpenditureImportableView expenditure : expenditures) {
+						if(StringHelper.isBlank(expenditure.getActivityIdentifier()) || StringHelper.isBlank(expenditure.getEconomicNatureIdentifier()) || StringHelper.isBlank(expenditure.getFundingSourceIdentifier()) 
+									|| StringHelper.isBlank(expenditure.getLessorIdentifier()))
+							LogHelper.logWarning(String.format("\t\tImpossible d'importer %s", expenditure.getIdentifier()), getClass());
+						else
+							importables.add(expenditure);
+					}
+					import_(legislativeActVersion, importables, auditWho, auditFunctionality, auditWhen);
+					expenditures.clear();
+					expenditures = null;
+					importables.clear();
+					importables = null;
+					System.gc();
+				}
+			}
 		} catch (Exception exception) {
 			throw new RuntimeException(exception);
 		}finally {
 			IMPORT_RUNNING.remove(legislativeActVersion.getIdentifier());
 		}
+	}
+	
+	@Transactional(value = TxType.REQUIRES_NEW)
+	private void import_(LegislativeActVersionImpl legislativeActVersion,Collection<ExpenditureImportableView> importables, String auditWho, String auditFunctionality,LocalDateTime auditWhen) {
+		if(CollectionHelper.isEmpty(importables))
+			return;
+		for(ExpenditureImportableView expenditure : importables) {
+			if(expenditure.getEntryAuthorization() == null)
+				expenditure.setEntryAuthorization(new EntryAuthorizationView());
+			if(expenditure.getPaymentCredit() == null)
+				expenditure.setPaymentCredit(new PaymentCreditView());
+			ExpenditureImpl __expenditure__ = new ExpenditureImpl();
+			__expenditure__.setIdentifier(expenditure.getIdentifier()).setActVersion(legislativeActVersion).setActivityIdentifier(expenditure.getActivityIdentifier()).setEconomicNatureIdentifier(expenditure.getEconomicNatureIdentifier())
+			.setFundingSourceIdentifier(expenditure.getFundingSourceIdentifier()).setLessorIdentifier(expenditure.getLessorIdentifier());
+			__expenditure__.copyAmounts(expenditure);
+			audit(__expenditure__, auditFunctionality, auditWho, auditWhen);
+			entityManager.persist(__expenditure__);
+		}
+		entityManager.flush();
+		entityManager.clear();
 	}
 	
 	@Scheduled(cron = "{cyk.expenditure.import.cron}")

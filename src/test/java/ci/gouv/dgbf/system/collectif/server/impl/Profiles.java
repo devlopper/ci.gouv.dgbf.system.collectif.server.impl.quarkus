@@ -9,6 +9,20 @@ import org.cyk.quarkus.extension.test.Profile;
 import io.quarkus.test.junit.QuarkusTestProfile;
 
 public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
+
+	public class Expenditure implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			return Profile.buildConfig(Expenditure.class);
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(Expenditure.class);
+		}
+	}
+	
+	/**/
 	
 	public interface Persistence {
 		

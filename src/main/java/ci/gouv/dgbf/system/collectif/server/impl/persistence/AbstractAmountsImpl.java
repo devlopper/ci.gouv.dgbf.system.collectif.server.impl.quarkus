@@ -30,6 +30,16 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 	@Transient Long actualPlusAdjustment = 0l;
 	@Transient Long actualMinusMovementIncludedPlusAdjustment = 0l;
 	
+	public AbstractAmountsImpl copy(AbstractAmountsView amounts) {
+		if(amounts == null)
+			return this;
+		initial = amounts.initial;
+		movement = amounts.movement;
+		actual = amounts.actual;
+		available = amounts.available;
+		return this;
+	}
+	
 	public static final String FIELD_INITIAL = "initial";
 	public static final String FIELD_MOVEMENT = "movement";
 	public static final String FIELD_MOVEMENT_INCLUDED = "movementIncluded";

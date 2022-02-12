@@ -12,11 +12,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true) 
-@Entity(name = ExpenditureView.ENTITY_NAME) @Access(AccessType.FIELD)
-@Table(name=ExpenditureView.TABLE_NAME)
+@Entity(name = ExpenditureImportedView.ENTITY_NAME) @Access(AccessType.FIELD)
+@Table(name = ExpenditureImportedView.TABLE_NAME)
 @org.hibernate.annotations.Immutable
-public class ExpenditureView extends AbstractExpenditureView implements Serializable {
+public class ExpenditureImportedView extends AbstractExpenditureView implements Serializable {
 
-	public static final String ENTITY_NAME = "ExpenditureView";
-	public static final String TABLE_NAME = "VMA_DEPENSE";
+	public static final String ENTITY_NAME = "ExpenditureImportedView";
+	public static final String TABLE_NAME = "VA_DEPENSE_IMPORTEE";
 }
