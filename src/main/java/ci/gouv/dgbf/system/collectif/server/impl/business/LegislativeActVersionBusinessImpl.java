@@ -74,7 +74,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		entityManager.persist(legislativeActVersion);
 		entityManager.flush();
 		//Import expenditures
-		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion, auditWho,auditFunctionality,auditWhen,entityManager);
+		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion, auditWho,auditFunctionality,auditWhen,null,entityManager);
 		return legislativeActVersion;
 	}
 	

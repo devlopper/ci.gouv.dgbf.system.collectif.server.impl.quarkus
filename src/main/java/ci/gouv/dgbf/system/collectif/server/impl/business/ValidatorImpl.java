@@ -213,8 +213,22 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		}
 		
 		static void validateImport(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
-			throwablesMessages.addIfTrue(String.format("%s de %s en cours d'importation",ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure.NAME ,legislativeActVersion.getName())
-					,ExpenditureBusinessImpl.IMPORT_RUNNING.contains(legislativeActVersion.getIdentifier()));
+			validateImportNotRunning(legislativeActVersion, throwablesMessages, entityManager);
+		}
+		
+		static Boolean validateImportNotRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+			if(!isImportRunning(legislativeActVersion, entityManager))
+				return Boolean.TRUE;
+			throwablesMessages.add(formatMessageImportIsRunning(legislativeActVersion));
+			return Boolean.FALSE;
+		}
+		
+		static Boolean isImportRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,EntityManager entityManager) {
+			return ExpenditureBusinessImpl.IMPORT_RUNNING.contains(legislativeActVersion.getIdentifier());
+		}
+		
+		static String formatMessageImportIsRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion) {
+			return String.format("%s de %s en cours d'importation",ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure.NAME ,legislativeActVersion.getName());
 		}
 	}
 	

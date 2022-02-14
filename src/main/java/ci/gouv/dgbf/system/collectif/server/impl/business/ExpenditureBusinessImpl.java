@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -22,8 +25,10 @@ import org.cyk.utility.__kernel__.log.LogHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
+import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
@@ -45,6 +50,10 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
 import io.quarkus.scheduler.Scheduled;
+import io.quarkus.vertx.ConsumeEvent;
+import io.vertx.core.eventbus.EventBus;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @ApplicationScoped
 public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
@@ -54,6 +63,7 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject @Hibernate MaterializedViewManager materializedViewManager;
+	@Inject EventBus eventBus;
 	
 	@Override @Transactional
 	public Result adjust(Map<String, Long[]> adjustments,String auditWho) {
@@ -118,12 +128,12 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		throwablesMessages.throwIfNotEmpty();
 		
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
-		
 		ValidatorImpl.Expenditure.validateImport(legislativeActVersion, auditWho, throwablesMessages, entityManager);
 		throwablesMessages.throwIfNotEmpty();
 		
 		Long count = persistence.count();
-		import_(legislativeActVersion, auditWho, IMPORT_AUDIT_IDENTIFIER, LocalDateTime.now(), entityManager);
+		import_(legislativeActVersion, auditWho, IMPORT_AUDIT_IDENTIFIER, LocalDateTime.now(),Boolean.TRUE,entityManager);
+		throwablesMessages.throwIfNotEmpty();
 		count = NumberHelper.getLong(NumberHelper.subtract(persistence.count(),count));
 		
 		// Return of message
@@ -133,14 +143,24 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void import_(LegislativeActVersionImpl legislativeActVersion, String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {
+	public void import_(LegislativeActVersionImpl legislativeActVersion, String auditWho, String auditFunctionality,LocalDateTime auditWhen,Boolean throwIfRunning, EntityManager entityManager) {
 		String finalAuditFunctionality = StringHelper.isBlank(auditFunctionality) ? IMPORT_AUDIT_IDENTIFIER : auditFunctionality;
 		LocalDateTime finalAuditWhen = auditWhen == null ? LocalDateTime.now() : auditWhen;
-		IMPORT_RUNNING.add(legislativeActVersion.getIdentifier());
+		synchronized(IMPORT_RUNNING) {
+			if(ValidatorImpl.Expenditure.isImportRunning(legislativeActVersion, entityManager)) {
+				String message = ValidatorImpl.Expenditure.formatMessageImportIsRunning(legislativeActVersion);
+				if(Boolean.TRUE.equals(throwIfRunning))
+					throw new RuntimeException(message);
+				else
+					LogHelper.logWarning(message, getClass());
+				return;
+			}
+			IMPORT_RUNNING.add(legislativeActVersion.getIdentifier());
+		}
 		try {
 			materializedViewManager.actualize(ExpenditureView.class);
 			Long count = entityManager.createNamedQuery(ExpenditureImportableView.QUERY_COUNT_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER, Long.class).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getSingleResult();
-			Integer batchSize = 2000;
+			Integer batchSize = IMPORT_BATCH_SIZE;
 			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(), batchSize);		
 			if(CollectionHelper.isNotEmpty(batchSizes)) {
 				LogHelper.logInfo(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,batchSize,batchSizes.size()), getClass());
@@ -160,9 +180,23 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 				expenditures.clear();
 				expenditures = null;
 				
+				ExecutorService executorService = Executors.newFixedThreadPool(2);
 				lists.forEach(array -> {	
-					import_(new ArrayList<>((List<Expenditure>)array[0]),(Integer)array[1],(Integer)array[2]);
-				});	
+					//persistBatch(new ArrayList<>((List<Expenditure>)array[0]),(Integer)array[1],(Integer)array[2],entityManager,Boolean.FALSE);
+					//eventBus.request(EVENT_CHANNEL_PERSIST_BATCH, new PersistBatchMessage(new ArrayList<>((List<Expenditure>)array[0]),(Integer)array[1],(Integer)array[2]));
+					executorService.execute(() -> {			
+						persistBatch(new ArrayList<>((List<Expenditure>)array[0]),(Integer)array[1],(Integer)array[2],EntityManagerGetter.getInstance().get(),Boolean.TRUE);
+					});
+				});
+				//Recommended by Oracle to shutdown
+				executorService.shutdown();
+				try {
+				    if (!executorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+				        executorService.shutdownNow();
+				    } 
+				} catch (InterruptedException e) {
+				    executorService.shutdownNow();
+				}
 			}
 		} catch (Exception exception) {
 			throw new RuntimeException(exception);
@@ -171,16 +205,28 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		}
 	}
 	
-	private void import_(List<Expenditure> expenditures,Integer batchIndex,Integer batchsCount) {
+	void persistBatch(List<Expenditure> expenditures,Integer batchIndex,Integer batchsCount,EntityManager entityManager,Boolean isUserTransaction) {
 		LogHelper.logInfo(String.format("\tTraitement du lot %s/%s | %s",batchIndex,batchsCount,CollectionHelper.getSize(expenditures)), getClass());
+		if(Boolean.TRUE.equals(isUserTransaction))
+			entityManager.getTransaction().begin();
 		for(Expenditure expenditure : expenditures)
 			entityManager.persist(expenditure);
-		entityManager.flush();
+		if(Boolean.TRUE.equals(isUserTransaction))
+			entityManager.getTransaction().commit();
+		else {
+			entityManager.flush();
+		}	
 		entityManager.clear();
 		expenditures.clear();
 		expenditures = null;
 		System.gc();
 	}
+	
+	public static final String EVENT_CHANNEL_PERSIST_BATCH = "persist_batch";
+	@ConsumeEvent(EVENT_CHANNEL_PERSIST_BATCH)
+    public void listenPersistBatch(PersistBatchMessage message) {
+		persistBatch(message.expenditures, message.batchIndex, message.batchsCount,EntityManagerGetter.getInstance().get(),Boolean.TRUE);
+    }
 	
 	@Scheduled(cron = "{cyk.expenditure.import.cron}")
 	void importAutomatically() {
@@ -198,7 +244,15 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		}
 	}
 	
+	@AllArgsConstructor @NoArgsConstructor
+	private static class PersistBatchMessage {
+		List<Expenditure> expenditures;
+		Integer batchIndex;
+		Integer batchsCount;
+	}
+	
 	/**/
 	
 	public static final Set<String> IMPORT_RUNNING = new HashSet<>();
+	public static Integer IMPORT_BATCH_SIZE = 2000;
 }
