@@ -230,6 +230,21 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		static String formatMessageImportIsRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion) {
 			return String.format("%s de %s en cours d'importation",ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure.NAME ,legislativeActVersion.getName());
 		}
+		
+		static Object[] validateCopyAdjustmentsInputs(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateIdentifier(legislativeActVersionSourceIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_NAME)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
+			LegislativeActVersionImpl legislativeActVersionSource = StringHelper.isBlank(legislativeActVersionSourceIdentifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionSourceIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_NAME)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
+			return new Object[] {legislativeActVersion,legislativeActVersionSource};
+		}
 	}
 	
 	public static interface Resource {

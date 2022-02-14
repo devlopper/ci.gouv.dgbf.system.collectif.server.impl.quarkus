@@ -2,17 +2,12 @@ package ci.gouv.dgbf.system.collectif.server.impl.business;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
-import org.cyk.utility.__kernel__.collection.CollectionHelper;
-import org.cyk.utility.__kernel__.log.LogHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
@@ -26,7 +21,6 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersisten
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 
@@ -103,46 +97,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 	}
 	
 	public void copyByOverWrite(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager,Long count,Integer batchSize) {
-		//1 - Copy adjustments
-		List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(), batchSize);		
-		LogHelper.logInfo(String.format("Traitement par lot de %s. Nombre de lot = %s", batchSize,CollectionHelper.getSize(batchSizes)), getClass());
-		if(batchSizes != null)
-			for(Integer index =0; index < batchSizes.size(); index = index + 1) {
-				Collection<ExpenditureImpl> expendituresDestinations = entityManager.createNamedQuery(ExpenditureImpl.QUERY_READ_BY_ACT_VERSION_IDENTIFIER, ExpenditureImpl.class).setParameter("actVersionIdentifier", destination.getIdentifier())
-						.setFirstResult(index*batchSize).setMaxResults(batchSizes.get(index)).getResultList();
-				LogHelper.logInfo(String.format("Traitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expendituresDestinations)), getClass());
-				if(CollectionHelper.isEmpty(expendituresDestinations))
-					continue;
-				Collection<ExpenditureImpl> expendituresSources = CollectionHelper.cast(ExpenditureImpl.class, expenditurePersistence.readMany(new QueryExecutorArguments()
-						.addProjectionsFromStrings(ExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,ExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,ExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureImpl.FIELD_LESSOR_IDENTIFIER
-								,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT)
-						.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,source.getIdentifier()
-								,Parameters.ACTIVITIES_IDENTIFIERS,expendituresDestinations.stream().map(x -> x.getActivityIdentifier()).collect(Collectors.toSet())
-								,Parameters.ECONOMIC_NATURES_IDENTIFIERS,expendituresDestinations.stream().map(x -> x.getEconomicNatureIdentifier()).collect(Collectors.toSet())
-								,Parameters.FUNDING_SOURCES_IDENTIFIERS,expendituresDestinations.stream().map(x -> x.getFundingSourceIdentifier()).collect(Collectors.toSet())
-								,Parameters.LESSORS_IDENTIFIERS,expendituresDestinations.stream().map(x -> x.getLessorIdentifier()).collect(Collectors.toSet())
-								)));
-				expendituresDestinations.forEach(expenditureDestination -> {
-					Boolean found = null;
-					if(expendituresSources != null)
-						for(ExpenditureImpl expenditureSource : expendituresSources) {
-							if(Boolean.TRUE.equals(ExpenditureImpl.areEqualByActivityEconomicNatureFundingSourceLessor(expenditureSource, expenditureDestination))) {
-								expenditureDestination.setEntryAuthorization(expenditureSource.getEntryAuthorization());
-								expenditureDestination.setPaymentCredit(expenditureSource.getPaymentCredit());
-								found = Boolean.TRUE;
-								break;
-							}
-						}
-					if(found == null)
-						LogHelper.logWarning(String.format("\t%s n'a pas été trouvé dans %s", expenditureDestination.getIdentifier(),source.getName()), getClass());
-					audit(expenditureDestination, auditFunctionality, auditWho, auditWhen);
-					entityManager.merge(expenditureDestination);
-				});
-				entityManager.flush();
-				entityManager.clear();
-				System.gc();
-			}
-		//2 - Copy regulatories acts
+		((ExpenditureBusinessImpl)expenditureBusiness).copyAdjustments(destination, source, auditWho,auditFunctionality,auditWhen);
 	}
 	
 	public void copyByMerge(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {

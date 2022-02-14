@@ -24,7 +24,6 @@ import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
-import ci.gouv.dgbf.system.collectif.server.impl.business.ExpenditureBusinessImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
@@ -70,7 +69,6 @@ public class ExpenditureTest {
 	
 	@Test @Order(2)
 	void import_2021_1_2() {
-		ExpenditureBusinessImpl.IMPORT_BATCH_SIZE = 1;
 		assertor.assertExpenditureByLegislativeActVersion("2021_1_2", null);
 		expenditureBusiness.import_("2021_1_2", "meliane");
 		assertor.assertExpenditureByLegislativeActVersion("2021_1_2", List.of("2021_1_2_1","2021_1_2_2","2021_1_2_3","2021_1_2_4","2021_1_2_5"));
@@ -91,12 +89,24 @@ public class ExpenditureTest {
 				expenditureBusiness.import_("2021_1_running","christian");
 			}
 		}.start();
+		TimeHelper.pause(1l * 500);
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			expenditureBusiness.import_("2021_1_running","christian");
 	    });
 		assertThat(exception.getMessage()).isEqualTo("Dépense de 2021_1_running en cours d'importation");
 		TimeHelper.pause(1l * 2000);
 		expenditureBusiness.import_("2021_1_running","christian");
+	}
+	
+	/* Copy */
+	
+	@Test @Order(2)
+	void copyAdjustments_2022_1_2_to_2022_1_3() {
+		assertor.assertEntryAuthorization("2022_1_3_1", 0l);
+		assertor.assertPaymentCredit("2022_1_3_1", 0l);
+		expenditureBusiness.copyAdjustments("2022_1_3","2022_1_2", "meliane");
+		assertor.assertEntryAuthorization("2022_1_3_1", 0l);
+		assertor.assertPaymentCredit("2022_1_3_1", 7l);
 	}
 	
 	/* Amounts */

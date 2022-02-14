@@ -46,6 +46,12 @@ import lombok.experimental.Accessors;
 @NamedQueries(value = {
 		@NamedQuery(name = ExpenditureImpl.QUERY_READ_BY_IDENTIIFERS,query = "SELECT t FROM ExpenditureImpl t WHERE t.identifier IN :identifiers")
 		,@NamedQuery(name = ExpenditureImpl.QUERY_READ_BY_ACT_VERSION_IDENTIFIER,query = "SELECT t FROM ExpenditureImpl t WHERE t.actVersion.identifier = :actVersionIdentifier ORDER BY t.identifier ASC")
+		,@NamedQuery(name = ExpenditureImpl.QUERY_READ_FOR_COPY_BY_ACT_VERSION_IDENTIFIER_BY_SOURCE_ACT_VERSION_IDENTIFIER
+		,query = "SELECT d.identifier,s.entryAuthorization.adjustment,s.paymentCredit.adjustment FROM ExpenditureImpl d JOIN ExpenditureImpl s ON s.activityIdentifier = d.activityIdentifier AND s.economicNatureIdentifier = d.economicNatureIdentifier"
+				+ " AND s.fundingSourceIdentifier = d.fundingSourceIdentifier AND s.lessorIdentifier = d.lessorIdentifier"
+				+ " WHERE d.actVersion.identifier = :legislativeActVersionIdentifier AND s.actVersion.identifier = :legislativeActVersionSourceIdentifier"
+				+ " AND (s.entryAuthorization.adjustment <> d.entryAuthorization.adjustment OR s.paymentCredit.adjustment <> d.paymentCredit.adjustment)"
+				+ " ORDER BY d.identifier ASC")
 })
 @AttributeOverrides(value= {
 		@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
@@ -212,6 +218,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	
 	public static final String QUERY_READ_BY_IDENTIIFERS = "ExpenditureImpl.readByIdentifiers";
 	public static final String QUERY_READ_BY_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readByActVersionIdentifier";
+	public static final String QUERY_READ_FOR_COPY_BY_ACT_VERSION_IDENTIFIER_BY_SOURCE_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readForCopyByActVersionIdentifierBySourceActVersionIdentifier";
 	
 	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
 	
