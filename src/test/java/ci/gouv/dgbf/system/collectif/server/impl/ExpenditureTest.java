@@ -1,19 +1,27 @@
 package ci.gouv.dgbf.system.collectif.server.impl;
 
+import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.persistence.query.Query;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
+import org.cyk.utility.rest.ResponseHelper;
+import org.cyk.utility.service.EntityReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -24,6 +32,9 @@ import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.api.service.EntryAuthorizationDto;
+import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
+import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureService;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
@@ -44,7 +55,7 @@ public class ExpenditureTest {
 	@Inject ExpenditureBusiness expenditureBusiness;
 	
 	@Test @Order(1)
-	void readExpenditureView() {
+	void persistence_readExpenditureView() {
 		Collection<ExpenditureView> expenditures = entityManager.createQuery("SELECT t FROM ExpenditureView t",ExpenditureView.class).getResultList();
 		assertThat(expenditures).isNotNull();
 		assertThat(FieldHelper.readSystemIdentifiersAsStrings(expenditures)).containsExactlyInAnyOrder("2021_1_1_1","2021_1_1_2","2021_1_1_3","2021_1_1_4","2021_1_1_5"
@@ -52,30 +63,131 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	void readExpenditureImportedView() {
+	void persistence_readExpenditureImportedView() {
 		Collection<ExpenditureImportedView> expenditures = entityManager.createQuery("SELECT t FROM ExpenditureImportedView t",ExpenditureImportedView.class).getResultList();
 		assertThat(expenditures).isNotNull();
 		assertThat(FieldHelper.readSystemIdentifiersAsStrings(expenditures)).containsExactlyInAnyOrder("2021_1_1_1","2021_1_1_2","2021_1_1_3","2021_1_1_4","2021_1_1_5");
 	}
 	
 	@Test @Order(1)
-	void readExpenditureImportableView() {
+	void persistence_readExpenditureImportableView() {
 		Collection<ExpenditureImportableView> expenditures = entityManager.createQuery("SELECT t FROM ExpenditureImportableView t",ExpenditureImportableView.class).getResultList();
 		assertThat(expenditures).isNotNull();
 		assertThat(FieldHelper.readSystemIdentifiersAsStrings(expenditures)).containsExactlyInAnyOrder("2021_1_2_1","2021_1_2_2","2021_1_2_3","2021_1_2_4","2021_1_2_5");
 	}
 	
+	@Test @Order(1)
+    public void service_get_many() {
+		io.restassured.response.Response response = given().when()
+				//.log().all()
+				.get("/api/depenses");
+		response.then()
+			//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.header(ResponseHelper.HEADER_X_TOTAL_COUNT, "12")
+        	.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
+		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void service_get_one_entryAuthorization() {
+		io.restassured.response.Response response = given()
+				.param(EntityReader.PARAMETER_NAME_PROJECTIONS,ExpenditureImpl.FIELD_IDENTIFIER)
+				.param(EntityReader.PARAMETER_NAME_PROJECTIONS,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION)
+				//.log().all()
+				.when().get("/api/depenses/2022_1_2_1");
+		response.then()
+		//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.body(ExpenditureDto.JSON_IDENTIFIER, equalTo("2022_1_2_1"))
+        	.body(FieldHelper.join(ExpenditureDto.JSON_ENTRY_AUTHORIZATION,EntryAuthorizationDto.JSON_ADJUSTMENT), equalTo(0))
+        	;
+		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void service_get_one_paymentCredit() {
+		io.restassured.response.Response response = given()
+				.param(EntityReader.PARAMETER_NAME_PROJECTIONS,ExpenditureImpl.FIELD_IDENTIFIER)
+				.param(EntityReader.PARAMETER_NAME_PROJECTIONS,ExpenditureImpl.FIELD_PAYMENT_CREDIT)
+				//.log().all()
+				.when().get("/api/depenses/2022_1_2_1");
+		response.then()
+		//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.body(ExpenditureDto.JSON_IDENTIFIER, equalTo("2022_1_2_1"))
+        	.body(FieldHelper.join(ExpenditureDto.JSON_PAYMENT_CREDIT,EntryAuthorizationDto.JSON_ADJUSTMENT), equalTo(7))
+        	;
+		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void service_get_one() {
+		io.restassured.response.Response response = given()
+				//.log().all()
+				.when().get("/api/depenses/2022_1_2_1");
+		response.then()
+		//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.body(ExpenditureDto.JSON_IDENTIFIER, equalTo("2022_1_2_1"))
+        	;
+		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void service_get_one_audit() {
+		io.restassured.response.Response response = given()
+				//.log().all()
+				.when().param(ExpenditureService.PARAMETER_NAME_PROJECTIONS, ExpenditureDto.JSON___AUDIT__).get("/api/depenses/2022_1_2_1");
+		response.then()
+		//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.body(ExpenditureDto.JSON_IDENTIFIER, equalTo("2022_1_2_1"))
+        	;
+		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void service_get_one_notfound() {
+		io.restassured.response.Response response = given()
+				//.log().all()
+				.when().get("/api/depenses/0");
+		response.then()
+		//.log().all()
+        	.statusCode(Response.Status.NOT_FOUND.getStatusCode());
+		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void service_count() {
+		io.restassured.response.Response response = given().when().get("/api/depenses/nombre");
+		response.then()
+		//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.body(equalTo("12"))
+        	;
+		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
 	/* Import */
 	
 	@Test @Order(2)
-	void import_2021_1_2() {
+	void business_import_2021_1_2() {
 		assertor.assertExpenditureByLegislativeActVersion("2021_1_2", null);
 		expenditureBusiness.import_("2021_1_2", "meliane");
 		assertor.assertExpenditureByLegislativeActVersion("2021_1_2", List.of("2021_1_2_1","2021_1_2_2","2021_1_2_3","2021_1_2_4","2021_1_2_5"));
 	}
 	
 	@Test
-	void import_null() {
+	void business_import_null() {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			expenditureBusiness.import_(null,null);
 	    });
@@ -83,7 +195,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(2)
-	void import_running() {
+	void business_import_running() {
 		new Thread() {
 			public void run() {
 				expenditureBusiness.import_("2021_1_running","christian");
@@ -101,7 +213,7 @@ public class ExpenditureTest {
 	/* Copy */
 	
 	@Test @Order(2)
-	void copyAdjustments_2022_1_2_to_2022_1_3() {
+	void business_copyAdjustments_2022_1_2_to_2022_1_3() {
 		assertor.assertEntryAuthorization("2022_1_3_1", 0l);
 		assertor.assertPaymentCredit("2022_1_3_1", 0l);
 		expenditureBusiness.copyAdjustments("2022_1_3","2022_1_2", "meliane");
@@ -112,7 +224,7 @@ public class ExpenditureTest {
 	/* Amounts */
 	
 	@Test @Order(3)
-	void readExpenditureOne_entryAuthorization() {
+	void persistence_readExpenditureOne_entryAuthorization() {
 		Expenditure expenditure = expenditurePersistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(expenditurePersistence.getQueryIdentifierReadDynamicOne())).addFilterField("identifier", "2022_1_2_1")
 				.addProjectionsFromStrings(ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION));
@@ -121,7 +233,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(3)
-	void readExpenditureOne_amounts_1() {
+	void persistence_readExpenditureOne_amounts_1() {
 		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(expenditurePersistence.getQueryIdentifierReadDynamicOne()).setTupleClass(ExpenditureImpl.class))
 				.addFilterField("identifier", "2022_1_2_1").addProjectionsFromStrings(ExpenditureImpl.FIELDS_AMOUNTS)
@@ -148,7 +260,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(3)
-	void readExpenditureOne_amounts_3() {
+	void persistence_readExpenditureOne_amounts_3() {
 		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(expenditurePersistence.getQueryIdentifierReadDynamicOne()).setTupleClass(ExpenditureImpl.class))
 				.addFilterField("identifier", "2022_1_2_3").addProjectionsFromStrings(ExpenditureImpl.FIELDS_AMOUNTS)
@@ -168,36 +280,36 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(3)
-	void readExpenditureOne_movementIncluded_1() {
+	void persistence_readExpenditureOne_movementIncluded_1() {
 		assertor.assertExpenditureMovementIncluded("2022_1_2_1", 0l, 0l);
 	}
 	
 	@Test @Order(3)
-	void readExpenditureOne_movementIncluded_2() {
+	void persistence_readExpenditureOne_movementIncluded_2() {
 		assertor.assertExpenditureMovementIncluded("2022_1_2_2", 0l, 0l);
 	}
 	
 	@Test @Order(3)
-	void readExpenditureOne_movementIncluded_3() {
+	void persistence_readExpenditureOne_movementIncluded_3() {
 		assertor.assertExpenditureMovementIncluded("2022_1_2_3", -25l, -25l);
 	}
 	
 	@Test @Order(3)
-	void readEntryAuthorizationAdjustment() {
+	void persistence_readEntryAuthorizationAdjustment() {
 		Collection<Object[]> objects = new ExpenditureImplEntryAuthorizationAdjustmentReader().readByIdentifiers(List.of("2022_1_2_1"), null);
 		assertThat(objects).hasSize(1);
 		assertThat(CollectionHelper.getElementAt(objects, 0)[1]).isEqualTo(0l);
 	}
 	
 	@Test @Order(3)
-	void readEntryAuthorizationAdjustmentAvailable() {
+	void persistence_readEntryAuthorizationAdjustmentAvailable() {
 		Collection<Object[]> objects = new ExpenditureImplEntryAuthorizationAdjustmentAvailableReader().readByIdentifiers(List.of("2022_1_2_1"), null);
 		assertThat(objects).hasSize(1);
 		assertThat(CollectionHelper.getElementAt(objects, 0)[1]).isEqualTo(0l);
 	}
 	
 	@Test @Order(3)
-	void read_2022_1_2_ADJUSTMENTS_NOT_EQUAL_ZERO() {
+	void persistence_read_2022_1_2_ADJUSTMENTS_NOT_EQUAL_ZERO() {
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(expenditures).isNotNull();
@@ -205,7 +317,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(3)
-	void read_2022_1_2_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO() {
+	void persistence_read_2022_1_2_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO() {
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(expenditures).isNotNull();
@@ -213,11 +325,84 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(3)
-	void read_2022_1_2_ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO() {
+	void persistence_read_2022_1_2_ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO() {
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(expenditures).isNotNull();
 		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_1","2022_1_2_3","2022_1_2_4","2022_1_2_5");
+	}
+	
+	/* Ajust */
+	
+	@Test @Order(4)
+	void business_adjust() {
+		assertor.assertExpenditureAudits("2022_1_3_5", "christian", "AJUSTEMENT", "MODIFICATION", TimeHelper.toMillisecond(LocalDateTime.of(2000, 1, 2, 1, 1)));
+		assertor.assertExpenditureAudit("2022_1_3_5", "AJUSTEMENT par christian le");
+		assertor.assertEntryAuthorization("2022_1_3_5", 0l);
+		assertor.assertPaymentCredit("2022_1_3_5", 0l);
+		expenditureBusiness.adjust(Map.of("2022_1_3_5",new Long[] {3l,1l}),"meliane");
+		assertor.assertEntryAuthorization("2022_1_3_5", 3l);
+		assertor.assertPaymentCredit("2022_1_3_5", 1l);
+		assertor.assertExpenditureAudits("2022_1_3_5", "meliane", "AJUSTEMENT", "MODIFICATION");
+		assertor.assertExpenditureAudit("2022_1_3_5", "AJUSTEMENT par meliane le");
+	}
+	
+	@Test @Order(4)
+	void business_adjust_availableNotMonitorable() {
+		assertor.assertEntryAuthorization("2022_2_2_1", 0l);
+		assertor.assertPaymentCredit("2022_2_2_1", 0l);
+		expenditureBusiness.adjust(Map.of("2022_2_2_1",new Long[] {-1l,-2l}),"meliane");
+		assertor.assertEntryAuthorization("2022_2_2_1", -1l);
+		assertor.assertPaymentCredit("2022_2_2_1", -2l);
+	}
+	
+	@Test @Order(4)
+	void business_adjustByEntryAuthorizations() {
+		assertor.assertEntryAuthorization("2022_1_3_4", 0l);
+		assertor.assertPaymentCredit("2022_1_3_4", 0l);
+		expenditureBusiness.adjustByEntryAuthorizations(Map.of("2022_1_3_4",3l),"sandrine");
+		assertor.assertEntryAuthorization("2022_1_3_4", 3l);
+		assertor.assertPaymentCredit("2022_1_3_4", 3l);
+		assertor.assertExpenditureAudits("2022_1_3_4", "sandrine", "AJUSTEMENT_PAR_AE", "MODIFICATION");
+	}
+	
+	@Test @Order(4)
+	void business_adjustByEntryAuthorizations_null() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			expenditureBusiness.adjustByEntryAuthorizations(null,"anonymous");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("Ajustements requis");
+	}
+	
+	@Test @Order(4)
+	void business_adjustByEntryAuthorizations_identifierNotExist() {
+		Assertions.assertThrows(RuntimeException.class, () -> {
+			expenditureBusiness.adjustByEntryAuthorizations(Map.of("identifier_not_exist",0l),"anonymous");
+	    });
+	}
+	
+	@Test
+	void business_adjustByEntryAuthorizations_availableNotEnough() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			expenditureBusiness.adjustByEntryAuthorizations(Map.of("2022_1_3_6",-2l),"anonymous");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("La Dépense 2022_1_3_6 à un disponible A.E. insuffisant(-2,0)\r\nLa Dépense 2022_1_3_6 à un disponible C.P. insuffisant(-2,0)");
+	}
+	
+	@Test @Order(4)
+	void business_adjust_availableNotEnough() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			expenditureBusiness.adjust(Map.of("2022_1_3_6",new Long[] {-2l,-2l}),"anonymous");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("La Dépense 2022_1_3_6 à un disponible A.E. insuffisant(-2,0)\r\nLa Dépense 2022_1_3_6 à un disponible C.P. insuffisant(-2,0)");
+	}
+	
+	@Test @Order(4)
+	void business_adjust_null() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			expenditureBusiness.adjust(null,"anonymous");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("Ajustements requis");
 	}
 	
 	/**/
