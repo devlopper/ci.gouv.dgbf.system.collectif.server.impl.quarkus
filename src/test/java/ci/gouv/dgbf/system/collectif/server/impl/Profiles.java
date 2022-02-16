@@ -14,7 +14,6 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		@Override
 		public Map<String, String> getConfigOverrides() {
 			Map<String, String> map = Profile.buildConfig(LegislativeAct.class);
-			Profile.setPort(map, 8081);
 			return map;
 		}
 		
@@ -28,7 +27,6 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		@Override
 		public Map<String, String> getConfigOverrides() {
 			Map<String, String> map = Profile.buildConfig(LegislativeActVersion.class);
-			Profile.setPort(map, 8081);
 			return map;
 		}
 		
@@ -42,7 +40,6 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		@Override
 		public Map<String, String> getConfigOverrides() {
 			Map<String, String> map = Profile.buildConfig(Expenditure.class);
-			Profile.setPort(map, 8081);
 			return map;
 		}
 		
@@ -56,13 +53,51 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		@Override
 		public Map<String, String> getConfigOverrides() {
 			Map<String, String> map = Profile.buildConfig(Resource.class);
-			Profile.setPort(map, 8081);
 			return map;
 		}
 		
 		@Override
 		public Set<String> tags() {
 			return Profile.buildTags(Resource.class);
+		}
+	}
+	
+	public class ReadOnlyEntity implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(ReadOnlyEntity.class);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(ReadOnlyEntity.class);
+		}
+	}
+	
+	public class RegulatoryAct implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(RegulatoryAct.class);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(RegulatoryAct.class);
+		}
+	}
+	
+	public class GeneratedAct implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(GeneratedAct.class);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(GeneratedAct.class);
 		}
 	}
 	

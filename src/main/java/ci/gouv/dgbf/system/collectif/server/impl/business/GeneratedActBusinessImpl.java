@@ -119,29 +119,34 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		
 		Collection<RegulatoryAct> regulatoryActs = regulatoryActPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
 				,Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE));
-		
-		Collection<RegulatoryActExpenditure> regulatoryActExpenditures = regulatoryActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_IDENTIFIERS
-				,FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs)).addProjectionsFromStrings(RegulatoryActExpenditureImpl.FIELD_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER
+		LogHelper.logInfo(String.format("%s acte(s) de gestion inclus dans %s", CollectionHelper.getSize(regulatoryActs),legislativeActVersion.getName()), getClass());
+		Collection<String> regulatoryActsIdentifiers = FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs);
+		Collection<RegulatoryActExpenditure> regulatoryActExpenditures = CollectionHelper.isEmpty(regulatoryActsIdentifiers) ? null 
+				: regulatoryActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_IDENTIFIERS
+				,regulatoryActsIdentifiers).addProjectionsFromStrings(RegulatoryActExpenditureImpl.FIELD_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER
 						,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER
 						,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ENTRY_AUTHORIZATION_AMOUNT,RegulatoryActExpenditureImpl.FIELD_PAYMENT_CREDIT_AMOUNT));
 		
-		for(RegulatoryAct regulatoryAct : regulatoryActs) {
-			Boolean regulatoryActExpenditureExist = null;
-			if(regulatoryActExpenditures != null)
-				for(RegulatoryActExpenditure regulatoryActExpenditure : regulatoryActExpenditures) {
-					if(regulatoryActExpenditure.getActIdentifier().equals(regulatoryAct.getIdentifier())) {
-						regulatoryActExpenditureExist = Boolean.TRUE;
-						break;
+		if(regulatoryActs != null)
+			for(RegulatoryAct regulatoryAct : regulatoryActs) {
+				Boolean regulatoryActExpenditureExist = null;
+				if(regulatoryActExpenditures != null)
+					for(RegulatoryActExpenditure regulatoryActExpenditure : regulatoryActExpenditures) {
+						if(regulatoryActExpenditure.getActIdentifier().equals(regulatoryAct.getIdentifier())) {
+							regulatoryActExpenditureExist = Boolean.TRUE;
+							break;
+						}
 					}
-				}
-			if(regulatoryActExpenditureExist == null)
-				throwablesMessages.add(String.format("L'acte de gestion %s n'a pas de %s", regulatoryAct.getName(),Expenditure.NAME));
-		}
+				if(regulatoryActExpenditureExist == null)
+					throwablesMessages.add(String.format("L'acte de gestion %s n'a pas de %s", regulatoryAct.getName(),Expenditure.NAME));
+			}
 		throwablesMessages.throwIfNotEmpty();
 		
 		Integer count = generateActsByMode(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, legislativeAct.getActGenerationMode(), throwablesMessages, auditWho, auditWho, auditWhen);		
 		throwablesMessages.throwIfNotEmpty();
 		
+		if(count == null)
+			count = 0;
 		// Return of message
 		result.close().setName(String.format("Génération de %s acte(s) de la version du collectif %s par %s",count,legislativeActVersionIdentifier,auditWho)).log(getClass());
 		result.addMessages(String.format("Nombre d'actes générés : %s", count));
@@ -152,6 +157,8 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	
 	private Integer generateActsByMode(LegislativeActVersionImpl legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures,LegislativeAct.ActGenerationMode generationMode
 			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+		if(CollectionHelper.isEmpty(regulatoryActs) || CollectionHelper.isEmpty(regulatoryActExpenditures))
+			return null;
 		if(generationMode == null)
 			generationMode = LegislativeAct.ActGenerationMode.DEFAULT;
 		if(LegislativeAct.ActGenerationMode.CANCELATION_ADJUSTMENT.equals(generationMode)) {
