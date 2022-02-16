@@ -10,10 +10,40 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 
 public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 
+	public class LegislativeAct implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(LegislativeAct.class);
+			Profile.setPort(map, 8081);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(LegislativeAct.class);
+		}
+	}
+	
+	public class LegislativeActVersion implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(LegislativeActVersion.class);
+			Profile.setPort(map, 8081);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(LegislativeActVersion.class);
+		}
+	}
+	
 	public class Expenditure implements QuarkusTestProfile{
 		@Override
 		public Map<String, String> getConfigOverrides() {
-			return Profile.buildConfig(Expenditure.class);
+			Map<String, String> map = Profile.buildConfig(Expenditure.class);
+			Profile.setPort(map, 8081);
+			return map;
 		}
 		
 		@Override

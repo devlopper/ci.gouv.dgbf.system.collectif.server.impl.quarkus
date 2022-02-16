@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 
+import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.time.TimeHelper;
@@ -22,6 +23,7 @@ import org.cyk.utility.persistence.query.Query;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.ResponseHelper;
 import org.cyk.utility.service.EntityReader;
+import org.cyk.utility.service.client.SpecificServiceGetter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -175,6 +177,68 @@ public class ExpenditureTest {
         	;
 		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void client_get_many() {
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, null, null, null, null, null);
+		assertThat(response).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("12");
+		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+		
+		List<ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure> expenditures = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
+		assertThat(expenditures).hasSize(12);
+		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
+    }
+	
+	@Test @Order(1)
+    public void client_get_many_asStrings() {
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, List.of("astrings"), null, null, null, null);
+		assertThat(response).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("12");
+		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
+		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+		
+		List<ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure> expenditures = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
+		assertThat(expenditures).hasSize(12);
+		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
+    }
+	
+	@Test @Order(1)
+    public void client_get_one() {
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).getByIdentifier("2022_1_2_1", null);
+		assertThat(response).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+		ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure expenditure = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
+		assertThat(expenditure).isNotNull();
+		assertThat(expenditure.getIdentifier()).isEqualTo("2022_1_2_1");
+		assertThat(expenditure.getEntryAuthorization()).isNull();
+    }
+	
+	@Test @Order(1)
+    public void client_get_one_entryAuthorization() {
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).getByIdentifier("2022_1_2_1"
+				, List.of(ExpenditureImpl.FIELD_IDENTIFIER,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT));
+		assertThat(response).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+		ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure expenditure = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
+		assertThat(expenditure).isNotNull();
+		assertThat(expenditure.getIdentifier()).isEqualTo("2022_1_2_1");
+		assertThat(expenditure.getEntryAuthorization()).isNotNull();
+		assertThat(expenditure.getEntryAuthorization().getAdjustment()).isEqualTo(0l);
+		assertThat(expenditure.getPaymentCredit().getAdjustment()).isEqualTo(7l);
+    }
+	
+	@Test @Order(1)
+    public void client_count() {
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).count(null,null);
+		assertThat(response).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+		Long count = ResponseHelper.getEntityAsLong(response);
+		assertThat(count).isEqualTo(12l);
     }
 	
 	/* Import */
@@ -404,6 +468,28 @@ public class ExpenditureTest {
 	    });
 		assertThat(exception.getMessage()).isEqualTo("Ajustements requis");
 	}
+	
+	@Test @Order(5)
+    public void client_adjustByEntryAuthorizations() {
+		assertor.assertEntryAuthorization("2022_1_3_4", 3l);
+		assertor.assertPaymentCredit("2022_1_3_4", 3l);
+		Response response = ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.getService().adjustByEntryAuthorizations(List.of(new ExpenditureDto.AdjustmentDto().setIdentifier("2022_1_3_4").setEntryAuthorization(17l)),"test");
+		assertThat(response).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+		assertor.assertEntryAuthorization("2022_1_3_4", 17l);
+		assertor.assertPaymentCredit("2022_1_3_4", 17l);
+    }
+	
+	@Test @Order(5)
+    public void client_adjust() {
+		assertor.assertEntryAuthorization("2022_1_3_5", 3l);
+		assertor.assertPaymentCredit("2022_1_3_5", 1l);
+		Response response = ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.getService().adjust(List.of(new ExpenditureDto.AdjustmentDto().setIdentifier("2022_1_3_5").setEntryAuthorization(7l).setPaymentCredit(5l)),"test");
+		assertThat(response).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+		assertor.assertEntryAuthorization("2022_1_3_5", 7l);
+		assertor.assertPaymentCredit("2022_1_3_5", 5l);
+    }
 	
 	/**/
 	

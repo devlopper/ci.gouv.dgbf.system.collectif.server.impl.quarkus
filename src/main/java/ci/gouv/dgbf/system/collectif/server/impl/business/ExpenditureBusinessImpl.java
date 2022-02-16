@@ -156,12 +156,12 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		return result;
 	}
 	
-	@Override
+	@Override @Transactional
 	public Result import_(String legislativeActVersionIdentifier, String auditWho) {
 		return import_(legislativeActVersionIdentifier, Boolean.TRUE, auditWho);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked") 
 	public void import_(LegislativeActVersionImpl legislativeActVersion, String auditWho, String auditFunctionality,LocalDateTime auditWhen,Boolean throwIfRunning, EntityManager entityManager) {
 		String finalAuditFunctionality = StringHelper.isBlank(auditFunctionality) ? IMPORT_AUDIT_IDENTIFIER : auditFunctionality;
 		LocalDateTime finalAuditWhen = auditWhen == null ? LocalDateTime.now() : auditWhen;
@@ -197,11 +197,11 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 					lists.add(new Object[] {new ArrayList<>(expenditures.subList(index*importBatchSize, index*importBatchSize+batchSizes.get(index))),index+1,batchSizes.size()});
 				expenditures.clear();
 				expenditures = null;
-				
 				ExecutorService executorService = Executors.newFixedThreadPool(importExecutorThreadCount);
-				lists.forEach(array -> {	
+				lists.forEach(array -> {
 					executorService.execute(() -> {
-						createBatch(new ArrayList<>((List<Expenditure>)array[0]),EntityManagerGetter.getInstance().get(),Boolean.TRUE,null);
+						EntityManager __entityManager__ = EntityManagerGetter.getInstance().get();
+						createBatch(new ArrayList<>((List<Expenditure>)array[0]),__entityManager__,Boolean.TRUE,null);
 					});
 				});
 				shutdownExecutorService(executorService, importExecutorTimeoutDuration, importExecutorTimeoutUnit);
