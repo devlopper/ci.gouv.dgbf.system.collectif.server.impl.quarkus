@@ -52,6 +52,20 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		}
 	}
 	
+	public class Resource implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(Resource.class);
+			Profile.setPort(map, 8081);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(Resource.class);
+		}
+	}
+	
 	/**/
 	
 	public interface Persistence {
