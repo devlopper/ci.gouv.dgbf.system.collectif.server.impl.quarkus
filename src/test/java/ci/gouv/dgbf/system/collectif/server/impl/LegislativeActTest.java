@@ -40,6 +40,16 @@ public class LegislativeActTest {
 	@Inject LegislativeActBusiness business;
 	
 	@Test @Order(1)
+	void persistence_readInProgressLatest() {
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) persistence.readOne(new QueryExecutorArguments()
+				.setQuery(new Query().setIdentifier(persistence.getQueryIdentifierReadDynamicOne()))
+				.addFilterField(Parameters.LATEST_LEGISLATIVE_ACT, Boolean.TRUE).addProjectionsFromStrings(LegislativeActImpl.FIELDS_AMOUNTS,LegislativeActImpl.FIELD___AUDIT__)
+				);
+		assertThat(legislativeAct).isNotNull();	
+		assertThat(legislativeAct.getIdentifier()).isEqualTo("2022_1");
+	}
+	
+	@Test @Order(1)
 	void persistence_readExpenditureOne_amounts_1() {
 		LegislativeActImpl legislativeAct = (LegislativeActImpl) persistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(persistence.getQueryIdentifierReadDynamicOne()))
@@ -140,6 +150,7 @@ public class LegislativeActTest {
 		assertThat(persistence.readOne("2023_1")).isNull();
 		business.create(null, null,"2023", "meliane");
 		assertor.assertLegislativeAct("2023_1", "2023_1","Collectif budgétaire 2023","2023");
+		assertor.assertLegislativeActAudit("2023_1", LegislativeActBusiness.CREATE_AUDIT_IDENTIFIER);
 	}
 	
 	@Test @Order(2)

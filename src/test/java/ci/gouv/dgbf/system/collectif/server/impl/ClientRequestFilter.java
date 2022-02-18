@@ -1,4 +1,4 @@
-package ci.gouv.dgbf.system.collectif.server.client;
+package ci.gouv.dgbf.system.collectif.server.impl;
 
 import java.io.IOException;
 

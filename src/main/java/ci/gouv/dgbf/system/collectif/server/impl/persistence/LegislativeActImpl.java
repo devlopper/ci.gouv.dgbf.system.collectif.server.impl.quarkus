@@ -47,6 +47,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@Transient Short exerciseYear;
 	@Transient String exerciseAsString;
 	
+	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
+	
 	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
 	@Transient String defaultVersionAsString;
 	@Transient String defaultVersionIdentifier;
@@ -96,6 +98,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 		return paymentCredit;
 	}
 	
+	public static final String FIELD_NUMBER = "number";
 	public static final String FIELD_ACT_GENERATION_MODE = "actGenerationMode";
 	public static final String FIELD_EXERCISE_IDENTIFIER = "exerciseIdentifier";
 	public static final String FIELD_EXERCISE_YEAR = "exerciseYear";
@@ -128,6 +131,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";
 	public static final String COLUMN_REFERENCE = "REFERENCE";
 	public static final String COLUMN_AVAILABLE_MONITORABLE = "DISPONIBLE_SURVEILLABLE";
+	public static final String COLUMN_NUMBER = "NUMERO";
 	
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";

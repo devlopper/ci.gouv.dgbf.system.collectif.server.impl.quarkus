@@ -46,6 +46,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAudi
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplPaymentCreditAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplAuditReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplDefaultVersionIdentifierReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplAuditsReader;
@@ -67,6 +68,12 @@ public class Assertor {
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
 	@Inject SpecificServiceGetter specificServiceGetter;
 	@Inject LegislativeActVersionController actVersionController;
+	
+	public void assertLegislativeActAudit(String identifier,String audit) {
+		LegislativeActImpl legislativeAct = DependencyInjection.inject(EntityManager.class).find(LegislativeActImpl.class, identifier);
+		new LegislativeActImplAuditReader().readThenSet(List.of(legislativeAct), null);
+		assertThat(legislativeAct.get__audit__()).as("audit").startsWith(audit);
+	}
 	
 	public void assertLegislativeAct(String identifier,String expectedCode,String expectedName,String expectedExerciseIdentifier) {
 		LegislativeActImpl legislativeAct = (LegislativeActImpl) actPersistence.readOne(identifier, List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_CODE,LegislativeActImpl.FIELD_NAME

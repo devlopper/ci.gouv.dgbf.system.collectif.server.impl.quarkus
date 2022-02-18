@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
@@ -44,6 +45,9 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		throwablesMessages.throwIfNotEmpty();
 		//All inputs are fine
 		LegislativeActImpl legislativeAct = new LegislativeActImpl().setCode(code).setName(name).setExerciseIdentifier(exerciseIdentifier).setInProgress(Boolean.FALSE).setExercise((ExerciseImpl) instances[0]);
+		if(legislativeAct.getNumber() == null)
+			legislativeAct.setNumber(NumberHelper.get(Byte.class,persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.EXERCISE_IDENTIFIER,exerciseIdentifier)),Byte.valueOf("0")));
+		legislativeAct.setNumber(NumberHelper.get(Byte.class,legislativeAct.getNumber()+Byte.valueOf("1")));
 		if(StringHelper.isBlank(legislativeAct.getCode())) {
 			Long count = persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.EXERCISE_YEAR,legislativeAct.getExercise().getYear()));
 			if(count == null)
@@ -56,7 +60,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		legislativeAct.setIdentifier(legislativeAct.getCode());
 		String auditFunctionality = CREATE_AUDIT_IDENTIFIER;
 		LocalDateTime auditWhen = LocalDateTime.now();
-		audit(legislativeAct , auditWho,auditFunctionality, auditWhen);
+		audit(legislativeAct , auditFunctionality,auditWho, auditWhen);
 		entityManager.persist(legislativeAct);
 		
 		LegislativeActVersionImpl legislativeActVersion = ((LegislativeActVersionBusinessImpl)legislativeActVersionBusiness).create(null, null, null, legislativeAct, auditWho,auditFunctionality, auditWhen,entityManager);;

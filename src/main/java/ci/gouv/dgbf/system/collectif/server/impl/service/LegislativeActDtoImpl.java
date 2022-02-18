@@ -18,6 +18,7 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true)
 public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements LegislativeActDto,Serializable {
 
+	@JsonbProperty(value = JSON_NUMBER) Byte number;
 	@JsonbProperty(value = JSON_EXERCISE) ExerciseDtoImpl exercise;
 	@JsonbProperty(value = JSON_EXERCISE_IDENTIFIER) String exerciseIdentifier;
 	@JsonbProperty(value = JSON_EXERCISE_YEAR) Short exerciseYear;
@@ -65,6 +66,7 @@ public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStrin
 				JSON_IDENTIFIER,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_IDENTIFIER
     			,JSON_CODE,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_CODE
     			,JSON_NAME,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_NAME
+    			,JSON_NUMBER,LegislativeActImpl.FIELD_NUMBER
     			,JSON_EXERCISE,LegislativeActImpl.FIELD_EXERCISE
     			,JSON_EXERCISE_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER
     			,JSON_EXERCISE_YEAR,LegislativeActImpl.FIELD_EXERCISE_YEAR

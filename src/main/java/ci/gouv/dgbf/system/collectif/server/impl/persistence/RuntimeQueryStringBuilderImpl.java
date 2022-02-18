@@ -76,8 +76,18 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 						,LegislativeActVersionImpl.FIELD_ACT,versionIdentifier));
 				arguments.removeFilterFields(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER);
 			}
-			if(arguments.getFilterField(Parameters.EXERCISE_YEAR) != null) {
+			if((arguments.getFilterBackup() != null && arguments.getFilterBackup().getFieldValue(Parameters.LATEST_LEGISLATIVE_ACT) != null) || arguments.getFilterField(Parameters.EXERCISE_YEAR) != null) {
 				builderArguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = t.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+			}
+		}
+		
+		if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(arguments))) {
+			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",LegislativeActVersionImpl.ENTITY_NAME));
+			
+			if((arguments.getFilterBackup() != null && arguments.getFilterBackup().getFieldValue(Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT) != null)) {
+				builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = t.%s AND la.%s = t",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_DEFAULT_VERSION));
+				builderArguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+				//builderArguments.getTuple().addJoins(String.format("JOIN %s dv ON dv = t AND dv.%s = la",LegislativeActVersionImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
 			}
 		}
 		
@@ -171,11 +181,29 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 						builderArguments.getOrder(Boolean.TRUE).desc("t", "code");
 					}
 				}
+				
+				Boolean defaultLegislativeActVersionInLatestLegislativeAct = arguments.getFilterFieldValueAsBoolean(null,Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT);
+				if(Boolean.TRUE.equals(defaultLegislativeActVersionInLatestLegislativeAct)) {
+					builderArguments.getOrder(Boolean.TRUE).desc("exercise", ExerciseImpl.FIELD_YEAR).desc("la", LegislativeActImpl.FIELD_NUMBER);
+					arguments.setNumberOfTuples(1);
+				}
 			}
 			arguments.removeFilterFields(Parameters.LATEST_LEGISLATIVE_ACT_VERSION);
-		}else if(legislativeActPersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
-			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
-				builderArguments.getOrder(Boolean.TRUE).desc("t", "code");
+			arguments.removeFilterFields(Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT);
+		}else if(legislativeActPersistence.isProcessable(arguments)) {
+			if(!legislativeActPersistence.getQueryIdentifierCountDynamic().equals(arguments.getQuery().getIdentifier())) {
+				Boolean latest = arguments.getFilterFieldValueAsBoolean(null,Parameters.LATEST_LEGISLATIVE_ACT);
+				if(Boolean.TRUE.equals(latest)) {
+					builderArguments.getOrder(Boolean.TRUE).desc("exercise", ExerciseImpl.FIELD_YEAR).desc("t", LegislativeActImpl.FIELD_NUMBER);
+					arguments.setNumberOfTuples(1);
+				}
+			}
+			arguments.removeFilterFields(Parameters.LATEST_LEGISLATIVE_ACT);
+			
+			if(legislativeActPersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
+				if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
+					builderArguments.getOrder(Boolean.TRUE).desc("t", "code");
+				}
 			}
 		}else if(exercisePersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
 			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
@@ -301,6 +329,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	}
 	
 	public static void populatePredicateLegislativeAct(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.EXERCISE_IDENTIFIER,"t",LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER);
 		if(arguments.getFilterField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER) != null) {
 			predicate.add(String.format("EXISTS(SELECT bav.identifier FROM %s bav WHERE bav.act.identifier = :%s)",arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER)));
 		}
@@ -318,6 +347,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	public static void populatePredicateLegislativeActVersion(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_IDENTIFIER,"t"
 				,FieldHelper.join(LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_IDENTIFIER));
+		/*Boolean defaultVersionInLatestLegislativeAct = arguments.getFilterFieldValueAsBoolean(null,Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT);
+		if(defaultVersionInLatestLegislativeAct != null) {
+			predicate.add(String.format("EXISTS(SELECT p FROM %s p WHERE p.%s = t)",LegislativeActImpl.ENTITY_NAME,LegislativeActImpl.FIELD_DEFAULT_VERSION));
+		}*/
 	}
 	
 	public static void populatePredicateBudgetSpecializationUnit(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {

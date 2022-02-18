@@ -46,6 +46,9 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
 	
+	@Transient Boolean isDefaultVersion;
+	@Transient String isDefaultVersionAsString;
+	
 	/*
 	 * This is used to handle non blocking processing
 	 */
@@ -99,6 +102,8 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELD_ACT_IDENTIFIER = "actIdentifier";
 	public static final String FIELD_ACT_AS_STRING = "actAsString";
 	public static final String FIELD_NUMBER = "number";
+	public static final String FIELD_IS_DEFAULT_VERSION = "isDefaultVersion";
+	public static final String FIELD_IS_DEFAULT_VERSION_AS_STRING = "isDefaultVersionAsString";
 	public static final String FIELD_CREATION_DATE = "creationDate";
 	public static final String FIELD_EXPENDITURE_NATURES = "expenditureNatures";
 	public static final String FIELD_EXPENDITURE_NATURES_SUMS_AND_TOTAL = "expenditureNaturesSumsAndTotal";
