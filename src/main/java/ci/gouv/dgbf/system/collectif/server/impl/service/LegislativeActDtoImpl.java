@@ -23,6 +23,7 @@ public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStrin
 	@JsonbProperty(value = JSON_EXERCISE_IDENTIFIER) String exerciseIdentifier;
 	@JsonbProperty(value = JSON_EXERCISE_YEAR) Short exerciseYear;
 	@JsonbProperty(value = JSON_EXERCISE_AS_STRING) String exerciseAsString;
+	@JsonbProperty(value = JSON_DEFAULT_VERSION_IDENTIFIER) String defaultVersionIdentifier;
 	@JsonbProperty(value = JSON_DEFAULT_VERSION_AS_STRING) String defaultVersionAsString;
 	@JsonbProperty(value = JSON_IN_PROGRESS) private Boolean inProgress;
 	@JsonbProperty(value = JSON_IN_PROGRESS_AS_STRING) private String inProgressAsString;
@@ -67,12 +68,15 @@ public class LegislativeActDtoImpl extends AbstractIdentifiableSystemScalarStrin
     			,JSON_CODE,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_CODE
     			,JSON_NAME,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_NAME
     			,JSON_NUMBER,LegislativeActImpl.FIELD_NUMBER
+    			,JSON_DEFAULT_VERSION_IDENTIFIER,LegislativeActImpl.FIELD_DEFAULT_VERSION_IDENTIFIER
     			,JSON_EXERCISE,LegislativeActImpl.FIELD_EXERCISE
     			,JSON_EXERCISE_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER
     			,JSON_EXERCISE_YEAR,LegislativeActImpl.FIELD_EXERCISE_YEAR
     			,JSON___AUDIT__,LegislativeActImpl.FIELD___AUDIT__
     			,JSONS_STRINGS,LegislativeActImpl.FIELDS_STRINGS
-    			,JSONS_AMOUTNS,LegislativeActImpl.FIELDS_AMOUNTS
+    			));
+		map.putAll(Map.of(
+				JSONS_AMOUTNS,LegislativeActImpl.FIELDS_AMOUNTS
     			));
 		AbstractServiceImpl.setProjections(LegislativeActDtoImpl.class, map);
 	}
