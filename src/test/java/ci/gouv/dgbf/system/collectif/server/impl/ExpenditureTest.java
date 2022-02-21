@@ -86,7 +86,7 @@ public class ExpenditureTest {
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
-        	.header(ResponseHelper.HEADER_X_TOTAL_COUNT, "12")
+        	.header(ResponseHelper.HEADER_X_TOTAL_COUNT, "13")
         	.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
         	;
 		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
@@ -173,7 +173,7 @@ public class ExpenditureTest {
 		response.then()
 		//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
-        	.body(equalTo("12"))
+        	.body(equalTo("13"))
         	;
 		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
@@ -184,12 +184,12 @@ public class ExpenditureTest {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("12");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure> expenditures = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
-		assertThat(expenditures).hasSize(12);
+		assertThat(expenditures).hasSize(13);
 		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
     }
 	
@@ -198,12 +198,12 @@ public class ExpenditureTest {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, List.of("astrings"), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("12");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure> expenditures = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
-		assertThat(expenditures).hasSize(12);
+		assertThat(expenditures).hasSize(13);
 		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
     }
 	
@@ -238,7 +238,7 @@ public class ExpenditureTest {
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);
-		assertThat(count).isEqualTo(12l);
+		assertThat(count).isEqualTo(13l);
     }
 	
 	/* Import */
@@ -394,6 +394,14 @@ public class ExpenditureTest {
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(expenditures).isNotNull();
 		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_1","2022_1_2_3","2022_1_2_4","2022_1_2_5");
+	}
+	
+	//@Test @Order(3)
+	void persistence_read_2022_1_2_9_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO() {
+		Collection<Expenditure> expenditures = expenditurePersistence.readMany(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
+				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO,Boolean.TRUE));
+		assertThat(expenditures).isNotNull();
+		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_9");
 	}
 	
 	/* Ajust */

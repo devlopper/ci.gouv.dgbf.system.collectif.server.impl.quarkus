@@ -1,5 +1,6 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
+import static org.cyk.utility.persistence.query.Language.jpql;
 import static org.cyk.utility.persistence.query.Language.parenthesis;
 import static org.cyk.utility.persistence.query.Language.Where.or;
 
@@ -12,6 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
@@ -93,10 +95,17 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		
 		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ExpenditureImpl.ENTITY_NAME));
-			if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
+			if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null
+					|| arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null) {
 				builderArguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
 				builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
 				builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+				
+				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null) {
+					builderArguments.getTuple().addJoins(String.format("JOIN %1$s available ON available.%2$s = exercise.%2$s AND available.%3$s = t.%3$s AND available.%4$s = t.%4$s AND available.%5$s = t.%5$s AND available.%6$s = t.%6$s"
+							,ExpenditureAvailableView.ENTITY_NAME,ExpenditureAvailableView.FIELD_YEAR,ExpenditureAvailableView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureAvailableView.FIELD_ECONOMIC_NATURE_IDENTIFIER
+							,ExpenditureAvailableView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureAvailableView.FIELD_LESSOR_IDENTIFIER));
+				}
 			}
 			
 			/*String identifier = (String) arguments.getFilterFieldValue(Parameters.SECTION_IDENTIFIER);
@@ -274,6 +283,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			predicate.add(Language.parenthesis(Language.Where.or(buildPredicateExpenditureAdjustmentsEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero)
 					,buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero))));
 		}
+		
+		Boolean availableMinusIncludedMovementPlusAdjustmentLessThanZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO);
+		if(availableMinusIncludedMovementPlusAdjustmentLessThanZero != null)
+			predicate.add(buildPredicateExpenditureAvailableMinusIncludedMovementPlusAdjustmentLessThanZeroPredicate(availableMinusIncludedMovementPlusAdjustmentLessThanZero));
 		/*
 		addPredicateExpenditureAdjustmentsEqualZero(predicate,  adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero == null ? null : !adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero);
 		
@@ -299,17 +312,37 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		return String.format("(t.%1$s.%3$s %4$s 0 %5$s t.%2$s.%3$s %4$s 0)",ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT,AbstractExpenditureAmountsImpl.FIELD_ADJUSTMENT
 				,isEqualToZero ? "=" : "<>",isEqualToZero ? "AND" : "OR");
 	}
-	
+	/*
 	private static final String PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT = 
-			"((SELECT SUM(rae.%2$s) FROM %1$s ralav JOIN %3$s rae ON rae.%4$s = ralav.%5$s.identifier AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s JOIN RegulatoryActImpl ra ON ra.identifier = rae.actIdentifier AND ra.year = exercise.year WHERE ralav.%11$s IS TRUE) %6$s 0)";
+			"((SELECT SUM(rae.%2$s) FROM %1$s ralav"
+			+ " JOIN %3$s rae ON rae.%4$s = ralav.%5$s.identifier AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s"
+			+ " JOIN RegulatoryActImpl ra ON ra.identifier = rae.actIdentifier AND ra.year = exercise.year WHERE ralav.%11$s IS TRUE) %6$s 0)";
+	*/
+	private static final String PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(rae.%4$s) FROM %1$s ralav,%2$s rae,%3$s ra"
+			+ " WHERE rae.%5$s = ralav.%6$s.identifier AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s AND ra.identifier = rae.%5$s AND ra.%11$s = exercise.%11$s AND ralav.%12$s IS TRUE"),"%13$s","0"));
 	private static String buildPredicateExpenditureMovementIncludedEqualZeroPredicate(Boolean isEqualToZero) {
 		Collection<String> strings = new ArrayList<>();
 		for(String field : RegulatoryActExpenditureImpl.ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT) {
-			strings.add(String.format(PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,field,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER
-					,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,Language.formatOperatorEqual(isEqualToZero),RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
-					,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_INCLUDED));
+			strings.add(String.format(PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActImpl.ENTITY_NAME,field
+					,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
+					,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActImpl.FIELD_YEAR,RegulatoryActLegislativeActVersionImpl.FIELD_INCLUDED,Language.formatOperatorEqual(isEqualToZero)));
 		}
-		return strings.stream().collect(Collectors.joining(" AND "));
+		return StringHelper.concatenate(strings, " AND ");
+	}
+	
+	private static final String PREDICATE_EXPENDITURE_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(available.%4$s-rae.%5$s+t.%6$s.adjustment) FROM %1$s ralav,%2$s rae,%3$s ra"
+			+ " WHERE rae.%7$s = ralav.%8$s.identifier AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s AND rae.%11$s = t.%11$s AND rae.%12$s = t.%12$s AND ra.identifier = rae.%7$s AND ra.%13$s = exercise.%13$s"),"%14$s","0"));
+	private static String buildPredicateExpenditureAvailableMinusIncludedMovementPlusAdjustmentLessThanZeroPredicate(Boolean isLessThanZero) {
+		Collection<String> strings = new ArrayList<>();
+		for(String field : RegulatoryActExpenditureImpl.ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT) {
+			strings.add(String.format(PREDICATE_EXPENDITURE_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT
+					,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActImpl.ENTITY_NAME
+					,StringUtils.substringBefore(field, "Amount"),field,StringUtils.substringBefore(field, "Amount")
+					,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
+					,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActImpl.FIELD_YEAR
+					,Language.formatOperatorLessThan(isLessThanZero)));
+		}
+		return StringHelper.concatenate(strings, " AND ");
 	}
 		
 	public static void populatePredicateResource(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {

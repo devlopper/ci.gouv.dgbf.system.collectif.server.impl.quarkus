@@ -93,5 +93,6 @@ SELECT sf.uuid AS "IDENTIFIANT",sf.src_code AS "CODE",sf.src_libelle AS "LIBELLE
 FROM SIIBC_BUDGET.source_financement sf;
 
 CREATE OR REPLACE VIEW VA_DEPENSE_DISPONIBLE AS
-SELECT fd.find_id AS "IDENTIFIANT",0 AS "AE",0 AS "CP"
-FROM financement_depenses@dblink_elabo_bidf fd;
+SELECT ld.exo_num||ld.ads_id||ld.nat_id||fd.sfin_id||fd.bai_id AS "IDENTIFIANT",ld.exo_num AS "EXERCICE",ld.ads_id AS "ACTIVITE",ld.nat_id AS "NATURE_ECONOMIQUE",fd.sfin_id AS "SOURCE_FINANCEMENT",fd.bai_id AS "BAILLEUR",0 AS "AE",0 AS "CP"
+FROM financement_depenses@dblink_elabo_bidf fd
+LEFT JOIN ligne_de_depenses@dblink_elabo_bidf ld ON ld.ldep_id = fd.ldep_id;

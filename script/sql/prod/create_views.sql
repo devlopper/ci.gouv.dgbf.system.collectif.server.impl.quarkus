@@ -143,3 +143,10 @@ WHERE ld.ACTIVITE=o.ACTIVITE AND ld.NATURE_ECONOMIQUE=o.NATURE_ECONOMIQUE AND ld
 AND ld.BAILLEUR=o.BAILLEUR AND ld.version_acte = i.version_acte AND o.acte = i.mouvement_credit AND i.inclus = 1
 GROUP BY ld.identifiant,ld.version_acte
 ORDER BY ld.identifiant,ld.version_acte ASC;
+
+CREATE OR REPLACE VIEW VA_DEPENSE_DISPONIBLE AS
+SELECT ld.exo_num||ld.ads_id||ld.nat_id||fd.sfin_id||fd.bai_id AS "IDENTIFIANT",ld.exo_num AS "ANNEE",ld.ads_id AS "ACTIVITE",ld.nat_id AS "NATURE_ECONOMIQUE",fd.sfin_id AS "SOURCE_FINANCEMENT",fd.bai_id AS "BAILLEUR"
+,NVL(vlb.DISPONIBLE_AE,0) AS "AE",NVL(vlb.DISPONIBLE_CP,0) AS "CP"
+FROM financement_depenses@dblink_elabo_bidf fd
+LEFT JOIN ligne_de_depenses@dblink_elabo_bidf ld ON ld.ldep_id = fd.ldep_id
+LEFT JOIN vs_ligne_budgetaire@dblink_elabo_bidf vlb on vlb.fin_id = fd.find_id;
