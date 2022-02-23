@@ -29,6 +29,7 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 	@Transient Long available = 0l;	
 	@Transient Long actualPlusAdjustment = 0l;
 	@Transient Long actualMinusMovementIncludedPlusAdjustment = 0l;
+	@Transient Long availableMinusMovementIncludedPlusAdjustment = 0l;
 	
 	public AbstractAmountsImpl copy(AbstractAmountsView amounts) {
 		if(amounts == null)
@@ -36,7 +37,6 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 		initial = amounts.initial;
 		movement = amounts.movement;
 		actual = amounts.actual;
-		available = amounts.available;
 		return this;
 	}
 	
@@ -52,6 +52,7 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 	public static final String FIELD_INITIAL_PLUS_ADJUSTMENT = "initialPlusAdjustment";	
 	public static final String FIELD_ACTUAL_PLUS_ADJUSTMENT = "actualPlusAdjustment";
 	public static final String FIELD_ACTUAL_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT = "actualMinusMovementIncludedPlusAdjustment";
+	public static final String FIELD_AVAILABLE_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT = "availableMinusMovementIncludedPlusAdjustment";
 	
 	public static final String FIELD_MOVEMENT_VIEW = "movementView";
 	public static final String FIELD_MOVEMENT_SELECTED = "movementSelected";

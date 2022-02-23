@@ -40,6 +40,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersio
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersionController;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.AbstractAmountsImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAuditReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAuditsReader;
@@ -68,6 +69,18 @@ public class Assertor {
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
 	@Inject SpecificServiceGetter specificServiceGetter;
 	@Inject LegislativeActVersionController actVersionController;
+	
+	void assertExpenditureAmounts(AbstractAmountsImpl amounts,AbstractAmountsImpl expected) {
+		String name = amounts.getClass().getSimpleName();
+		assertThat(amounts.getInitial()).as("initial "+name).isEqualTo(expected.getInitial());
+		assertThat(amounts.getMovement()).as("mouvement "+name).isEqualTo(expected.getMovement());
+		assertThat(amounts.getActual()).as("actuel "+name).isEqualTo(expected.getActual());
+		assertThat(amounts.getAdjustment()).as("ajustement "+name).isEqualTo(expected.getAdjustment());
+		assertThat(amounts.getMovementIncluded()).as("mouvement inclus "+name).isEqualTo(expected.getMovementIncluded());
+		assertThat(amounts.getAvailable()).as("disponible "+name).isEqualTo(expected.getAvailable());
+		assertThat(amounts.getActualMinusMovementIncludedPlusAdjustment()).as("actuel - mouvement inclu + ajustement "+name).isEqualTo(expected.getActualMinusMovementIncludedPlusAdjustment());
+		assertThat(amounts.getAvailableMinusMovementIncludedPlusAdjustment()).as("disponible - mouvement inclu + ajustement "+name).isEqualTo(expected.getAvailableMinusMovementIncludedPlusAdjustment());
+	}
 	
 	public void assertLegislativeActAudit(String identifier,String audit) {
 		LegislativeActImpl legislativeAct = DependencyInjection.inject(EntityManager.class).find(LegislativeActImpl.class, identifier);

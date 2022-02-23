@@ -23,6 +23,7 @@ public abstract class AbstractAmountsDtoImpl extends AbstractObject implements A
 	@JsonbProperty(value = JSON_ACTUAL) Long actual;
 	@JsonbProperty(value = JSON_ACTUAL_MINUS_MOVEMENT_INCLUDED) Long actualMinusMovementIncluded;
 	@JsonbProperty(value = JSON_ACTUAL_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT) Long actualMinusMovementIncludedPlusAdjustment;
+	@JsonbProperty(value = JSON_AVAILABLE_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT) Long availableMinusMovementIncludedPlusAdjustment;
 	@JsonbProperty(value = JSON_ACTUAL_PLUS_ADJUSTMENT) Long actualPlusAdjustment;
 	@JsonbProperty(value = JSON_AVAILABLE) Long available;
 }

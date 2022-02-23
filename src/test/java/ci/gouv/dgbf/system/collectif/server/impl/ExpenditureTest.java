@@ -37,12 +37,15 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.service.EntryAuthorizationDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureService;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAmountsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportableView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportedView;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureView;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureQueryStringBuilder;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -56,12 +59,29 @@ public class ExpenditureTest {
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
 	
+	//@Test
+	void queryStringBuilder_predicate_getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero() {
+		assertThat(ExpenditureQueryStringBuilder.Predicate.getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero())
+			.isEqualTo("(SUM(CASE WHEN available.entryAuthorization IS NULL THEN 0 ELSE available.entryAuthorization END - CASE WHEN rae.entryAuthorizationAmount IS NULL THEN 0 ELSE rae.entryAuthorizationAmount END "
+					+ "+ CASE WHEN t.entryAuthorization.adjustment IS NULL THEN 0 ELSE t.entryAuthorization.adjustment END) < 0 OR SUM(CASE WHEN available.paymentCredit IS NULL THEN 0 ELSE available.paymentCredit END - "
+					+ "CASE WHEN rae.paymentCreditAmount IS NULL THEN 0 ELSE rae.paymentCreditAmount END + CASE WHEN t.paymentCredit.adjustment IS NULL THEN 0 ELSE t.paymentCredit.adjustment END) < 0)");
+	}
+	
+	@Test
+	void getJoinRegulatoryActExpenditure() {
+		assertThat(ExpenditureImpl.getJoinRegulatoryActExpenditure()).isEqualTo("JOIN RegulatoryActExpenditureImpl rae ON rae.year = exercise.year AND rae.activityIdentifier = t.activityIdentifier AND "
+				+ "rae.economicNatureIdentifier = t.economicNatureIdentifier AND rae.fundingSourceIdentifier = t.fundingSourceIdentifier AND rae.lessorIdentifier = t.lessorIdentifier");
+	}
+	
 	@Test @Order(1)
-	void persistence_readExpenditureView() {
-		Collection<ExpenditureView> expenditures = entityManager.createQuery("SELECT t FROM ExpenditureView t",ExpenditureView.class).getResultList();
+	void persistence_readAmounts_array() {
+		Collection<ExpenditureImpl> expenditures = new ExpenditureImplAmountsReader().readByIdentifiersThenInstantiate(List.of("2022_1_2_9"), null);
 		assertThat(expenditures).isNotNull();
-		assertThat(FieldHelper.readSystemIdentifiersAsStrings(expenditures)).containsExactlyInAnyOrder("2021_1_1_1","2021_1_1_2","2021_1_1_3","2021_1_1_4","2021_1_1_5"
-				,"2021_1_2_1","2021_1_2_2","2021_1_2_3","2021_1_2_4","2021_1_2_5","2022_1_2_1","2022_1_2_2","2022_1_2_3","2022_1_2_4","2022_1_2_5");
+		ExpenditureImpl expenditure = expenditures.iterator().next();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(33l).setAvailable(-100l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(33l).setAvailableMinusMovementIncludedPlusAdjustment(-67l));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(2l).setMovement(10l).setActual(12l).setAdjustment(0l).setAvailable(-100l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(12l).setAvailableMinusMovementIncludedPlusAdjustment(-100l));
 	}
 	
 	@Test @Order(1)
@@ -377,7 +397,7 @@ public class ExpenditureTest {
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(expenditures).isNotNull();
-		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_1");
+		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_1","2022_1_2_9");
 	}
 	
 	@Test @Order(3)
@@ -393,7 +413,7 @@ public class ExpenditureTest {
 		Collection<Expenditure> expenditures = expenditurePersistence.readMany(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(expenditures).isNotNull();
-		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_1","2022_1_2_3","2022_1_2_4","2022_1_2_5");
+		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_1","2022_1_2_3","2022_1_2_4","2022_1_2_5","2022_1_2_9");
 	}
 	
 	//@Test @Order(3)
@@ -404,7 +424,7 @@ public class ExpenditureTest {
 		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_9");
 	}
 	
-	/* Ajust */
+	/* Adjust */
 	
 	@Test @Order(4)
 	void business_adjust() {
