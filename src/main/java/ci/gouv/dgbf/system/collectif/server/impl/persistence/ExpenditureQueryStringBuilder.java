@@ -1,11 +1,16 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
+import static org.cyk.utility.persistence.query.Language.jpql;
 import static org.cyk.utility.persistence.query.Language.parenthesis;
 import static org.cyk.utility.persistence.query.Language.Where.or;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
@@ -18,6 +23,7 @@ import org.cyk.utility.persistence.server.query.string.WhereStringBuilder;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
 import org.cyk.utility.persistence.server.query.string.WhereStringBuilder.Predicate;
 
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 
 public interface ExpenditureQueryStringBuilder {
@@ -35,7 +41,7 @@ public interface ExpenditureQueryStringBuilder {
 				
 				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmount("t", FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
 				
-				arguments.getProjection(Boolean.TRUE).add(String.format("SUM(CASE WHEN ralav.included IS TRUE THEN rae.%sAmount ELSE 0l END)",fieldName));
+				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmountMovementIncluded(fieldName));
 				
 				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmount("available", fieldName));
 			}
@@ -43,6 +49,10 @@ public interface ExpenditureQueryStringBuilder {
 		
 		static String projectExpenditureAmount(String tupleName,String fieldName) {
 			return String.format("MAX(%s)",CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild(FieldHelper.join(tupleName,fieldName),"0l"));
+		}
+		
+		static String projectExpenditureAmountMovementIncluded(String fieldName) {
+			return String.format("SUM(CASE WHEN ralav.included IS TRUE THEN rae.%sAmount ELSE 0l END)",fieldName);
 		}
 		
 		static Integer setAmounts(AbstractAmountsImpl amounts,Object[] array,Integer index) {
@@ -78,11 +88,15 @@ public interface ExpenditureQueryStringBuilder {
 	
 	public static interface Join {
 		
-		static void joinRegulatoryActLegislativeActVersion(Arguments arguments) {
+		static void joinLegislativeActVersionAndExercise(Arguments arguments) {
 			arguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
 			arguments.getTuple().addJoins("LEFT "+getJoinExpenditureView());
 			arguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
 			arguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+		}
+		
+		static void joinRegulatoryActLegislativeActVersion(Arguments arguments) {
+			joinLegislativeActVersionAndExercise(arguments);
 			arguments.getTuple().addJoins("LEFT "+getJoinRegulatoryActExpenditure());
 			arguments.getTuple().addJoins(String.format("LEFT JOIN %s ra ON ra.%s = rae.%s",RegulatoryActImpl.ENTITY_NAME,RegulatoryActImpl.FIELD_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER));
 			arguments.getTuple().addJoins(String.format("LEFT JOIN %s ralav ON ralav.%s = ra AND ralav.%s = lav",RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT
@@ -92,6 +106,16 @@ public interface ExpenditureQueryStringBuilder {
 		static void joinRegulatoryActLegislativeActVersionAndAvailable(Arguments arguments) {
 			joinRegulatoryActLegislativeActVersion(arguments);
 			arguments.getTuple().addJoins("LEFT "+getJoinAvailable());
+		}
+		
+		static void joinAmounts(Arguments arguments,Boolean isRead) {
+			joinRegulatoryActLegislativeActVersionAndAvailable(arguments);
+			if(Boolean.TRUE.equals(isRead))
+				arguments.getGroup(Boolean.TRUE).add("t.identifier");
+		}
+		
+		static void joinAmounts(Arguments arguments) {
+			joinAmounts(arguments, Boolean.TRUE);
 		}
 		
 		public static String getJoinExpenditureView() {
@@ -190,16 +214,50 @@ public interface ExpenditureQueryStringBuilder {
 				predicate.add(Language.Where.notIfTrue(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(),!availableMinusIncludedMovementPlusAdjustmentLessThanZero));
 			
 		}
+		
+		static String getMovementIncludedEqualZero(String amountFieldName) {
+			return String.format("%s = 0l",Projection.projectExpenditureAmountMovementIncluded(amountFieldName));
+		}
+		
+		static String getMovementIncludedEqualZero() {
+			return parenthesis(or(getMovementIncludedEqualZero(ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getMovementIncludedEqualZero(ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
+		}
+		
 		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(String amountFieldName) {
 			return String.format("available.%1$s - rae.%2$s + t.%3$s < 0"
 					,amountFieldName,amountFieldName+"Amount",amountFieldName+"."+EntryAuthorizationImpl.FIELD_ADJUSTMENT);
-			//return String.format("SUM(CASE WHEN available.%1$s IS NULL THEN 0 ELSE available.%1$s END - CASE WHEN rae.%2$s IS NULL THEN 0 ELSE rae.%2$s END + CASE WHEN t.%3$s IS NULL THEN 0 ELSE t.%3$s END) < 0"
-			//		,amountFieldName,amountFieldName+"Amount",amountFieldName+"."+EntryAuthorizationImpl.FIELD_ADJUSTMENT);
 		}
 		
 		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero() {
 			return parenthesis(or(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
 		}
+		/*
+		private static final String PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(rae.%4$s) FROM %1$s ralav,%2$s rae,%3$s ra"
+				+ " WHERE rae.%5$s = ralav.%6$s.identifier AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s AND ra.identifier = rae.%5$s AND ra.%11$s = exercise.%11$s AND ralav.%12$s IS TRUE"),"%13$s","0"));
+		private static String buildPredicateExpenditureMovementIncludedEqualZeroPredicate(Boolean isEqualToZero) {
+			Collection<String> strings = new ArrayList<>();
+			for(String field : RegulatoryActExpenditureImpl.ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT) {
+				strings.add(String.format(PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActImpl.ENTITY_NAME,field
+						,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
+						,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActImpl.FIELD_YEAR,RegulatoryActLegislativeActVersionImpl.FIELD_INCLUDED,Language.formatOperatorEqual(isEqualToZero)));
+			}
+			return StringHelper.concatenate(strings, " AND ");
+		}
+		
+		private static final String PREDICATE_EXPENDITURE_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(available.%4$s-rae.%5$s+t.%6$s.adjustment) FROM %1$s ralav,%2$s rae,%3$s ra"
+				+ " WHERE rae.%7$s = ralav.%8$s.identifier AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s AND rae.%11$s = t.%11$s AND rae.%12$s = t.%12$s AND ra.identifier = rae.%7$s AND ra.%13$s = exercise.%13$s"),"%14$s","0"));
+		private static String buildPredicateExpenditureAvailableMinusIncludedMovementPlusAdjustmentLessThanZeroPredicate(Boolean isLessThanZero) {
+			Collection<String> strings = new ArrayList<>();
+			for(String field : RegulatoryActExpenditureImpl.ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT) {
+				strings.add(String.format(PREDICATE_EXPENDITURE_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT
+						,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActImpl.ENTITY_NAME
+						,StringUtils.substringBefore(field, "Amount"),field,StringUtils.substringBefore(field, "Amount")
+						,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
+						,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActImpl.FIELD_YEAR
+						,Language.formatOperatorLessThan(isLessThanZero)));
+			}
+			return StringHelper.concatenate(strings, " AND ");
+		}*/
 	}
 	
 	

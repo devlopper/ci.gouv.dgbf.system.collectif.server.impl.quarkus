@@ -95,19 +95,24 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		
 		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ExpenditureImpl.ENTITY_NAME));
-			if(ExpenditureQueryStringBuilder.Join.isJoinedToRegulatoryActLegislativeActVersionAndAvailable(arguments, builderArguments)) {
+			/*if(ExpenditureQueryStringBuilder.Join.isJoinedToRegulatoryActLegislativeActVersionAndAvailable(arguments, builderArguments)) {
 				ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
 				builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
-			}else {
+			}else {*/
 				if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
+					/*
 					builderArguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
 					builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
 					builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));	
+					*/
+					ExpenditureQueryStringBuilder.Join.joinAmounts(builderArguments,!arguments.getQuery().getIdentifier().equals(expenditurePersistence.getQueryIdentifierCountDynamic()));
+					//if(!arguments.getQuery().getIdentifier().equals(expenditurePersistence.getQueryIdentifierCountDynamic()))
+					//	builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 				}
 				
 				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null) {
-					ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
-					builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
+					//ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
+					//builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 				}
 				
 				/*String identifier = (String) arguments.getFilterFieldValue(Parameters.SECTION_IDENTIFIER);
@@ -117,16 +122,23 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 					arguments.removeFilterFields(Parameters.SECTION_IDENTIFIER);
 				}
 				*/
-				if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
-					builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
-				}
-			}
+				/*if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
+					//builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
+				}*/
+			//}
 		}else if(Boolean.TRUE.equals(resourcePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ResourceImpl.ENTITY_NAME));
 			if(Boolean.TRUE.equals(isResourceJoinedToView(arguments, builderArguments))) {
 				builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier",ResourceView.ENTITY_NAME));
 			}
 		}
+	}
+	
+	@Override
+	protected Boolean isGroupedByIdentifier(QueryExecutorArguments arguments) {
+		if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null)
+			return Boolean.TRUE;
+		return super.isGroupedByIdentifier(arguments);
 	}
 	
 	@Override
@@ -280,6 +292,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		Boolean includedMovementNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO);
 		if(includedMovementNotEqualZero != null)
 			predicate.add(buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!includedMovementNotEqualZero));
+			//builderArguments.getHaving(Boolean.TRUE).add(Language.Where.notIfTrue(ExpenditureQueryStringBuilder.Predicate.getMovementIncludedEqualZero(), includedMovementNotEqualZero)  /*buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!includedMovementNotEqualZero)*/);
 		
 		Boolean adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO);
 		if(adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero != null) {
@@ -346,7 +359,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		}
 		return StringHelper.concatenate(strings, " AND ");
 	}
-		
+
 	public static void populatePredicateResource(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_IDENTIFIER,"t"
 				,FieldHelper.join(ExpenditureImpl.FIELD_ACT_VERSION,LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_IDENTIFIER));

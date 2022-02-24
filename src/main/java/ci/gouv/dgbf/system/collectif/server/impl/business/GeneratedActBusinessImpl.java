@@ -233,6 +233,10 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 			if(CollectionHelper.isEmpty(expenditures))
 				break;
 			expenditures.forEach(expenditure -> {
+				if(expenditure.getEntryAuthorization() == null || expenditure.getPaymentCredit() == null) {
+					LogHelper.logWarning(String.format("%s %s doit avoir AE(%s) et CP(%s)", Expenditure.NAME,expenditure.getIdentifier(),expenditure.getEntryAuthorization() != null,expenditure.getPaymentCredit() != null), getClass());
+					return;
+				}
 				GeneratedActExpenditureImpl generatedActExpenditure = new GeneratedActExpenditureImpl().setIdentifier(act.getIdentifier()+"_"+expenditure.getIdentifier()).setAct(act).setActivityIdentifier(expenditure.getActivityIdentifier())
 						.setEconomicNatureIdentifier(expenditure.getEconomicNatureIdentifier()).setFundingSourceIdentifier(expenditure.getFundingSourceIdentifier()).setLessorIdentifier(expenditure.getLessorIdentifier())
 						.setEntryAuthorizationAmount(expenditure.getEntryAuthorization().getActualMinusMovementIncludedPlusAdjustment())

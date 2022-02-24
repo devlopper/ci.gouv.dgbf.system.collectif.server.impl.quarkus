@@ -10,7 +10,7 @@ public class ExpenditureImplAmountsReader extends AbstractExpenditureImplReader 
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
 		ExpenditureQueryStringBuilder.Projection.projectAmounts(arguments);
-		ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(arguments);
+		ExpenditureQueryStringBuilder.Join.joinAmounts(arguments);
 		return arguments;
 	}
 	

@@ -15,6 +15,7 @@ SELECT
 	,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_code||' '||u.usb_liblg AS "USB_CODE_LIBELLE"
 	,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
 	,fd.FIND_BVOTE_AE AS "BUDGET_INITIAL_AE",fd.FIND_BVOTE_CP AS "BUDGET_INITIAL_CP"
+	,fd.FIND_MONTANT_AE - fd.FIND_BVOTE_AE AS "MOUVEMENT_AE",fd.FIND_MONTANT_CP - fd.FIND_BVOTE_CP AS "MOUVEMENT_CP"
 	,fd.FIND_MONTANT_AE AS "BUDGET_ACTUEL_AE",fd.FIND_MONTANT_CP AS "BUDGET_ACTUEL_CP"
 FROM financement_depenses fd
 LEFT JOIN ligne_de_depenses ld ON ld.ldep_id = fd.ldep_id AND ld.exo_num = fd.exo_num

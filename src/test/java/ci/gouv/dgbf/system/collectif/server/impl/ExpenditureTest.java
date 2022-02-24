@@ -68,6 +68,12 @@ public class ExpenditureTest {
 	}
 	
 	@Test
+	void queryStringBuilder_predicate_getMovementIncludedEqualZero() {
+		assertThat(ExpenditureQueryStringBuilder.Predicate.getMovementIncludedEqualZero())
+			.isEqualTo("(SUM(CASE WHEN ralav.included IS TRUE THEN rae.entryAuthorizationAmount ELSE 0l END) = 0l OR SUM(CASE WHEN ralav.included IS TRUE THEN rae.paymentCreditAmount ELSE 0l END) = 0l)");
+	}
+	
+	@Test
 	void getJoinRegulatoryActExpenditure() {
 		assertThat(ExpenditureImpl.getJoinRegulatoryActExpenditure()).isEqualTo("JOIN RegulatoryActExpenditureImpl rae ON rae.year = exercise.year AND rae.activityIdentifier = t.activityIdentifier AND "
 				+ "rae.economicNatureIdentifier = t.economicNatureIdentifier AND rae.fundingSourceIdentifier = t.fundingSourceIdentifier AND rae.lessorIdentifier = t.lessorIdentifier");
@@ -406,6 +412,15 @@ public class ExpenditureTest {
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(expenditures).isNotNull();
 		assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2_3","2022_1_2_4","2022_1_2_5");
+	}
+	
+	@Test @Order(3)
+	void persistence_count_2022_1_2_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO() {
+		System.out.println("ExpenditureTest.persistence_count_2022_1_2_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO()*****************************************************************");
+		Long count = expenditurePersistence.count(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
+				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
+		assertThat(count).isNotNull();
+		assertThat(count).isEqualTo(3);
 	}
 	
 	@Test @Order(3)
