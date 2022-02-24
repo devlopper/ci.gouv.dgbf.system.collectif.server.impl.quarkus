@@ -3,8 +3,10 @@ package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 import static org.cyk.utility.persistence.query.Language.jpql;
 import static org.cyk.utility.persistence.query.Language.parenthesis;
 import static org.cyk.utility.persistence.query.Language.Where.or;
+import static org.cyk.utility.persistence.query.Language.Where.and;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,59 @@ public interface ExpenditureQueryStringBuilder {
 	String[] REGULATORY_ACT_LEGISLATIVE_ACT_VERSION_AND_AVAILABLE = {ExpenditureImpl.FIELDS_AMOUNTS};
 	
 	public static interface Projection {
+		static void projectAmounts(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
+			arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
+			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
+				arguments.getProjection().add(projectAmount("t", FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
+				if(Boolean.TRUE.equals(view)) {
+					arguments.getProjection().add(projectAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
+					arguments.getProjection().add(projectAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_MOVEMENT)));
+					arguments.getProjection().add(projectAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_ACTUAL)));
+				}
+				if(Boolean.TRUE.equals(includedMovement))
+					arguments.getProjection().add(projectAmount("im", fieldName));
+				if(Boolean.TRUE.equals(available))
+					arguments.getProjection().add(projectAmount("available", fieldName));
+			}
+		}
+		
+		static String projectAmount(String tupleName,String fieldName) {
+			return CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild(FieldHelper.join(tupleName,fieldName),"0l");
+		}
+		
+		static Integer setAmounts(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean view,Boolean includedMovement,Boolean available) {
+			if(amounts == null || index == null || index < 0)
+				return index;
+			if(index < array.length)
+				amounts.setAdjustment(NumberHelper.getLong(array[index++],0l));
+			if(Boolean.TRUE.equals(view)) {
+				if(index < array.length)
+					amounts.setInitial(NumberHelper.getLong(array[index++],0l));
+				if(index < array.length)
+					amounts.setMovement(NumberHelper.getLong(array[index++],0l));
+				if(index < array.length)
+					amounts.setActual(NumberHelper.getLong(array[index++],0l));
+			}
+			if(Boolean.TRUE.equals(includedMovement) && index < array.length)
+				amounts.setMovementIncluded(NumberHelper.getLong(array[index++],0l));
+			if(Boolean.TRUE.equals(available) && index < array.length)
+				amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
+			
+			amounts.computeActualPlusAdjustment();
+			amounts.computeActualMinusMovementIncludedPlusAdjustment();
+			amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
+			return index;
+		}
+		
+		static void setAmounts(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available) {
+			if(expenditure == null)
+				return;
+			Integer index = setAmounts(expenditure.getEntryAuthorization(Boolean.TRUE),array,1,view,includedMovement,available);
+			setAmounts(expenditure.getPaymentCredit(Boolean.TRUE),array,index,view,includedMovement,available);
+		}
+		
+		/**/
+		
 		static void projectAmounts(Arguments arguments) {
 			arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
 			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
@@ -86,11 +141,42 @@ public interface ExpenditureQueryStringBuilder {
 		}
 	}
 	
-	public static interface Join {
+	public static interface Tuple {
+		
+		public static String getView() {
+			return String.format("JOIN %3$s ev ON ev.%4$s = lav.identifier AND ev.%5$s = t.%5$s AND ev.%6$s = t.%6$s AND ev.%7$s = t.%7$s AND ev.%8$s = t.%8$s", "t","exercise"
+					,ExpenditureView.ENTITY_NAME,ExpenditureView.FIELD_LEGISLATIVE_ACT_VERSION_IDENTIFIER,ExpenditureView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureView.FIELD_ECONOMIC_NATURE_IDENTIFIER
+					,ExpenditureView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureView.FIELD_LESSOR_IDENTIFIER);
+		}
+		
+		public static String getIncludedMovement() {
+			return String.format("JOIN %1$s im ON im.%2$s = t.%2$s",ExpenditureIncludedMovementView.ENTITY_NAME,ExpenditureIncludedMovementView.FIELD_IDENTIFIER);
+		}
+		
+		public static String getAvailable() {
+			return String.format("JOIN %3$s available ON available.%4$s = exercise.%5$s AND available.%6$s = t.%6$s AND available.%7$s = t.%7$s AND available.%8$s = t.%8$s AND available.%9$s = t.%9$s", "t", "exercise"
+					,ExpenditureAvailableView.ENTITY_NAME,ExpenditureAvailableView.FIELD_YEAR,ExerciseImpl.FIELD_YEAR,ExpenditureAvailableView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureAvailableView.FIELD_ECONOMIC_NATURE_IDENTIFIER
+					,ExpenditureAvailableView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureAvailableView.FIELD_LESSOR_IDENTIFIER);
+		}
+		
+		/**/
+		
+		static void joinAmounts(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
+			if(Boolean.TRUE.equals(view)) {
+				arguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
+				arguments.getTuple().addJoins("LEFT "+getView());
+				arguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
+				arguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+			}
+			if(Boolean.TRUE.equals(includedMovement))
+				arguments.getTuple().addJoins("LEFT "+getIncludedMovement());
+			if(Boolean.TRUE.equals(available))
+				arguments.getTuple().addJoins("LEFT "+getAvailable());
+		}
 		
 		static void joinLegislativeActVersionAndExercise(Arguments arguments) {
 			arguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
-			arguments.getTuple().addJoins("LEFT "+getJoinExpenditureView());
+			arguments.getTuple().addJoins("LEFT "+getView());
 			arguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
 			arguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
 		}
@@ -105,7 +191,7 @@ public interface ExpenditureQueryStringBuilder {
 		
 		static void joinRegulatoryActLegislativeActVersionAndAvailable(Arguments arguments) {
 			joinRegulatoryActLegislativeActVersion(arguments);
-			arguments.getTuple().addJoins("LEFT "+getJoinAvailable());
+			arguments.getTuple().addJoins("LEFT "+getAvailable());
 		}
 		
 		static void joinAmounts(Arguments arguments,Boolean isRead) {
@@ -118,43 +204,23 @@ public interface ExpenditureQueryStringBuilder {
 			joinAmounts(arguments, Boolean.TRUE);
 		}
 		
-		public static String getJoinExpenditureView() {
-			return String.format("JOIN %3$s ev ON ev.%4$s = lav.identifier AND ev.%5$s = t.%5$s AND ev.%6$s = t.%6$s AND ev.%7$s = t.%7$s AND ev.%8$s = t.%8$s", "t","exercise"
-					,ExpenditureView.ENTITY_NAME,ExpenditureView.FIELD_LEGISLATIVE_ACT_VERSION_IDENTIFIER,ExpenditureView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureView.FIELD_ECONOMIC_NATURE_IDENTIFIER
-					,ExpenditureView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureView.FIELD_LESSOR_IDENTIFIER);
-		}
-		
-		public static String getJoinRegulatoryActExpenditure(String tupleVariableName,String exerciseTupleVariableName) {
-			return String.format("JOIN %3$s rae ON rae.%4$s = exercise.%5$s AND rae.%6$s = t.%6$s AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s", tupleVariableName,exerciseTupleVariableName
+		public static String getJoinRegulatoryActExpenditure() {
+			return String.format("JOIN %3$s rae ON rae.%4$s = exercise.%5$s AND rae.%6$s = t.%6$s AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s", "t", "exercise"
 					,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.FIELD_YEAR,ExerciseImpl.FIELD_YEAR,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
 					,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER);
-		}
-		
-		public static String getJoinRegulatoryActExpenditure() {
-			return getJoinRegulatoryActExpenditure("t", "exercise");
-		}
-		
-		public static String getJoinAvailable(String tupleVariableName,String exerciseTupleVariableName) {
-			return String.format("JOIN %3$s available ON available.%4$s = exercise.%5$s AND available.%6$s = t.%6$s AND available.%7$s = t.%7$s AND available.%8$s = t.%8$s AND available.%9$s = t.%9$s", tupleVariableName,exerciseTupleVariableName
-					,ExpenditureAvailableView.ENTITY_NAME,ExpenditureAvailableView.FIELD_YEAR,ExerciseImpl.FIELD_YEAR,ExpenditureAvailableView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureAvailableView.FIELD_ECONOMIC_NATURE_IDENTIFIER
-					,ExpenditureAvailableView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureAvailableView.FIELD_LESSOR_IDENTIFIER);
-		}
-		
-		public static String getJoinAvailable() {
-			return getJoinAvailable("t", "exercise");
 		}
 		
 		public static void join(QueryExecutorArguments arguments, Arguments builderArguments) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ExpenditureImpl.ENTITY_NAME));
 			if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
-				builderArguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
-				builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
-				builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));	
+				//builderArguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
+				//builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
+				//builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));	
 			}
 			
 			if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null) {
-				ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
-				builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
+				//ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
+				//builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 			}
 			
 			/*String identifier = (String) arguments.getFilterFieldValue(Parameters.SECTION_IDENTIFIER);
@@ -165,7 +231,7 @@ public interface ExpenditureQueryStringBuilder {
 			}
 			*/
 			if(Boolean.TRUE.equals(isJoinedToView(arguments, builderArguments))) {
-				builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
+				//builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
 			}
 		}
 		
@@ -211,25 +277,45 @@ public interface ExpenditureQueryStringBuilder {
 		public static void populate(QueryExecutorArguments queryExecutorArguments, Arguments arguments, WhereStringBuilder.Predicate predicate,Filter filter) {
 			Boolean availableMinusIncludedMovementPlusAdjustmentLessThanZero = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO);
 			if(availableMinusIncludedMovementPlusAdjustmentLessThanZero != null)
-				predicate.add(Language.Where.notIfTrue(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(),!availableMinusIncludedMovementPlusAdjustmentLessThanZero));
-			
+				predicate.add(Language.Where.notIfTrue(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(null),!availableMinusIncludedMovementPlusAdjustmentLessThanZero));
 		}
 		
-		static String getMovementIncludedEqualZero(String amountFieldName) {
-			return String.format("%s = 0l",Projection.projectExpenditureAmountMovementIncluded(amountFieldName));
+		String MOVEMENT_INCLUDED_EQUAL_ZERO_FORMAT = "(im.%1$s IS NULL OR im.%1$s = 0l)";
+		String MOVEMENT_INCLUDED_NOT_EQUAL_ZERO_FORMAT = "im.%1$s IS NOT NULL AND im.%1$s <> 0l";
+		static String getMovementIncludedEqualZero(Boolean equal,String amountFieldName) {
+			return String.format(Boolean.TRUE.equals(equal) ? MOVEMENT_INCLUDED_EQUAL_ZERO_FORMAT : MOVEMENT_INCLUDED_NOT_EQUAL_ZERO_FORMAT ,amountFieldName);
 		}
 		
-		static String getMovementIncludedEqualZero() {
-			return parenthesis(or(getMovementIncludedEqualZero(ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getMovementIncludedEqualZero(ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
+		static String getMovementIncludedEqualZero(Boolean equal) {
+			if(Boolean.TRUE.equals(equal))
+				return parenthesis(or(getMovementIncludedEqualZero(equal,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getMovementIncludedEqualZero(equal,ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
+			return and(getMovementIncludedEqualZero(equal,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getMovementIncludedEqualZero(equal,ExpenditureImpl.FIELD_PAYMENT_CREDIT));
 		}
 		
-		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(String amountFieldName) {
-			return String.format("available.%1$s - rae.%2$s + t.%3$s < 0"
-					,amountFieldName,amountFieldName+"Amount",amountFieldName+"."+EntryAuthorizationImpl.FIELD_ADJUSTMENT);
+		String ADJUSTMENT_NOT_EQUAL_ZERO_OR_MOVEMENT_INCLUDED_NOT_EQUAL_ZERO_FORMAT = "((t.%1$s.adjustment IS NOT NULL AND t.%1$s.adjustment <> 0l) OR (im.%1$s IS NOT NULL AND im.%1$s <> 0l))";
+		String ADJUSTMENT_EQUAL_ZERO_AND_MOVEMENT_INCLUDED_EQUAL_ZERO_FORMAT = "t.%1$s.adjustment IS NULL OR t.%1$s.adjustment <> 0l AND im.%1$s IS NOT NULL AND im.%1$s <> 0l";
+		static String getAdjustmentNotEqualZeroOrMovementIncludedNotEqualZero(Boolean notEqual,String amountFieldName) {
+			return String.format(Boolean.TRUE.equals(notEqual) ? ADJUSTMENT_NOT_EQUAL_ZERO_OR_MOVEMENT_INCLUDED_NOT_EQUAL_ZERO_FORMAT : ADJUSTMENT_EQUAL_ZERO_AND_MOVEMENT_INCLUDED_EQUAL_ZERO_FORMAT ,amountFieldName);
 		}
 		
-		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero() {
-			return parenthesis(or(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
+		static String getAdjustmentNotEqualZeroOrMovementIncludedNotEqualZero(Boolean notEqual) {
+			if(Boolean.TRUE.equals(notEqual))
+				return parenthesis(or(getAdjustmentNotEqualZeroOrMovementIncludedNotEqualZero(notEqual,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAdjustmentNotEqualZeroOrMovementIncludedNotEqualZero(notEqual,ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
+			return and(getAdjustmentNotEqualZeroOrMovementIncludedNotEqualZero(notEqual,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAdjustmentNotEqualZeroOrMovementIncludedNotEqualZero(notEqual,ExpenditureImpl.FIELD_PAYMENT_CREDIT));
+		}
+		
+		String AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT = "("+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("available.%1$s", "0l")
+			+" - "+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("im.%1$s", "0l")
+			+" + "+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("t.%1$s.adjustment", "0l")+" < 0l)";
+		String AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_NOT_LESS_THAN_ZERO_FORMAT = "("+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("available.%1$s", "0l")
+		+" - "+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("im.%1$s", "0l")
+		+" + "+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("t.%1$s.adjustment", "0l")+" >= 0l)";
+		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(Boolean equal,String amountFieldName) {
+			return String.format(Boolean.TRUE.equals(equal) ? AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT : AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_NOT_LESS_THAN_ZERO_FORMAT ,amountFieldName);
+		}
+		
+		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(Boolean equal) {
+			return parenthesis(or(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(equal,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(equal,ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
 		}
 		/*
 		private static final String PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(rae.%4$s) FROM %1$s ralav,%2$s rae,%3$s ra"

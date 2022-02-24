@@ -59,18 +59,10 @@ public class ExpenditureTest {
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
 	
-	//@Test
-	void queryStringBuilder_predicate_getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero() {
-		assertThat(ExpenditureQueryStringBuilder.Predicate.getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero())
-			.isEqualTo("(SUM(CASE WHEN available.entryAuthorization IS NULL THEN 0 ELSE available.entryAuthorization END - CASE WHEN rae.entryAuthorizationAmount IS NULL THEN 0 ELSE rae.entryAuthorizationAmount END "
-					+ "+ CASE WHEN t.entryAuthorization.adjustment IS NULL THEN 0 ELSE t.entryAuthorization.adjustment END) < 0 OR SUM(CASE WHEN available.paymentCredit IS NULL THEN 0 ELSE available.paymentCredit END - "
-					+ "CASE WHEN rae.paymentCreditAmount IS NULL THEN 0 ELSE rae.paymentCreditAmount END + CASE WHEN t.paymentCredit.adjustment IS NULL THEN 0 ELSE t.paymentCredit.adjustment END) < 0)");
-	}
-	
 	@Test
 	void queryStringBuilder_predicate_getMovementIncludedEqualZero() {
-		assertThat(ExpenditureQueryStringBuilder.Predicate.getMovementIncludedEqualZero())
-			.isEqualTo("(SUM(CASE WHEN ralav.included IS TRUE THEN rae.entryAuthorizationAmount ELSE 0l END) = 0l OR SUM(CASE WHEN ralav.included IS TRUE THEN rae.paymentCreditAmount ELSE 0l END) = 0l)");
+		assertThat(ExpenditureQueryStringBuilder.Predicate.getMovementIncludedEqualZero(Boolean.TRUE))
+			.isEqualTo("((im.entryAuthorization IS NULL OR im.entryAuthorization = 0l) OR (im.paymentCredit IS NULL OR im.paymentCredit = 0l))");
 	}
 	
 	@Test
@@ -416,7 +408,6 @@ public class ExpenditureTest {
 	
 	@Test @Order(3)
 	void persistence_count_2022_1_2_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO() {
-		System.out.println("ExpenditureTest.persistence_count_2022_1_2_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO()*****************************************************************");
 		Long count = expenditurePersistence.count(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER)
 				.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
 		assertThat(count).isNotNull();

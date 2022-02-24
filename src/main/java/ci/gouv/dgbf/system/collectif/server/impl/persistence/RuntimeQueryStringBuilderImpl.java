@@ -105,7 +105,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 					builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
 					builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));	
 					*/
-					ExpenditureQueryStringBuilder.Join.joinAmounts(builderArguments,!arguments.getQuery().getIdentifier().equals(expenditurePersistence.getQueryIdentifierCountDynamic()));
+					ExpenditureQueryStringBuilder.Tuple.joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 					//if(!arguments.getQuery().getIdentifier().equals(expenditurePersistence.getQueryIdentifierCountDynamic()))
 					//	builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 				}
@@ -133,13 +133,13 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			}
 		}
 	}
-	
+	/*
 	@Override
 	protected Boolean isGroupedByIdentifier(QueryExecutorArguments arguments) {
 		if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null)
 			return Boolean.TRUE;
 		return super.isGroupedByIdentifier(arguments);
-	}
+	}*/
 	
 	@Override
 	protected void populatePredicate(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
@@ -291,13 +291,14 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		
 		Boolean includedMovementNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO);
 		if(includedMovementNotEqualZero != null)
-			predicate.add(buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!includedMovementNotEqualZero));
+			predicate.add(ExpenditureQueryStringBuilder.Predicate.getMovementIncludedEqualZero(!includedMovementNotEqualZero) /*buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!includedMovementNotEqualZero)*/);
 			//builderArguments.getHaving(Boolean.TRUE).add(Language.Where.notIfTrue(ExpenditureQueryStringBuilder.Predicate.getMovementIncludedEqualZero(), includedMovementNotEqualZero)  /*buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!includedMovementNotEqualZero)*/);
 		
 		Boolean adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero = arguments.getFilterFieldValueAsBoolean(null,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO);
 		if(adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero != null) {
-			predicate.add(Language.parenthesis(Language.Where.or(buildPredicateExpenditureAdjustmentsEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero)
-					,buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero))));
+			predicate.add(ExpenditureQueryStringBuilder.Predicate.getAdjustmentNotEqualZeroOrMovementIncludedNotEqualZero(adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero));
+			//predicate.add(Language.parenthesis(Language.Where.or(buildPredicateExpenditureAdjustmentsEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero)
+			//		,buildPredicateExpenditureMovementIncludedEqualZeroPredicate(!adjustmentsNotEqualZeroOrIncludedMovementNotEqualZero))));
 		}
 				
 		ExpenditureQueryStringBuilder.Predicate.populate(arguments, builderArguments, predicate, filter);

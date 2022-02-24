@@ -9,13 +9,13 @@ public class ExpenditureImplAmountsReader extends AbstractExpenditureImplReader 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		ExpenditureQueryStringBuilder.Projection.projectAmounts(arguments);
-		ExpenditureQueryStringBuilder.Join.joinAmounts(arguments);
+		ExpenditureQueryStringBuilder.Projection.projectAmounts(arguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+		ExpenditureQueryStringBuilder.Tuple.joinAmounts(arguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 		return arguments;
 	}
 	
 	@Override
 	protected void __set__(ExpenditureImpl expenditure, Object[] array) {
-		ExpenditureQueryStringBuilder.Projection.setAmounts(expenditure, array);
+		ExpenditureQueryStringBuilder.Projection.setAmounts(expenditure, array,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 	}
 }
