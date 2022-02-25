@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.business;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -37,14 +38,14 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 	@Inject LegislativeActVersionBusiness legislativeActVersionBusiness;
 	
 	@Override @Transactional
-	public Result create(String code, String name, String exerciseIdentifier, String auditWho) {
+	public Result create(String code, String name, String exerciseIdentifier,LocalDate date, String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
-		Object[] instances = ValidatorImpl.LegislativeAct.validateCreateInputs(code, name, exerciseIdentifier, auditWho, throwablesMessages);
+		Object[] instances = ValidatorImpl.LegislativeAct.validateCreateInputs(code, name, exerciseIdentifier,date, auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		//All inputs are fine
-		LegislativeActImpl legislativeAct = new LegislativeActImpl().setCode(code).setName(name).setExerciseIdentifier(exerciseIdentifier).setInProgress(Boolean.FALSE).setExercise((ExerciseImpl) instances[0]);
+		LegislativeActImpl legislativeAct = new LegislativeActImpl().setCode(code).setName(name).setExerciseIdentifier(exerciseIdentifier).setDate(date).setInProgress(Boolean.FALSE).setExercise((ExerciseImpl) instances[0]);
 		if(legislativeAct.getNumber() == null)
 			legislativeAct.setNumber(NumberHelper.get(Byte.class,persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.EXERCISE_IDENTIFIER,exerciseIdentifier)),Byte.valueOf("0")));
 		legislativeAct.setNumber(NumberHelper.get(Byte.class,legislativeAct.getNumber()+Byte.valueOf("1")));

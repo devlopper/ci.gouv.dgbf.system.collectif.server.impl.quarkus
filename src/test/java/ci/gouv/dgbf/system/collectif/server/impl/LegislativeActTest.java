@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -148,7 +149,7 @@ public class LegislativeActTest {
 	@Test @Order(2)
 	void business_create() {
 		assertThat(persistence.readOne("2023_1")).isNull();
-		business.create(null, null,"2023", "meliane");
+		business.create(null, null,"2023",LocalDate.of(2023, 2, 4), "meliane");
 		assertor.assertLegislativeAct("2023_1", "2023_1","Collectif budgétaire 2023","2023");
 		assertor.assertLegislativeActAudit("2023_1", LegislativeActBusiness.CREATE_AUDIT_IDENTIFIER);
 	}
@@ -157,16 +158,16 @@ public class LegislativeActTest {
 	void business_create_sameYear() {
 		assertThat(persistence.readOne("2020_1")).isNotNull();
 		assertThat(persistence.readOne("2020_2")).isNull();
-		business.create(null, null,"2020", "meliane");
+		business.create(null, null,"2020",LocalDate.of(2023, 2, 4), "meliane");
 		assertor.assertLegislativeAct("2020_2", "2020_2","Collectif budgétaire 2020","2020");
 	}
 	
 	@Test @Order(2)
 	void business_create_exerciseIdentifierNull() {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
-			business.create((String)null,(String)null,(String)null,(String)null);
+			business.create((String)null,(String)null,(String)null,(LocalDate)null,(String)null);
 	    });
-		assertThat(exception.getMessage()).isEqualTo("L'identifiant de Exercice est requis\r\nLe nom d'utilisateur est requis");
+		assertThat(exception.getMessage()).isEqualTo("L'identifiant de Exercice est requis\r\nLa date est requise\r\nLe nom d'utilisateur est requis");
 	}
 	
 	/* Update Version */

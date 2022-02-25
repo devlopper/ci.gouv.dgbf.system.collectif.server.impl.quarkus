@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.business;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +48,9 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	
 	public static interface LegislativeAct {
 		
-		static Object[] validateCreateInputs(String code, String name, String exerciseIdentifier, String auditWho,ThrowablesMessages throwablesMessages) {
+		static Object[] validateCreateInputs(String code, String name, String exerciseIdentifier,LocalDate date, String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(exerciseIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.Exercise.NAME, throwablesMessages);
+			throwablesMessages.addIfTrue("La date est requise", date == null);
 			validateAuditWho(auditWho, throwablesMessages);
 			ExerciseImpl exercise = StringHelper.isBlank(exerciseIdentifier) ? null : (ExerciseImpl) validateExistenceAndReturn(Exercise.class, exerciseIdentifier,List.of(ExerciseImpl.FIELD_IDENTIFIER,ExerciseImpl.FIELD_YEAR)
 					, __inject__(ExercisePersistence.class), throwablesMessages);

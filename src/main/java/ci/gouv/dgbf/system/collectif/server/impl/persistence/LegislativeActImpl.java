@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -48,6 +49,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@Transient String exerciseAsString;
 	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
+	
+	@NotNull @Column(name = COLUMN_DATE,nullable = false) LocalDate date;
 	
 	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
 	@Transient String defaultVersionAsString;
@@ -98,6 +101,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 		return paymentCredit;
 	}
 	
+	public static final String FIELD_DATE = "date";
 	public static final String FIELD_NUMBER = "number";
 	public static final String FIELD_ACT_GENERATION_MODE = "actGenerationMode";
 	public static final String FIELD_EXERCISE_IDENTIFIER = "exerciseIdentifier";
@@ -122,6 +126,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String ENTITY_NAME = "LegislativeActImpl";
 	public static final String TABLE_NAME = "TA_COLLECTIF";
 	
+	public static final String COLUMN_DATE = "DATE_";
 	public static final String COLUMN_ACT_GENERATION_MODE = "MODE_GENERATION_ACTE";
 	public static final String COLUMN_EXERCISE = "EXERCICE";
 	public static final String COLUMN_DEFAULT_VERSION = "VERSION_PAR_DEFAUT";

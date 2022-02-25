@@ -1,6 +1,8 @@
 package ci.gouv.dgbf.system.collectif.server.impl.service;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
@@ -28,8 +30,8 @@ public class LegislativeActServiceImpl extends AbstractSpecificServiceImpl<Legis
 	}
 	
 	@Override
-	public Response create(String identifier, String name, String exerciseIdentifier, String auditWho) {
-		return buildResponseOk(business.create(identifier, name, exerciseIdentifier, auditWho));
+	public Response create(String identifier, String name, String exerciseIdentifier,Long dateAsTimestamp, String auditWho) {
+		return buildResponseOk(business.create(identifier, name, exerciseIdentifier,dateAsTimestamp == null ? null : Instant.ofEpochMilli(dateAsTimestamp).atZone(ZoneId.systemDefault()).toLocalDate(), auditWho));
 	}
 
 	@Override
