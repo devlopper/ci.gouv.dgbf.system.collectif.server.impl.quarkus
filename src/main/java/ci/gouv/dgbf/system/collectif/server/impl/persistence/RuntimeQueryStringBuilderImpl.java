@@ -243,23 +243,23 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"t"
 				,FieldHelper.join(ExpenditureImpl.FIELD_ACT_VERSION,LegislativeActImpl.FIELD_IDENTIFIER));
 		
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.SECTION_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.SECTION_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_SECTION_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.EXPENDITURE_NATURE_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.EXPENDITURE_NATURE_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_NATURE_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ADMINISTRATIVE_UNIT_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ADMINISTRATIVE_UNIT_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_ADMINISTRATIVE_UNIT_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.BUDGET_SPECIALIZATION_UNIT_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.BUDGET_SPECIALIZATION_UNIT_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_BUDGET_SPECIALIZATION_UNIT_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ACTION_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ACTION_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_ACTION_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ACTIVITY_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ACTIVITY_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_ACTIVITY_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ECONOMIC_NATURE_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ECONOMIC_NATURE_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_ECONOMIC_NATURE_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.FUNDING_SOURCE_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.FUNDING_SOURCE_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_FUNDING_SOURCE_IDENTIFIER);
-		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LESSOR_IDENTIFIER,"v"
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LESSOR_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_LESSOR_IDENTIFIER);
 		
 		if(arguments.getFilterFieldValue(Parameters.ACTIVITIES_IDENTIFIERS) != null) {
