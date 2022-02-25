@@ -277,7 +277,7 @@ public interface ExpenditureQueryStringBuilder {
 		public static void populate(QueryExecutorArguments queryExecutorArguments, Arguments arguments, WhereStringBuilder.Predicate predicate,Filter filter) {
 			Boolean availableMinusIncludedMovementPlusAdjustmentLessThanZero = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO);
 			if(availableMinusIncludedMovementPlusAdjustmentLessThanZero != null)
-				predicate.add(Language.Where.notIfTrue(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(null),!availableMinusIncludedMovementPlusAdjustmentLessThanZero));
+				predicate.add(Language.Where.notIfTrue(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(null),availableMinusIncludedMovementPlusAdjustmentLessThanZero));
 		}
 		
 		String MOVEMENT_INCLUDED_EQUAL_ZERO_FORMAT = "(im.%1$s IS NULL OR im.%1$s = 0l)";
@@ -310,12 +310,14 @@ public interface ExpenditureQueryStringBuilder {
 		String AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_NOT_LESS_THAN_ZERO_FORMAT = "("+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("available.%1$s", "0l")
 		+" - "+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("im.%1$s", "0l")
 		+" + "+CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild("t.%1$s.adjustment", "0l")+" >= 0l)";
-		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(Boolean equal,String amountFieldName) {
-			return String.format(Boolean.TRUE.equals(equal) ? AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT : AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_NOT_LESS_THAN_ZERO_FORMAT ,amountFieldName);
+		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(Boolean lessThan,String amountFieldName) {
+			return String.format(Boolean.TRUE.equals(lessThan) ? AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT : AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_NOT_LESS_THAN_ZERO_FORMAT ,amountFieldName);
 		}
 		
-		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(Boolean equal) {
-			return parenthesis(or(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(equal,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(equal,ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
+		static String getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(Boolean lessThan) {
+			if(Boolean.TRUE.equals(lessThan))
+				return parenthesis(or(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
+			return and(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_PAYMENT_CREDIT));
 		}
 		/*
 		private static final String PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(rae.%4$s) FROM %1$s ralav,%2$s rae,%3$s ra"

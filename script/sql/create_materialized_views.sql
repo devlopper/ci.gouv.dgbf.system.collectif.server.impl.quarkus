@@ -156,7 +156,7 @@ SELECT lr.exercice||a.ads_code||ne.nat_code AS "IDENTIFIANT",lr.exercice AS "EXE
 ,ne.nat_id AS "NATURE_ECONOMIQUE_IDENTIFIANT",ne.nat_code AS "NATURE_ECONOMIQUE_CODE",ne.nat_code||' '||ne.nat_liblg AS "NATURE_ECONOMIQUE_CODE_LIBELLE"
 ,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_code||' '||u.usb_liblg AS "USB_CODE_LIBELLE"
 ,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
-,lr.MONTANT AS "BUDGET_INITIAL",lr.MONTANT AS "BUDGET_ACTUEL"
+,lr.MONTANT AS "BUDGET_INITIAL",lr.MONTANT AS "BUDGET_ACTUEL",0 AS "MOUVEMENT"
 FROM ligne_recette@dblink_elabo_bidf lr
 LEFT JOIN activite_de_recette@dblink_elabo_bidf a ON a.ads_code = lr.ads_id
 LEFT JOIN nature_economique@dblink_elabo_bidf ne ON ne.nat_id = lr.nat_id

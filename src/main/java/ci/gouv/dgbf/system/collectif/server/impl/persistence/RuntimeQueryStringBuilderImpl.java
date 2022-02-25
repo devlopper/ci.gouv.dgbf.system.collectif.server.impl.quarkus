@@ -111,6 +111,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				}
 				
 				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null) {
+					ExpenditureQueryStringBuilder.Tuple.joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 					//ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
 					//builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 				}
@@ -122,9 +123,9 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 					arguments.removeFilterFields(Parameters.SECTION_IDENTIFIER);
 				}
 				*/
-				/*if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
-					//builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
-				}*/
+				if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
+					builderArguments.getTuple().addJoins(String.format("JOIN %s ev ON ev.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
+				}
 			//}
 		}else if(Boolean.TRUE.equals(resourcePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ResourceImpl.ENTITY_NAME));
@@ -181,7 +182,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		if(expenditurePersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
 			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
 				if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments)))
-					builderArguments.getOrder(Boolean.TRUE).asc("v", ExpenditureView.FIELD_SECTION_CODE/*, ExpenditureView.FIELD_ADMINISTRATIVE_UNIT_CODE*/, ExpenditureView.FIELD_NATURE_CODE
+					builderArguments.getOrder(Boolean.TRUE).asc("ev", ExpenditureView.FIELD_SECTION_CODE/*, ExpenditureView.FIELD_ADMINISTRATIVE_UNIT_CODE*/, ExpenditureView.FIELD_NATURE_CODE
 							, ExpenditureView.FIELD_BUDGET_SPECIALIZATION_UNIT_CODE, ExpenditureView.FIELD_ACTION_CODE, ExpenditureView.FIELD_ACTIVITY_CODE
 							, ExpenditureView.FIELD_ECONOMIC_NATURE_CODE, ExpenditureView.FIELD_FUNDING_SOURCE_CODE, ExpenditureView.FIELD_LESSOR_CODE);
 				else
