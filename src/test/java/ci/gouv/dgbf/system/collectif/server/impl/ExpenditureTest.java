@@ -40,6 +40,7 @@ import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureService;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAmountsReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAmountsWithoutAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationAdjustmentReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportableView;
@@ -80,6 +81,17 @@ public class ExpenditureTest {
 				.setActualMinusMovementIncludedPlusAdjustment(33l).setAvailableMinusMovementIncludedPlusAdjustment(-67l));
 		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(2l).setMovement(10l).setActual(12l).setAdjustment(0l).setAvailable(-100l).setMovementIncluded(0l)
 				.setActualMinusMovementIncludedPlusAdjustment(12l).setAvailableMinusMovementIncludedPlusAdjustment(-100l));
+	}
+	
+	@Test @Order(1)
+	void persistence_readAmountsWithoutAvailable_array() {
+		Collection<ExpenditureImpl> expenditures = new ExpenditureImplAmountsWithoutAvailableReader().readByIdentifiersThenInstantiate(List.of("2022_1_2_9"), null);
+		assertThat(expenditures).isNotNull();
+		ExpenditureImpl expenditure = expenditures.iterator().next();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(33l).setAvailable(0l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(33l).setAvailableMinusMovementIncludedPlusAdjustment(0l));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(2l).setMovement(10l).setActual(12l).setAdjustment(0l).setAvailable(0l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(12l).setAvailableMinusMovementIncludedPlusAdjustment(0l));
 	}
 	
 	@Test @Order(1)

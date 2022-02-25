@@ -135,7 +135,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 				new ExpenditureImplAsStringsReader().readThenSet(expenditures, null);
 			else if(ExpenditureImpl.FIELDS_AMOUNTS.equals(fieldName))
 				new ExpenditureImplAmountsReader().readThenSet(expenditures, null);
-				//ExpenditurePersistenceImpl.readAmounts(expenditures);
+			else if(ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_AVAILABLE.equals(fieldName))
+				new ExpenditureImplAmountsWithoutAvailableReader().readThenSet(expenditures, null);
 			else if(ExpenditureImpl.FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT.equals(fieldName))
 				new ExpenditureImplAmountsInitialActualMovementAdjustmentActualPlusAdjustmentReader().readThenSet(expenditures, null);
 			else if(ExpenditureImpl.FIELDS_AMOUNTS_ACTUAL.equals(fieldName))

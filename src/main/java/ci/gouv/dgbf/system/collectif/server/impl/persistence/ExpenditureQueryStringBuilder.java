@@ -65,8 +65,10 @@ public interface ExpenditureQueryStringBuilder {
 				amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
 			
 			amounts.computeActualPlusAdjustment();
-			amounts.computeActualMinusMovementIncludedPlusAdjustment();
-			amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
+			if(Boolean.TRUE.equals(includedMovement))
+				amounts.computeActualMinusMovementIncludedPlusAdjustment();
+			if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available))
+				amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
 			return index;
 		}
 		
