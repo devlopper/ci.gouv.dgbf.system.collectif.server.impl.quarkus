@@ -1,18 +1,12 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
-import static org.cyk.utility.persistence.query.Language.jpql;
 import static org.cyk.utility.persistence.query.Language.parenthesis;
-import static org.cyk.utility.persistence.query.Language.Where.or;
 import static org.cyk.utility.persistence.query.Language.Where.and;
+import static org.cyk.utility.persistence.query.Language.Where.or;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
@@ -21,11 +15,9 @@ import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.Language;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.query.string.CaseStringBuilder;
-import org.cyk.utility.persistence.server.query.string.WhereStringBuilder;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
-import org.cyk.utility.persistence.server.query.string.WhereStringBuilder.Predicate;
+import org.cyk.utility.persistence.server.query.string.WhereStringBuilder;
 
-import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 
 public interface ExpenditureQueryStringBuilder {
