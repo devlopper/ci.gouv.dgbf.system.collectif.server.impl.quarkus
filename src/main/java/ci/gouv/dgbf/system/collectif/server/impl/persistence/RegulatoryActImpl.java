@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.Access;
@@ -26,6 +27,10 @@ import lombok.experimental.Accessors;
 public class RegulatoryActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements RegulatoryAct,Serializable {
 
 	@Column(name = COLUMN_YEAR) Short year;
+	
+	@Column(name = COLUMN_DATE) LocalDate date;
+	@Transient String dateAsString;
+	
 	@Column(name = COLUMN_ENTRY_AUTHORIZATION_AMOUNT) Long entryAuthorizationAmount;
 	@Column(name = COLUMN_PAYMENT_CREDIT_AMOUNT) Long paymentCreditAmount;
 	@Transient Boolean included;
@@ -56,10 +61,13 @@ public class RegulatoryActImpl extends AbstractIdentifiableSystemScalarStringIde
 	}
 	
 	public static final String FIELD_YEAR = "year";
+	public static final String FIELD_DATE = "date";
+	public static final String FIELD_DATE_AS_STRING = "dateAsString";
 	public static final String FIELD_ENTRY_AUTHORIZATION_AMOUNT = "entryAuthorizationAmount";
 	public static final String FIELD_PAYMENT_CREDIT_AMOUNT = "paymentCreditAmount";
 	public static final String FIELD_INCLUDED = "included";
 	public static final String FIELD_INCLUDED_AS_STRING = "includedAsString";
+	public static final String FIELDS_CODE_NAME_YEAR_DATE_AS_STRING_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING = "codeNameYearDateAsStringEntryAuthorizationAmountPaymentCreditAmountIncludedAndIncludedAsString";
 	public static final String FIELDS_YEAR_NAME_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING = "yearNameEntryAuthorizationAmountPaymentCreditAmountIncludedAndIncludedAsString";
 	public static final String FIELDS_YEAR_NAME_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT = "yearNameEntryAuthorizationAmountPaymentCreditAmount";
 	public static final String FIELDS_INCLUDED_AND_INCLUDED_AS_STRING = "includedAndIncludedAsString";
@@ -70,6 +78,7 @@ public class RegulatoryActImpl extends AbstractIdentifiableSystemScalarStringIde
 	public static final String TABLE_NAME = "VMA_ACTE_GESTION";
 	
 	public static final String COLUMN_YEAR = "exercice";
+	public static final String COLUMN_DATE = "date";
 	public static final String COLUMN_ENTRY_AUTHORIZATION_AMOUNT = "montant_ae";
 	public static final String COLUMN_PAYMENT_CREDIT_AMOUNT = "montant_cp";
 }

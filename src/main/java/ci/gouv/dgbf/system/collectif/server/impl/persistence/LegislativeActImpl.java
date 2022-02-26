@@ -126,7 +126,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String ENTITY_NAME = "LegislativeActImpl";
 	public static final String TABLE_NAME = "TA_COLLECTIF";
 	
-	public static final String COLUMN_DATE = "DATE_";
+	public static final String COLUMN_DATE = "DATE";
 	public static final String COLUMN_ACT_GENERATION_MODE = "MODE_GENERATION_ACTE";
 	public static final String COLUMN_EXERCISE = "EXERCICE";
 	public static final String COLUMN_DEFAULT_VERSION = "VERSION_PAR_DEFAUT";

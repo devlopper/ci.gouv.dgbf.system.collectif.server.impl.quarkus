@@ -39,6 +39,20 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	@Inject RegulatoryActLegislativeActVersionPersistence regulatoryActLegislativeActVersionPersistence;
 	@Inject EntityManager entityManager;
 
+	@Override
+	public Result includeByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
+		Result result = new Result().open();
+		//ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		//Object[] instances = ValidatorImpl.RegulatoryAct.validateIncludeByLegislativeActVersionIdentifierInputs(legislativeActVersionIdentifier, auditWho, throwablesMessages);
+		//throwablesMessages.throwIfNotEmpty();
+		
+		// Return of message
+		//result.close().setName(String.format("Ajustement de %s %s(s) par %s",expenditures.size(),Expenditure.NAME,auditWho)).log(getClass());
+		//result.addMessages(String.format("Nombre de %s mise à jour : %s",Expenditure.NAME, expenditures.size()));
+		return result;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override @Transactional
 	public Result include(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {

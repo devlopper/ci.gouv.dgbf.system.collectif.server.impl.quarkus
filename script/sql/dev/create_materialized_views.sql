@@ -6,13 +6,15 @@ SELECT
     ,TO_CHAR(ab.acte_numero) AS "CODE"
     ,TO_CHAR(ab.acte_numero)||' '||ab.acte_ref_externe_acte as LIBELLE
     ,TO_NUMBER(ab.exo_num) AS "EXERCICE"
+    ,ab.acte_date_signature AS "DATE"
     ,SUM(fd.find_montant_ae) as "MONTANT_AE"
     ,SUM(fd.find_montant_cp) as "MONTANT_CP"
 FROM 
     SIIBC_MEA.acte_budgetaire ab
 JOIN SIIBC_MEA.financement_depenses fd ON fd.acte_id = ab.acte_id
 JOIN SIIBC_MEA.categorie_acte_budgetaire cab ON cab.cab_id = ab.acte_cab_id AND cab.cab_tact_code IN ('REGLEMENTAIRE')
-GROUP BY ab.acte_id,ab.acte_numero,ab.acte_ref_externe_acte,ab.exo_num
+WHERE ab.acte_statut = 'APPLIQUE'
+GROUP BY ab.acte_id,ab.acte_numero,ab.acte_ref_externe_acte,ab.exo_num,ab.acte_date_signature
 ORDER BY TO_CHAR(ab.acte_numero) ASC;
 ALTER TABLE VMA_ACTE_GESTION ADD CONSTRAINT VMA_ACTE_GESTION_PK PRIMARY KEY (IDENTIFIANT);
 ALTER TABLE VMA_ACTE_GESTION ADD CONSTRAINT VMA_ACTE_GESTION_UK_CODE UNIQUE (CODE);

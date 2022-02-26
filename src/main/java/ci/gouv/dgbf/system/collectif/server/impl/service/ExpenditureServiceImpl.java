@@ -32,15 +32,15 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 	}
 	
 	@Override
-	public Response adjust(List<AdjustmentDto> adjustmentsDtos,String userIdentifier) {
+	public Response adjust(List<AdjustmentDto> adjustmentsDtos,String auditWho) {
 		return buildResponseOk(business.adjust(adjustmentsDtos == null ? null : Optional.ofNullable(adjustmentsDtos).get().stream()
-				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> new Long[] {dto.getEntryAuthorization(),dto.getPaymentCredit()})),userIdentifier));
+				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> new Long[] {dto.getEntryAuthorization(),dto.getPaymentCredit()})),auditWho));
 	}
 	
 	@Override
-	public Response adjustByEntryAuthorizations(List<AdjustmentDto> adjustmentsDtos,String userIdentifier) {
+	public Response adjustByEntryAuthorizations(List<AdjustmentDto> adjustmentsDtos,String auditWho) {
 		return buildResponseOk(business.adjustByEntryAuthorizations(adjustmentsDtos == null ? null : Optional.ofNullable(adjustmentsDtos).get().stream()
-				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> dto.getEntryAuthorization())),userIdentifier));
+				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> dto.getEntryAuthorization())),auditWho));
 	}
 	
 	@Override

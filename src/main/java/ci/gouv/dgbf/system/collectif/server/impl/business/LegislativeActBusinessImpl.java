@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -56,7 +57,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 			legislativeAct.setCode(String.format(CODE_FORMAT, legislativeAct.getExercise().getYear(),++count));
 		}
 		if(StringHelper.isBlank(legislativeAct.getName())) {
-			legislativeAct.setName(String.format(NAME_FORMAT, legislativeAct.getExercise().getYear()));
+			legislativeAct.setName(String.format(NAME_FORMAT, legislativeAct.getExercise().getYear(),TimeHelper.formatLocalDate(date)));
 		}
 		legislativeAct.setIdentifier(legislativeAct.getCode());
 		String auditFunctionality = CREATE_AUDIT_IDENTIFIER;
@@ -114,5 +115,5 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 	}
 	
 	private static final String CODE_FORMAT = "%s_%s";
-	private static final String NAME_FORMAT = LegislativeAct.NAME+" %s";
+	private static final String NAME_FORMAT = LegislativeAct.NAME+" %s du %s";
 }

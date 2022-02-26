@@ -171,6 +171,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 		for(String fieldName : fieldsNames) {
 			if(RegulatoryActImpl.FIELDS_YEAR_NAME_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING.equals(fieldName))				
 				new RegulatoryActImplYearNameEntryAuthorizationAmountPaymentCreditAmountIncludedAndIncludedAsStringReader().readThenSet(regulatoryActs, map);
+			else if(RegulatoryActImpl.FIELDS_CODE_NAME_YEAR_DATE_AS_STRING_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING.equals(fieldName))				
+				new RegulatoryActImplCodeNameYearDateAsStringEntryAuthorizationAmountPaymentCreditAmountIncludedAndIncludedAsStringReader().readThenSet(regulatoryActs, map);
 			else if(RegulatoryActImpl.FIELDS_AUDITS_AS_STRINGS.equals(fieldName))
 				new RegulatoryActImplAuditsAsStringsReader().readThenSet(regulatoryActs, map);
 			else if(RegulatoryActImpl.FIELD___AUDIT__.equals(fieldName))

@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.Access;
@@ -42,6 +43,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) LegislativeActImpl act;
 	@Transient String actIdentifier;
+	@Transient LocalDate actDate;
 	@Transient String actAsString;
 	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
@@ -100,6 +102,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	//public static final String FIELD_ACT_GENERATION_MODE = "actGenerationMode";
 	public static final String FIELD_ACT = "act";
 	public static final String FIELD_ACT_IDENTIFIER = "actIdentifier";
+	public static final String FIELD_ACT_DATE = "actDate";
 	public static final String FIELD_ACT_AS_STRING = "actAsString";
 	public static final String FIELD_NUMBER = "number";
 	public static final String FIELD_IS_DEFAULT_VERSION = "isDefaultVersion";

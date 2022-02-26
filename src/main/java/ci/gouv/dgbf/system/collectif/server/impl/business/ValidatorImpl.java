@@ -54,6 +54,9 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			validateAuditWho(auditWho, throwablesMessages);
 			ExerciseImpl exercise = StringHelper.isBlank(exerciseIdentifier) ? null : (ExerciseImpl) validateExistenceAndReturn(Exercise.class, exerciseIdentifier,List.of(ExerciseImpl.FIELD_IDENTIFIER,ExerciseImpl.FIELD_YEAR)
 					, __inject__(ExercisePersistence.class), throwablesMessages);
+			if(exercise != null && exercise.getYear() != null) {
+				throwablesMessages.addIfTrue(String.format("L'année(%s) de la date doit être égale à l'année(%s) de l'exercice",date.getYear(),exercise.getYear()), date.getYear() != exercise.getYear().intValue());
+			}
 			return new Object[] {exercise};
 		}
 		
@@ -278,6 +281,16 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 				return;
 			throwablesMessages.add(String.format("Les %s suivant sont déja %s : %s",ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct.NAME_PLURAL,Boolean.TRUE.equals(include) ? "inclus" : "exclus"
 				, includedOrExcluded.stream().map(array -> (String)array[3]+" "+array[4]).collect(Collectors.joining(","))));
+		}
+		
+		static Object[] validateIncludeByLegislativeActVersionIdentifierInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			validateAuditWho(auditWho, throwablesMessages);
+			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
+					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+							,LegislativeActVersionImpl.FIELD_ACT_DATE)
+					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
+			return new Object[] {legislativeActVersion};
 		}
 	}
 	

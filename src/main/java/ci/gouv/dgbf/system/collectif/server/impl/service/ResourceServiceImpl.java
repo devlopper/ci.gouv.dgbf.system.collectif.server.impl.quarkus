@@ -32,8 +32,8 @@ public class ResourceServiceImpl extends AbstractSpecificServiceImpl<ResourceDto
 	}
 	
 	@Override
-	public Response adjust(List<AdjustmentDto> adjustmentsDtos,String userIdentifier) {
+	public Response adjust(List<AdjustmentDto> adjustmentsDtos,String auditWho) {
 		return buildResponseOk(business.adjust(adjustmentsDtos == null ? null : Optional.ofNullable(adjustmentsDtos).get().stream()
-				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> dto.getRevenue())),userIdentifier));
+				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> dto.getRevenue())),auditWho));
 	}
 }

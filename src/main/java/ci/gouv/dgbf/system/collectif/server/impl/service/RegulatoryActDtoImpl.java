@@ -19,6 +19,7 @@ import lombok.experimental.Accessors;
 public class RegulatoryActDtoImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements RegulatoryActDto,Serializable {
 
 	@JsonbProperty(value = JSON_YEAR) Short year;
+	@JsonbProperty(value = JSON_DATE_AS_STRING) Short dateAsString;
 	@JsonbProperty(value = JSON_ENTRY_AUTHORIZATION_AMOUNT) Long entryAuthorizationAmount;
 	@JsonbProperty(value = JSON_PAYMENT_CREDIT_AMOUNT) Long paymentCreditAmount;
 	@JsonbProperty(value = JSON_INCLUDED) String included;
@@ -68,6 +69,10 @@ public class RegulatoryActDtoImpl extends AbstractIdentifiableSystemScalarString
     			,JSON_INCLUDED_AS_STRING,RegulatoryActImpl.FIELD_INCLUDED_AS_STRING
     			,JSONS_YEAR_NAME_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AS_STRING,RegulatoryActImpl.FIELDS_YEAR_NAME_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING
     			,JSON___AUDIT__,RegulatoryActImpl.FIELD___AUDIT__
+    			));
+		
+		map.putAll(Map.of(
+				JSONS_CODE_NAME_YEAR_DATE_AS_STRING_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING,RegulatoryActImpl.FIELDS_CODE_NAME_YEAR_DATE_AS_STRING_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING
     			));
 		AbstractServiceImpl.setProjections(RegulatoryActDtoImpl.class, map);
 	}
