@@ -19,7 +19,7 @@ import lombok.experimental.Accessors;
 public class RegulatoryActDtoImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements RegulatoryActDto,Serializable {
 
 	@JsonbProperty(value = JSON_YEAR) Short year;
-	@JsonbProperty(value = JSON_DATE_AS_STRING) Short dateAsString;
+	@JsonbProperty(value = JSON_DATE_AS_STRING) String dateAsString;
 	@JsonbProperty(value = JSON_ENTRY_AUTHORIZATION_AMOUNT) Long entryAuthorizationAmount;
 	@JsonbProperty(value = JSON_PAYMENT_CREDIT_AMOUNT) Long paymentCreditAmount;
 	@JsonbProperty(value = JSON_INCLUDED) String included;

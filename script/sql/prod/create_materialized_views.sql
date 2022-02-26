@@ -6,7 +6,7 @@ SELECT
     ,TO_CHAR(ab.acte_numero) AS "CODE"
     ,ab.acte_ref_externe_acte as LIBELLE
     ,TO_NUMBER(ab.exo_num) AS "EXERCICE"
-    ,ab.acte_date_signature AS "DATE"
+    ,ab.acte_date_signature AS "DATE_"
     ,SUM(fd.find_montant_ae) as "MONTANT_AE"
     ,SUM(fd.find_montant_cp) as "MONTANT_CP"
 FROM 

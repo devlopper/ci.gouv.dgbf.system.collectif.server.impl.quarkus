@@ -4,9 +4,9 @@ CREATE MATERIALIZED VIEW VMA_ACTE_GESTION REFRESH NEXT SYSDATE + 1/24/4 COMPLETE
 SELECT 
     ab.acte_id AS "IDENTIFIANT"
     ,TO_CHAR(ab.acte_numero) AS "CODE"
-    ,TO_CHAR(ab.acte_numero)||' '||ab.acte_ref_externe_acte as LIBELLE
+    ,ab.acte_ref_externe_acte as LIBELLE
     ,TO_NUMBER(ab.exo_num) AS "EXERCICE"
-    ,ab.acte_date_signature AS "DATE"
+    ,ab.acte_date_signature AS "DATE_"
     ,SUM(fd.find_montant_ae) as "MONTANT_AE"
     ,SUM(fd.find_montant_cp) as "MONTANT_CP"
 FROM 

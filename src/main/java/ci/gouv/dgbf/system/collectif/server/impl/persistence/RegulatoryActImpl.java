@@ -78,7 +78,7 @@ public class RegulatoryActImpl extends AbstractIdentifiableSystemScalarStringIde
 	public static final String TABLE_NAME = "VMA_ACTE_GESTION";
 	
 	public static final String COLUMN_YEAR = "exercice";
-	public static final String COLUMN_DATE = "date";
+	public static final String COLUMN_DATE = "date_";
 	public static final String COLUMN_ENTRY_AUTHORIZATION_AMOUNT = "montant_ae";
 	public static final String COLUMN_PAYMENT_CREDIT_AMOUNT = "montant_cp";
 }
