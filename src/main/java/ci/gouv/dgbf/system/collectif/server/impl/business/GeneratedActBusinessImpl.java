@@ -119,7 +119,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		
 		Collection<RegulatoryAct> regulatoryActs = regulatoryActPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
 				,Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE));
-		LogHelper.logInfo(String.format("%s acte(s) de gestion inclus dans %s", CollectionHelper.getSize(regulatoryActs),legislativeActVersion.getName()), getClass());
+		LogHelper.log(String.format("%s acte(s) de gestion inclus dans %s", CollectionHelper.getSize(regulatoryActs),legislativeActVersion.getName()),Result.getLogLevel(), getClass());
 		Collection<String> regulatoryActsIdentifiers = FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs);
 		Collection<RegulatoryActExpenditure> regulatoryActExpenditures = CollectionHelper.isEmpty(regulatoryActsIdentifiers) ? null 
 				: regulatoryActExpenditurePersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_IDENTIFIERS
@@ -206,7 +206,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
 		Long count = expenditurePersistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
 				,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
-		LogHelper.logInfo(String.format("Nombre de dépenses ajustées ou ayant leur mouvements inclus : %s", count), getClass());
+		LogHelper.log(String.format("Nombre de dépenses ajustées ou ayant leur mouvements inclus : %s", count),Result.getLogLevel(), getClass());
 		if(NumberHelper.isEqualToZero(count))
 			return null;
 		GeneratedActImpl act = new GeneratedActImpl();
@@ -222,14 +222,14 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		
 		Integer batchSize = 100;
 		List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(), batchSize);		
-		LogHelper.logInfo(String.format("Traitement par lot de %s. Nombre de lot = %s", batchSize,batchSizes.size()), getClass());
+		LogHelper.log(String.format("Traitement par lot de %s. Nombre de lot = %s", batchSize,batchSizes.size()),Result.getLogLevel(), getClass());
 		for(Integer index =0; index < batchSizes.size(); index = index + 1) {
 			Collection<ExpenditureImpl> expenditures = CollectionHelper.cast(ExpenditureImpl.class, expenditurePersistence.readMany(new QueryExecutorArguments()
 					.addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER,ExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,ExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,ExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER
 							,ExpenditureImpl.FIELD_LESSOR_IDENTIFIER).addProcessableTransientFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS)
 					.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier(),Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE,Parameters.GENERATED_ACT_EXPENDITURE_EXISTS,Boolean.FALSE)
 					.setNumberOfTuples(batchSizes.get(index))));
-			LogHelper.logInfo(String.format("Traitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expenditures)), getClass());
+			LogHelper.log(String.format("Traitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expenditures)),Result.getLogLevel(), getClass());
 			if(CollectionHelper.isEmpty(expenditures))
 				break;
 			expenditures.forEach(expenditure -> {
@@ -251,7 +251,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	
 	private void generateAdjustmentAct(LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
 		Long adjustedCount = expenditurePersistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier(),Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE));
-		LogHelper.logInfo(String.format("Nombre de dépenses ajustées : %s", adjustedCount), getClass());
+		LogHelper.log(String.format("Nombre de dépenses ajustées : %s", adjustedCount),Result.getLogLevel(), getClass());
 		if(NumberHelper.isEqualToZero(adjustedCount))
 			return;
 		GeneratedActImpl act = new GeneratedActImpl();
@@ -267,14 +267,14 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		
 		Integer batchSize = 100;
 		List<Integer> batchSizes = NumberHelper.getProportions(adjustedCount.intValue(), batchSize);		
-		LogHelper.logInfo(String.format("Traitement par lot de %s. Nombre de lot = %s", batchSize,batchSizes.size()), getClass());
+		LogHelper.log(String.format("Traitement par lot de %s. Nombre de lot = %s", batchSize,batchSizes.size()),Result.getLogLevel(), getClass());
 		for(Integer index =0; index < batchSizes.size(); index = index + 1) {
 			Collection<ExpenditureImpl> expenditures = CollectionHelper.cast(ExpenditureImpl.class, expenditurePersistence.readMany(new QueryExecutorArguments()
 					.addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER,ExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,ExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,ExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER
 							,ExpenditureImpl.FIELD_LESSOR_IDENTIFIER).addProcessableTransientFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS)
 					.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier(),Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE,Parameters.GENERATED_ACT_EXPENDITURE_EXISTS,Boolean.FALSE)
 					.setNumberOfTuples(batchSizes.get(index))));
-			LogHelper.logInfo(String.format("Traitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expenditures)), getClass());
+			LogHelper.log(String.format("Traitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expenditures)),Result.getLogLevel(), getClass());
 			if(CollectionHelper.isEmpty(expenditures))
 				break;
 			expenditures.forEach(expenditure -> {
