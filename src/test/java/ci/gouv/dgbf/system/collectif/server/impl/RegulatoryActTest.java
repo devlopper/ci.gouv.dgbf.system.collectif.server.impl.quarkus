@@ -2,6 +2,7 @@ package ci.gouv.dgbf.system.collectif.server.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -30,6 +31,12 @@ public class RegulatoryActTest {
 	@Inject Assertor assertor;
 	@Inject RegulatoryActPersistence persistence;
 	@Inject RegulatoryActBusiness business;
+	
+	@Test @Order(1)
+	void persistence_readRegulatoryActMany_REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL() {
+		Collection<RegulatoryAct> regulatoryActs = persistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL,LocalDate.of(2019, 1, 1)));
+		assertThat(regulatoryActs).hasSize(1);
+	}
 	
 	@Test @Order(1)
 	void persistence_readRegulatoryActMany() {

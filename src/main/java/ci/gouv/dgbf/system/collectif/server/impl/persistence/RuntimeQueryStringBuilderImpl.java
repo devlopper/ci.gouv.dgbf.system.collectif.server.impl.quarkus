@@ -4,6 +4,7 @@ import static org.cyk.utility.persistence.query.Language.parenthesis;
 import static org.cyk.utility.persistence.query.Language.Where.or;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -451,6 +452,18 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 						,included ? "" : "NOT",Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
 				filter.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, legislativeActVersionIdentifier);
 			}
+		}
+		
+		LocalDate greatestDate = arguments.getFilterFieldValueAsLocalDate(null,Parameters.REGULATORY_ACT_DATE_LOWER_THAN_OR_EQUAL);
+		if(greatestDate != null) {
+			predicate.add(String.format("t.%s <= :%s",RegulatoryActImpl.FIELD_DATE,Parameters.REGULATORY_ACT_DATE_LOWER_THAN_OR_EQUAL));
+			filter.addField(Parameters.REGULATORY_ACT_DATE_LOWER_THAN_OR_EQUAL, greatestDate);
+		}
+		
+		LocalDate lowestDate = arguments.getFilterFieldValueAsLocalDate(null,Parameters.REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL);
+		if(lowestDate != null) {
+			predicate.add(String.format("t.%s >= :%s",RegulatoryActImpl.FIELD_DATE,Parameters.REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL));
+			filter.addField(Parameters.REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL, lowestDate);
 		}
 	}
 	

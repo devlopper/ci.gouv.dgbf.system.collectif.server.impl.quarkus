@@ -44,6 +44,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) LegislativeActImpl act;
 	@Transient String actIdentifier;
 	@Transient LocalDate actDate;
+	@Transient Long actDateAsTimestamp;
 	@Transient String actAsString;
 	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
@@ -102,6 +103,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	//public static final String FIELD_ACT_GENERATION_MODE = "actGenerationMode";
 	public static final String FIELD_ACT = "act";
 	public static final String FIELD_ACT_IDENTIFIER = "actIdentifier";
+	public static final String FIELD_ACT_DATE_AS_TIMESTAMP = "actDateAsTimestamp";
 	public static final String FIELD_ACT_DATE = "actDate";
 	public static final String FIELD_ACT_AS_STRING = "actAsString";
 	public static final String FIELD_NUMBER = "number";
