@@ -44,7 +44,7 @@ public class LegislativeActVersionTest {
 				.addFilterField(persistence.getParameterNameIdentifier(), "2021_1_2").addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP));
 		assertThat(legislativeActVersion).isNotNull();
 		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2021_1_2");
-		assertThat(legislativeActVersion.getActFromDateAsTimestamp()).as("Act from date as timestamp").isNull();
+		assertThat(legislativeActVersion.getActFromDateAsTimestamp()).as("Act from date as timestamp").isEqualTo(1609459200000L);
 		assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Act date as timestamp").isEqualTo(946684800000L);
 	}
 	
@@ -54,7 +54,7 @@ public class LegislativeActVersionTest {
 				.addFilterField(persistence.getParameterNameIdentifier(), "2022_1_1").addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP));
 		assertThat(legislativeActVersion).isNotNull();
 		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2022_1_1");
-		assertThat(legislativeActVersion.getActFromDateAsTimestamp()).as("Act from date as timestamp").isNull();
+		assertThat(legislativeActVersion.getActFromDateAsTimestamp()).as("Act from date as timestamp").isEqualTo(1640995200000L);
 		assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Act date as timestamp").isEqualTo(1640995200000L);
 	}
 	

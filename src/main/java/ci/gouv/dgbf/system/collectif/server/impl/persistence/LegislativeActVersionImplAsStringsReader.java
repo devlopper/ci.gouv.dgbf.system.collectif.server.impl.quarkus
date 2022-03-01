@@ -12,7 +12,7 @@ public class LegislativeActVersionImplAsStringsReader extends AbstractLegislativ
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
 		arguments.getTuple().getJoin(Boolean.TRUE).add(String.format("JOIN %s la ON la = t.%s", LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT)
 				,String.format("LEFT JOIN %s dv ON dv = la.%s",LegislativeActVersionImpl.ENTITY_NAME,LegislativeActImpl.FIELD_DEFAULT_VERSION));
-		arguments.getProjection(Boolean.TRUE).addFromTuple("t",LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_NUMBER);		
+		arguments.getProjection(Boolean.TRUE).addFromTuple("t",LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_NUMBER);
 		arguments.getProjection(Boolean.TRUE).addFromTuple("la",LegislativeActImpl.FIELD_NAME);
 		arguments.getProjection(Boolean.TRUE).addFromTuple("dv",LegislativeActVersionImpl.FIELD_IDENTIFIER);
 		return arguments;

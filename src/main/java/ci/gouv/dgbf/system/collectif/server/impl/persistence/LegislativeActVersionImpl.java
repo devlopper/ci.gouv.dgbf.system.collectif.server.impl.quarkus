@@ -48,6 +48,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@Transient String actIdentifier;
 	@Transient LocalDate actDate;
 	@Transient Long actDateAsTimestamp;
+	@Transient Short actDateYear;
 	@Transient String actAsString;
 	@Transient Long actFromDateAsTimestamp;
 	

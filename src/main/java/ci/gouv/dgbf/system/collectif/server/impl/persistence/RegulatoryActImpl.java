@@ -9,6 +9,8 @@ import javax.persistence.AccessType;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -24,6 +26,11 @@ import lombok.experimental.Accessors;
 @Table(name=RegulatoryActImpl.TABLE_NAME)
 @Cacheable
 @org.hibernate.annotations.Immutable
+@NamedQueries(value = {
+		@NamedQuery(name = RegulatoryActImpl.QUERY_READ_WHERE_NOT_INCLUDED_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_FROM_DATE_BY_TO_DATE,query = 
+				"SELECT t FROM RegulatoryActImpl t WHERE t.date >= :fromDate AND t.date <= :toDate "
+				+ "AND NOT EXISTS(SELECT p FROM RegulatoryActLegislativeActVersionImpl p WHERE p.regulatoryAct = t AND p.legislativeActVersion.identifier = :legislativeActVersionIdentifier)")
+})
 public class RegulatoryActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl implements RegulatoryAct,Serializable {
 
 	@Column(name = COLUMN_YEAR) Short year;
@@ -81,4 +88,6 @@ public class RegulatoryActImpl extends AbstractIdentifiableSystemScalarStringIde
 	public static final String COLUMN_DATE = "date_";
 	public static final String COLUMN_ENTRY_AUTHORIZATION_AMOUNT = "montant_ae";
 	public static final String COLUMN_PAYMENT_CREDIT_AMOUNT = "montant_cp";
+	
+	public static final String QUERY_READ_WHERE_NOT_INCLUDED_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_FROM_DATE_BY_TO_DATE = "RegulatoryActImpl.readWhereNotIncludedByLegislativeActVersionIdentifierByFromDateByToDate";
 }

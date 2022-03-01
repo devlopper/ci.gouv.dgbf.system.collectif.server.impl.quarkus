@@ -2,6 +2,7 @@ package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
@@ -25,7 +26,7 @@ public class LegislativeActImplFromDateAsTimestampReader extends AbstractLegisla
 	
 	public static LocalDate buildDate(LocalDate date,Short year) {
 		if(date == null && year != null)
-			date = LocalDate.of(year.intValue(), 1, 1);
+			date = LocalDate.of(year.intValue(), 1, 1).atStartOfDay(ZoneId.systemDefault()).toLocalDate();
 		return date;
 	}
 }

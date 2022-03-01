@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.business;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +28,9 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActLegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplFromDateAsTimestampReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActLegislativeActVersionImpl;
@@ -42,15 +46,30 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	@Override
 	public Result includeByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
 		Result result = new Result().open();
-		//ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
-		//Object[] instances = ValidatorImpl.RegulatoryAct.validateIncludeByLegislativeActVersionIdentifierInputs(legislativeActVersionIdentifier, auditWho, throwablesMessages);
-		//throwablesMessages.throwIfNotEmpty();
+		Object[] instances = ValidatorImpl.RegulatoryAct.validateIncludeByLegislativeActVersionIdentifierInputs(legislativeActVersionIdentifier, auditWho, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
 		
+		LegislativeActVersion legislativeActVersion = (LegislativeActVersion) instances[0];
+		Integer count = includeByLegislativeActVersionIdentifier(legislativeActVersion, auditWho, INCLUDE_BY_LEGISLATIVE_ACT_IDENTIFIER_AUDIT_IDENTIFIER, LocalDateTime.now(), entityManager);
 		// Return of message
-		//result.close().setName(String.format("Ajustement de %s %s(s) par %s",expenditures.size(),Expenditure.NAME,auditWho)).log(getClass());
-		//result.addMessages(String.format("Nombre de %s mise à jour : %s",Expenditure.NAME, expenditures.size()));
+		result.close().setName(String.format("Inclusion des %s de %s par %s",RegulatoryAct.NAME_PLURAL,legislativeActVersion.getName(),auditWho)).log(getClass());
+		result.addMessages(String.format("Inclusion de %s : %s",RegulatoryAct.NAME_PLURAL, count));
 		return result;
+	}
+	
+	public Integer includeByLegislativeActVersionIdentifier(LegislativeActVersion legislativeActVersion, String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {
+		Object[] dates = CollectionHelper.getFirst(new LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader().readByIdentifiers(List.of(legislativeActVersion.getIdentifier()), null));
+		Collection<RegulatoryAct> regulatoryActs = CollectionHelper.cast(RegulatoryAct.class, entityManager.createNamedQuery(RegulatoryActImpl.QUERY_READ_WHERE_NOT_INCLUDED_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_FROM_DATE_BY_TO_DATE,RegulatoryActImpl.class)
+				.setParameter("fromDate", LegislativeActImplFromDateAsTimestampReader.buildDate((LocalDate) dates[2], ((LegislativeActVersionImpl)legislativeActVersion).getActDateYear())).setParameter("toDate", dates[3])
+				.setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getResultList());
+		if(CollectionHelper.isEmpty(regulatoryActs))
+			return null;
+		Collection<Object[]> arrays = new RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader().readByIdentifiers(FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs)
+				, Map.of(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()));
+		include(regulatoryActs, legislativeActVersion, arrays, Boolean.TRUE, auditWho, auditFunctionality, auditWhen, entityManager);
+		return regulatoryActs.size();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -64,11 +83,15 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		Result result = (Result) data[3];
 		
 		LocalDateTime auditWhen = LocalDateTime.now();
-		//2 - Update to TRUE where FALSE OR NULL (NOT TRUE)
-		__update__(arrays, Boolean.TRUE,auditWho,INCLUDE_AUDIT_IDENTIFIER,auditWhen);
-		//3 - Create
-		__create__(arrays, regulatoryActs, legislativeActVersion,auditWho,INCLUDE_AUDIT_IDENTIFIER,auditWhen);
+		include(regulatoryActs, legislativeActVersion, arrays, existingIgnorable, auditWho, INCLUDE_AUDIT_IDENTIFIER, auditWhen, entityManager);
 		return result.close().log(getClass());
+	}
+	
+	public void include(Collection<RegulatoryAct> regulatoryActs, LegislativeActVersion legislativeActVersion,Collection<Object[]> arrays,Boolean existingIgnorable,String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {		
+		//1 - Update to TRUE where FALSE OR NULL (NOT TRUE)
+		__update__(arrays, Boolean.TRUE,auditWho,auditFunctionality,auditWhen,entityManager);
+		//2 - Create
+		__create__(arrays, regulatoryActs, legislativeActVersion,auditWho,auditFunctionality,auditWhen,entityManager);
 	}
 
 	@Override @Transactional
@@ -86,7 +109,7 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		
 		LocalDateTime auditWhen = LocalDateTime.now();
 		//2 - Update to FALSE where TRUE
-		__update__(arrays, Boolean.FALSE,auditWho,EXCLUDE_AUDIT_IDENTIFIER,auditWhen);
+		__update__(arrays, Boolean.FALSE,auditWho,EXCLUDE_AUDIT_IDENTIFIER,auditWhen,entityManager);
 		return result.close().log(getClass());
 	}
 
@@ -97,7 +120,7 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 
 	/**/
 	
-	private void __create__(Collection<Object[]> arrays,Collection<RegulatoryAct> regulatoryActs,LegislativeActVersion legislativeActVersion,String auditWho,String auditFunctionality,LocalDateTime auditWhen) {
+	private void __create__(Collection<Object[]> arrays,Collection<RegulatoryAct> regulatoryActs,LegislativeActVersion legislativeActVersion,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
 		Collection<Object[]> createsArrays = arrays.stream().filter(array -> StringHelper.isBlank((String)array[2])).collect(Collectors.toList());
 		if(CollectionHelper.isNotEmpty(createsArrays)) {
 			createsArrays.forEach(array -> {
@@ -112,7 +135,7 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		}
 	}
 	
-	private void __update__(Collection<Object[]> arrays,Boolean include,String auditWho,String auditFunctionality,LocalDateTime auditWhen) {
+	private void __update__(Collection<Object[]> arrays,Boolean include,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
 		Collection<Object[]> updatesArrays = arrays.stream().filter(array -> (Boolean.TRUE.equals(include) ? !Boolean.TRUE.equals(array[1]) : Boolean.TRUE.equals(array[1])) && StringHelper.isNotBlank((String)array[2])).collect(Collectors.toList());
 		if(CollectionHelper.isNotEmpty(updatesArrays)) {
 			Collection<RegulatoryActLegislativeActVersionImpl> updates = updatesArrays.stream().map(array -> entityManager.find(RegulatoryActLegislativeActVersionImpl.class, array[2])).collect(Collectors.toList());
