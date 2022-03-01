@@ -18,6 +18,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +32,9 @@ import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true) 
 @Entity(name = LegislativeActImpl.ENTITY_NAME) @Access(AccessType.FIELD)
-@Table(name=LegislativeActImpl.TABLE_NAME)
+@Table(name=LegislativeActImpl.TABLE_NAME,uniqueConstraints = {
+		@UniqueConstraint(name = "UK_EXERCICE_NUMERO",columnNames = {LegislativeActImpl.COLUMN_EXERCISE,LegislativeActImpl.COLUMN_NUMBER})
+})
 @NamedQueries(value = {
 		@NamedQuery(name = LegislativeActImpl.QUERY_READ_BY_IDENTIIFER,query = "SELECT t FROM LegislativeActImpl t WHERE t.identifier = :identifier")
 })
@@ -53,6 +56,9 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@NotNull @Column(name = COLUMN_DATE,nullable = false) LocalDate date;
 	@Transient Long dateAsTimestamp;
 	@Transient String dateAsString;
+	
+	@Transient Long fromDateAsTimestamp;
+	@Transient String fromDateAsString;
 	
 	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
 	@Transient String defaultVersionAsString;
@@ -105,6 +111,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	
 	public static final String FIELD_DATE = "date";
 	public static final String FIELD_DATE_AS_TIMESTAMP = "dateAsTimestamp";
+	public static final String FIELD_FROM_DATE_AS_TIMESTAMP = "fromDateAsTimestamp";
 	public static final String FIELD_NUMBER = "number";
 	public static final String FIELD_ACT_GENERATION_MODE = "actGenerationMode";
 	public static final String FIELD_EXERCISE_IDENTIFIER = "exerciseIdentifier";

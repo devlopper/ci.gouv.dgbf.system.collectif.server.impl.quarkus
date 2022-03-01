@@ -52,6 +52,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 		for(String fieldName : fieldsNames) {
 			if(LegislativeActImpl.FIELD_DEFAULT_VERSION_IDENTIFIER.equals(fieldName))
 				new LegislativeActImplDefaultVersionIdentifierReader().readThenSet(legislativeActs, null);
+			else if(LegislativeActImpl.FIELD_FROM_DATE_AS_TIMESTAMP.equals(fieldName))
+				new LegislativeActImplFromDateAsTimestampReader().readThenSet(legislativeActs, null);
 			else if(LegislativeActImpl.FIELD_DATE_AS_TIMESTAMP.equals(fieldName))
 				new LegislativeActImplDateAsTimestampReader().readThenSet(legislativeActs, null);
 			else if(LegislativeActImpl.FIELD_IN_PROGRESS_AS_STRING.equals(fieldName))
@@ -73,8 +75,10 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 		for(String fieldName : fieldsNames) {
 			if(LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER.equals(fieldName))
 				new LegislativeActVersionImplLegislativeActIdentifierReader().readThenSet(legislativeActVersions, null);
+			else if(LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP.equals(fieldName))
+				new LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELD_ACT_DATE_AS_TIMESTAMP.equals(fieldName))
-				new LegislativeActVersionImplActDateAsTimestampReader().readThenSet(legislativeActVersions, null);
+				new LegislativeActVersionImplLegislativeActDateAsTimestampReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_ACT_AS_STRING_CODE_NAME_NUMBER.equals(fieldName))
 				new LegislativeActVersionImplActAsStringCodeNameNumberReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_CODE_NAME_NUMBER.equals(fieldName))

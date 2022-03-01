@@ -16,6 +16,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
@@ -29,7 +30,9 @@ import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true) 
 @Entity(name = LegislativeActVersionImpl.ENTITY_NAME) @Access(AccessType.FIELD)
-@Table(name = LegislativeActVersionImpl.TABLE_NAME)
+@Table(name = LegislativeActVersionImpl.TABLE_NAME,uniqueConstraints = {
+		@UniqueConstraint(name = "UK_COLLECTIF_NUMERO",columnNames = {LegislativeActVersionImpl.COLUMN_ACT,LegislativeActVersionImpl.COLUMN_NUMBER})
+})
 @NamedQueries(value = {
 		@NamedQuery(name = LegislativeActVersionImpl.QUERY_READ_BY_IDENTIIFER,query = "SELECT t FROM LegislativeActVersionImpl t WHERE t.identifier = :identifier")
 })
@@ -46,6 +49,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@Transient LocalDate actDate;
 	@Transient Long actDateAsTimestamp;
 	@Transient String actAsString;
+	@Transient Long actFromDateAsTimestamp;
 	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
 	
@@ -106,6 +110,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELD_ACT_DATE_AS_TIMESTAMP = "actDateAsTimestamp";
 	public static final String FIELD_ACT_DATE = "actDate";
 	public static final String FIELD_ACT_AS_STRING = "actAsString";
+	public static final String FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP = "actFromDateAsTimestampDateAsTimestamp";
 	public static final String FIELD_NUMBER = "number";
 	public static final String FIELD_IS_DEFAULT_VERSION = "isDefaultVersion";
 	public static final String FIELD_IS_DEFAULT_VERSION_AS_STRING = "isDefaultVersionAsString";

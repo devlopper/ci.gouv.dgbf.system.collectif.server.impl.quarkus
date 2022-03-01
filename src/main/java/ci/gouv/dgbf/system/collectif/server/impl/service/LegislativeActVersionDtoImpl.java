@@ -27,6 +27,7 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
 	@JsonbProperty(value = JSON_LEGISLATIVE_ACT) LegislativeActDtoImpl act;
 	@JsonbProperty(value = JSON_LEGISLATIVE_ACT_IDENTIFIER) String actIdentifier;
 	@JsonbProperty(value = JSON_LEGISLATIVE_ACT_DATE_AS_TIMESTAMP) Long actDateAsTimestamp;
+	@JsonbProperty(value = JSON_LEGISLATIVE_ACT_FROM_DATE_AS_TIMESTAMP) Long actFromDateAsTimestamp;
 	@JsonbProperty(value = JSON_LEGISLATIVE_ACT_AS_STRING) String actAsString;
 	@JsonbProperty(value = JSON_GENERATED_ACT_COUNT) Short generatedActCount;
 	@JsonbProperty(value = JSON_ACT_GENERATABLE) Boolean actGeneratable;
@@ -59,7 +60,8 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
 		map.putAll(Map.of(
     			LegislativeActVersionDto.JSONS_STRINGS,LegislativeActVersionImpl.FIELDS_STRINGS
     			,LegislativeActVersionDto.JSONS_AMOUTNS,LegislativeActVersionImpl.FIELDS_AMOUNTS
-    			,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE,LegislativeActVersionImpl.FIELDS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE 
+    			,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE,LegislativeActVersionImpl.FIELDS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE
+    			,LegislativeActVersionDto.JSONS_LEGISLATIVE_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP,LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP
     			));
 		AbstractServiceImpl.setProjections(LegislativeActVersionDtoImpl.class, map);
 	}

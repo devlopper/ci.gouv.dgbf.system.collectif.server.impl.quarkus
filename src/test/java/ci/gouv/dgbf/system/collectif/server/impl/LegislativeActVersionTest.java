@@ -39,6 +39,55 @@ public class LegislativeActVersionTest {
 	@Inject LegislativeActVersionBusiness business;
 	
 	@Test @Order(1)
+	void persistence_actFromDateAsTimestampDateAsTimestamp_2021_1_2() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments()
+				.addFilterField(persistence.getParameterNameIdentifier(), "2021_1_2").addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2021_1_2");
+		assertThat(legislativeActVersion.getActFromDateAsTimestamp()).as("Act from date as timestamp").isNull();
+		assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Act date as timestamp").isEqualTo(946684800000L);
+	}
+	
+	@Test @Order(1)
+	void persistence_actFromDateAsTimestampDateAsTimestamp_2022_1_1() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments()
+				.addFilterField(persistence.getParameterNameIdentifier(), "2022_1_1").addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2022_1_1");
+		assertThat(legislativeActVersion.getActFromDateAsTimestamp()).as("Act from date as timestamp").isNull();
+		assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Act date as timestamp").isEqualTo(1640995200000L);
+	}
+	
+	@Test @Order(1)
+	void persistence_actFromDateAsTimestampDateAsTimestamp_2022_2_1() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments()
+				.addFilterField(persistence.getParameterNameIdentifier(), "2022_2_1").addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2022_2_1");
+		assertThat(legislativeActVersion.getActFromDateAsTimestamp()).as("Act from date as timestamp").isEqualTo(946684800000L);
+		assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Act date as timestamp").isEqualTo(1640995200000L);
+	}
+	
+	@Test @Order(1)
+	void persistence_asStrings() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments()
+				.addFilterField(persistence.getParameterNameIdentifier(), "2021_1_2").addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELDS_STRINGS));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2021_1_2");
+		//assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Date as timestamp").isEqualTo(946684800000L);
+	}
+	
+	@Test @Order(1)
+	void persistence_actDateAsTimestamp() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments()
+				.setQuery(new Query().setIdentifier(persistence.getQueryIdentifierReadDynamicOne()))
+				.addFilterField(Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT, Boolean.TRUE).addProjectionsFromStrings(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_ACT_DATE_AS_TIMESTAMP));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2022_1_2");
+		assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Date as timestamp").isEqualTo(1640995200000L);
+	}
+	
+	@Test @Order(1)
 	void persistence_defaultVersionInLatestAct() {
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(persistence.getQueryIdentifierReadDynamicOne()))
@@ -119,7 +168,7 @@ public class LegislativeActVersionTest {
 	@Test @Order(1)
 	void persistence_readMany() {
 		Collection<LegislativeActVersion> legislativeActVersions = persistence.readMany(null, null, null);
-		assertThat(legislativeActVersions).hasSize(8);
+		assertThat(legislativeActVersions).hasSize(9);
 	}
 	
 	@Test @Order(1)
@@ -160,13 +209,13 @@ public class LegislativeActVersionTest {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("8");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("9");
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion> legislativeActVersions = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class,response);
-		assertThat(legislativeActVersions).hasSize(8);
-		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
+		assertThat(legislativeActVersions).hasSize(9);
+		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_2_1","2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
     }
 	
 	@Test @Order(1)
@@ -175,16 +224,16 @@ public class LegislativeActVersionTest {
 				,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("8");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("9");
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion> legislativeActVersions = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class,response);
-		assertThat(legislativeActVersions).hasSize(8);
-		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
-		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActCount()).collect(Collectors.toList())).containsExactly(Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("1"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"));
-		assertThat(legislativeActVersions.stream().map(e -> e.getActGeneratable()).collect(Collectors.toList())).containsExactly(Boolean.TRUE,Boolean.TRUE,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
-		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActDeletable()).collect(Collectors.toList())).containsExactly(Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE);
+		assertThat(legislativeActVersions).hasSize(9);
+		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_2_1","2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
+		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActCount()).collect(Collectors.toList())).containsExactly(Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("1"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"));
+		assertThat(legislativeActVersions.stream().map(e -> e.getActGeneratable()).collect(Collectors.toList())).containsExactly(Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActDeletable()).collect(Collectors.toList())).containsExactly(Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE);
     }
 	
 	@Test @Order(1)
@@ -216,7 +265,7 @@ public class LegislativeActVersionTest {
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);
-		assertThat(count).isEqualTo(8l);
+		assertThat(count).isEqualTo(9l);
     }
 	
 	@Test @Order(1)
@@ -224,13 +273,13 @@ public class LegislativeActVersionTest {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("8");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("9");
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion> legislativeActVersions = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class,response);
-		assertThat(legislativeActVersions).hasSize(8);
-		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
+		assertThat(legislativeActVersions).hasSize(9);
+		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_2_1","2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
     }
 	
 	@Test @Order(1)
@@ -239,16 +288,16 @@ public class LegislativeActVersionTest {
 				,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("8");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("9");
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion> legislativeActVersions = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class,response);
-		assertThat(legislativeActVersions).hasSize(8);
-		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
-		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActCount()).collect(Collectors.toList())).containsExactly(Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("1"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"));
-		assertThat(legislativeActVersions.stream().map(e -> e.getActGeneratable()).collect(Collectors.toList())).containsExactly(Boolean.TRUE,Boolean.TRUE,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
-		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActDeletable()).collect(Collectors.toList())).containsExactly(Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE);
+		assertThat(legislativeActVersions).hasSize(9);
+		assertThat(legislativeActVersions.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_2_1","2022_1_3","2022_1_2","2022_1_1","2021_1_4","2021_1_3","2021_1_2","2021_1_1","2020_1_1");
+		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActCount()).collect(Collectors.toList())).containsExactly(Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("1"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"),Short.valueOf("0"));
+		assertThat(legislativeActVersions.stream().map(e -> e.getActGeneratable()).collect(Collectors.toList())).containsExactly(Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+		assertThat(legislativeActVersions.stream().map(e -> e.getGeneratedActDeletable()).collect(Collectors.toList())).containsExactly(Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE,Boolean.FALSE);
     }
 	
 	@Test @Order(1)
@@ -280,7 +329,7 @@ public class LegislativeActVersionTest {
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);
-		assertThat(count).isEqualTo(8l);
+		assertThat(count).isEqualTo(9l);
     }
 	
 	/* Create */
