@@ -104,7 +104,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 	}
 	
 	public void copyByOverWrite(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager,Long count,Integer batchSize) {
-		((ExpenditureBusinessImpl)expenditureBusiness).copyAdjustments(destination, source, auditWho,auditFunctionality,auditWhen);
+		((ExpenditureBusinessImpl)expenditureBusiness).copy(destination, source, auditWho,auditFunctionality,auditWhen);
 	}
 	
 	public void copyByMerge(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {

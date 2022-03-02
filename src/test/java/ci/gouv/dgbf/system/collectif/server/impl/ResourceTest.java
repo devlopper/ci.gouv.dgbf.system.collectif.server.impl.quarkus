@@ -278,8 +278,8 @@ public class ResourceTest {
 		assertor.assertRevenue("2021_1_1_1", 3l);
 		business.adjust(Map.of("2021_1_1_1",7l),"meliane");
 		assertor.assertRevenue("2021_1_1_1", 7l);
-		assertor.assertResourceAudits("2021_1_1_1", "meliane", "AJUSTEMENT", "MODIFICATION");
-		assertor.assertResourceAudit("2021_1_1_1", "AJUSTEMENT par meliane le");
+		assertor.assertResourceAudits("2021_1_1_1", "meliane", ResourceBusiness.ADJUST_AUDIT_IDENTIFIER, "MODIFICATION");
+		assertor.assertResourceAudit("2021_1_1_1", ResourceBusiness.ADJUST_AUDIT_IDENTIFIER+" par meliane le");
 	}
 	
 	@Test @Order(2)
@@ -303,8 +303,8 @@ public class ResourceTest {
 		assertThat(response.then().extract().asString()).isEqualTo("Nombre de Ressource mise à jour : 1");
 		
 		assertor.assertRevenue("2021_1_1_1", 5l);
-		assertor.assertResourceAudits("2021_1_1_1", "meliane", "AJUSTEMENT", "MODIFICATION");
-		assertor.assertResourceAudit("2021_1_1_1", "AJUSTEMENT par meliane le");
+		assertor.assertResourceAudits("2021_1_1_1", "meliane", ResourceBusiness.ADJUST_AUDIT_IDENTIFIER, "MODIFICATION");
+		assertor.assertResourceAudit("2021_1_1_1", ResourceBusiness.ADJUST_AUDIT_IDENTIFIER+" par meliane le");
 	}
 	
 	@Test @Order(3)
@@ -323,8 +323,8 @@ public class ResourceTest {
 	void controller_adjust() {
 		controller.adjust("meliane",new ci.gouv.dgbf.system.collectif.server.client.rest.Resource().setIdentifier("2021_1_1_1").setRevenue(new Revenue().setAdjustment(17l)));
 		assertor.assertRevenue("2021_1_1_1", 17l);
-		assertor.assertResourceAudits("2021_1_1_1", "meliane", "AJUSTEMENT", "MODIFICATION");
-		assertor.assertResourceAudit("2021_1_1_1", "AJUSTEMENT par meliane le");
+		assertor.assertResourceAudits("2021_1_1_1", "meliane", ResourceBusiness.ADJUST_AUDIT_IDENTIFIER, "MODIFICATION");
+		assertor.assertResourceAudit("2021_1_1_1", ResourceBusiness.ADJUST_AUDIT_IDENTIFIER+" par meliane le");
 	}
 	
 	@Test @Order(4)

@@ -26,7 +26,6 @@ import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
-import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -39,6 +38,7 @@ import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
@@ -53,31 +53,13 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
 import io.quarkus.scheduler.Scheduled;
 
 @ApplicationScoped
-public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
+public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
 
 	@Inject EntityManager entityManager;
 	@Inject ExpenditurePersistence persistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject @Hibernate MaterializedViewManager materializedViewManager;
-	
-	@ConfigProperty(name = "cyk.expenditure.import.batch.size",defaultValue = "2000")
-	Integer importBatchSize;
-	@ConfigProperty(name = "cyk.expenditure.import.executor.thread.count",defaultValue = "4")
-	Integer importExecutorThreadCount;
-	@ConfigProperty(name = "cyk.expenditure.import.executor.timeout.duration",defaultValue = "5")
-	Long importExecutorTimeoutDuration;
-	@ConfigProperty(name = "cyk.expenditure.import.executor.timeout.unit",defaultValue = "MINUTES")
-	TimeUnit importExecutorTimeoutUnit;
-	
-	@ConfigProperty(name = "cyk.expenditure.copy.batch.size",defaultValue = "2000")
-	Integer copyBatchSize;
-	@ConfigProperty(name = "cyk.expenditure.copy.executor.thread.count",defaultValue = "4")
-	Integer copyExecutorThreadCount;
-	@ConfigProperty(name = "cyk.expenditure.copy.executor.timeout.duration",defaultValue = "5")
-	Long copyExecutorTimeoutDuration;
-	@ConfigProperty(name = "cyk.expenditure.copy.executor.timeout.unit",defaultValue = "MINUTES")
-	TimeUnit copyExecutorTimeoutUnit;
 	
 	@Override @Transactional
 	public Result adjust(Map<String, Long[]> adjustments,String auditWho) {
@@ -160,7 +142,7 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 		return import_(legislativeActVersionIdentifier, Boolean.TRUE, auditWho);
 	}
 	
-	@SuppressWarnings("unchecked") 
+	@Override @SuppressWarnings("unchecked") 
 	public void import_(LegislativeActVersionImpl legislativeActVersion, String auditWho, String auditFunctionality,LocalDateTime auditWhen,Boolean throwIfRunning, EntityManager entityManager) {
 		String finalAuditFunctionality = StringHelper.isBlank(auditFunctionality) ? IMPORT_AUDIT_IDENTIFIER : auditFunctionality;
 		LocalDateTime finalAuditWhen = auditWhen == null ? LocalDateTime.now() : auditWhen;
@@ -229,20 +211,20 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	}
 
 	@Override @Transactional
-	public Result copyAdjustments(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho) {
+	public Result copy(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
 		Object[] instances = ValidatorImpl.Expenditure.validateCopyAdjustmentsInputs(legislativeActVersionIdentifier, legislativeActVersionSourceIdentifier, auditWho, throwablesMessages, entityManager);
 		throwablesMessages.throwIfNotEmpty();		
-		Integer count = copyAdjustments((LegislativeActVersionImpl)instances[0], (LegislativeActVersionImpl)instances[1],COPY_ADJUSTMENTS_AUDIT_IDENTIFIER, auditWho,LocalDateTime.now());		
+		Integer count = copy((LegislativeActVersionImpl)instances[0], (LegislativeActVersionImpl)instances[1],COPY_ADJUSTMENTS_AUDIT_IDENTIFIER, auditWho,LocalDateTime.now());		
 		// Return of message
 		result.close().setName(String.format("Copie de %s ajustement(s) de %s vers %s par %s",count,legislativeActVersionSourceIdentifier,legislativeActVersionIdentifier,auditWho)).log(getClass());
 		result.addMessages(String.format("Nombre d'ajustements copiés : %s", count));
 		return result;
 	}
 	
-	public Integer copyAdjustments(LegislativeActVersionImpl legislativeActVersion, LegislativeActVersionImpl legislativeActVersionSource,String auditWho,String auditFunctionality,LocalDateTime auditWhen) {
+	public Integer copy(LegislativeActVersionImpl legislativeActVersion, LegislativeActVersionImpl legislativeActVersionSource,String auditWho,String auditFunctionality,LocalDateTime auditWhen) {
 		@SuppressWarnings("unchecked")
 		List<Object[]> arrays = entityManager.createNamedQuery(ExpenditureImpl.QUERY_READ_FOR_COPY_BY_ACT_VERSION_IDENTIFIER_BY_SOURCE_ACT_VERSION_IDENTIFIER).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier())
 				.setParameter("legislativeActVersionSourceIdentifier", legislativeActVersionSource.getIdentifier()).getResultList();
@@ -277,4 +259,47 @@ public class ExpenditureBusinessImpl extends AbstractSpecificBusinessImpl<Expend
 	/**/
 	
 	public static final Set<String> IMPORT_RUNNING = new HashSet<>();
+
+	@Override
+	String getImportAuditIdentifier() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	Boolean isImportRunning(LegislativeActVersion legislativeActVersion, EntityManager entityManager) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	String formatMessageImportIsRunning(LegislativeActVersion legislativeActVersion) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	void updateMaterializedView() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	Long countImportable(LegislativeActVersion legislativeActVersion) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	List<Object[]> readImportable(LegislativeActVersion legislativeActVersion) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	List<Expenditure> instantiate(LegislativeActVersion legislativeActVersion, List<Object[]> arrays, String auditWho,
+			String auditFunctionality, LocalDateTime auditWhen) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

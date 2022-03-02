@@ -310,7 +310,7 @@ public class ExpenditureTest {
 	void business_copyAdjustments_2022_1_2_to_2022_1_3() {
 		assertor.assertEntryAuthorization("2022_1_3_1", 0l);
 		assertor.assertPaymentCredit("2022_1_3_1", 0l);
-		expenditureBusiness.copyAdjustments("2022_1_3","2022_1_2", "meliane");
+		expenditureBusiness.copy("2022_1_3","2022_1_2", "meliane");
 		assertor.assertEntryAuthorization("2022_1_3_1", 0l);
 		assertor.assertPaymentCredit("2022_1_3_1", 7l);
 	}
@@ -453,8 +453,8 @@ public class ExpenditureTest {
 		expenditureBusiness.adjust(Map.of("2022_1_3_5",new Long[] {3l,1l}),"meliane");
 		assertor.assertEntryAuthorization("2022_1_3_5", 3l);
 		assertor.assertPaymentCredit("2022_1_3_5", 1l);
-		assertor.assertExpenditureAudits("2022_1_3_5", "meliane", "AJUSTEMENT", "MODIFICATION");
-		assertor.assertExpenditureAudit("2022_1_3_5", "AJUSTEMENT par meliane le");
+		assertor.assertExpenditureAudits("2022_1_3_5", "meliane", ExpenditureBusiness.ADJUST_AUDIT_IDENTIFIER, "MODIFICATION");
+		assertor.assertExpenditureAudit("2022_1_3_5", ExpenditureBusiness.ADJUST_AUDIT_IDENTIFIER+" par meliane le");
 	}
 	
 	@Test @Order(4)
@@ -473,7 +473,7 @@ public class ExpenditureTest {
 		expenditureBusiness.adjustByEntryAuthorizations(Map.of("2022_1_3_4",3l),"sandrine");
 		assertor.assertEntryAuthorization("2022_1_3_4", 3l);
 		assertor.assertPaymentCredit("2022_1_3_4", 3l);
-		assertor.assertExpenditureAudits("2022_1_3_4", "sandrine", "AJUSTEMENT_PAR_AE", "MODIFICATION");
+		assertor.assertExpenditureAudits("2022_1_3_4", "sandrine", ExpenditureBusiness.ADJUST_AUDIT_IDENTIFIER+"_PAR_AE", "MODIFICATION");
 	}
 	
 	@Test @Order(4)
