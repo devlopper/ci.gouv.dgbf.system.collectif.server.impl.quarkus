@@ -17,6 +17,7 @@ import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
@@ -31,6 +32,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 	@Inject LegislativeActVersionPersistence persistence;
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
+	@Inject RegulatoryActBusiness regulatoryActBusiness;
 
 	@Override @Transactional
 	public Result create(String code, String name, Byte number, String legislativeActIdentifier, String auditWho) {
@@ -67,6 +69,10 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		//Persist instance
 		entityManager.persist(legislativeActVersion);
 		entityManager.flush();
+		
+		legislativeActVersion.setActIdentifier(legislativeAct.getIdentifier());
+		((RegulatoryActBusinessImpl)regulatoryActBusiness).includeByLegislativeActVersionIdentifier(legislativeActVersion, auditWho, auditFunctionality, auditWhen, entityManager);
+		
 		//entityManager.clear();
 		//Import expenditures
 		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion, auditWho,auditFunctionality,auditWhen,null,entityManager);

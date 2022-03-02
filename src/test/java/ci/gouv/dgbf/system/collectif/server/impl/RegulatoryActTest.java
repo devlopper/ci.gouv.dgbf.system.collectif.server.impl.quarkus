@@ -18,6 +18,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActLegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImpl;
 import io.quarkus.test.junit.QuarkusTest;
@@ -30,18 +31,19 @@ public class RegulatoryActTest {
 	
 	@Inject Assertor assertor;
 	@Inject RegulatoryActPersistence persistence;
+	@Inject RegulatoryActLegislativeActVersionPersistence regulatoryActLegislativeActVersionPersistence;
 	@Inject RegulatoryActBusiness business;
 	
 	@Test @Order(1)
 	void persistence_readRegulatoryActMany_REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL() {
 		Collection<RegulatoryAct> regulatoryActs = persistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL,LocalDate.of(2019, 1, 1)));
-		assertThat(regulatoryActs).hasSize(1);
+		assertThat(regulatoryActs).hasSize(8);
 	}
 	
 	@Test @Order(1)
 	void persistence_readRegulatoryActMany() {
 		Collection<RegulatoryAct> regulatoryActs = persistence.readMany(null, null, null);
-		assertThat(regulatoryActs).hasSize(12);
+		assertThat(regulatoryActs).hasSize(19);
 	}
 	
 	@Test @Order(1)
@@ -179,5 +181,43 @@ public class RegulatoryActTest {
 		assertor.assertRegulatoryAct("exclude_included_true","2021_1_1",Boolean.TRUE);
 		business.exclude("2021_1_1",null,"meliane", "exclude_included_true");
 		assertor.assertRegulatoryAct("exclude_included_true","2021_1_1",Boolean.FALSE);
+	}
+	
+	/* Include by legislative act version identifier */
+	
+	@Test @Order(2)
+	void business_includeByLegislativeActVersionIdentifier_2021_1_2() {
+		Long count = regulatoryActLegislativeActVersionPersistence.count();
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_1_2",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(0l);
+		assertor.assertRegulatoryAct("include_by_lav_2021_1_2_01","2021_1_2",null);
+		assertor.assertRegulatoryAct("include_by_lav_2021_1_2_02","2021_1_2",null);
+		assertor.assertRegulatoryAct("include_by_lav_2021_1_2_03","2021_1_2",null);
+		
+		business.includeByLegislativeActVersionIdentifier("2021_1_2", "meliane");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 3);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_1_2",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(3l);
+		assertor.assertRegulatoryAct("include_by_lav_2021_1_2_01","2021_1_2",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_by_lav_2021_1_2_02","2021_1_2",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_by_lav_2021_1_2_03","2021_1_2",Boolean.TRUE);	
+	}
+	
+	@Test @Order(2)
+	void business_includeByLegislativeActVersionIdentifier_2021_2_1() {
+		Long count = regulatoryActLegislativeActVersionPersistence.count();
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_2_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(0l);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_01","2021_2_1",null);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_02","2021_2_1",null);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_03","2021_2_1",null);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_04","2021_2_1",null);
+		
+		business.includeByLegislativeActVersionIdentifier("2021_2_1", "meliane");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 4);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_2_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(4l);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_01","2021_2_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_02","2021_2_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_03","2021_2_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_04","2021_2_1",Boolean.TRUE);
 	}
 }

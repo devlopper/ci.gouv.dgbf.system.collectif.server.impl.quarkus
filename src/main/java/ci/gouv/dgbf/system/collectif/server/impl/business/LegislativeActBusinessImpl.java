@@ -3,16 +3,12 @@ package ci.gouv.dgbf.system.collectif.server.impl.business;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
-import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
@@ -23,33 +19,19 @@ import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
-import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActLegislativeActVersion;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplFromDateAsTimestampReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImpl;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActLegislativeActVersionImpl;
 
 @ApplicationScoped
 public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<LegislativeAct> implements LegislativeActBusiness,Serializable {
 
 	@Inject EntityManager entityManager;
 	@Inject LegislativeActPersistence persistence;
-	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
-	@Inject ExercisePersistence exercisePersistence;
-	@Inject RegulatoryActPersistence regulatoryActPersistence;
-	@Inject RegulatoryActBusiness regulatoryActBuiness;
 	@Inject LegislativeActVersionBusiness legislativeActVersionBusiness;
 	
 	@Override @Transactional
@@ -88,10 +70,6 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		if(inProgressCount == null || inProgressCount == 0)
 			legislativeAct.setInProgress(Boolean.TRUE);
 		entityManager.merge(legislativeAct);
-		
-		// Include regulatory acts
-		legislativeActVersion.setActDateYear(legislativeAct.getExercise().getYear());
-		((RegulatoryActBusinessImpl)regulatoryActBuiness).includeByLegislativeActVersionIdentifier(legislativeActVersion, auditWho, auditFunctionality, auditWhen, entityManager);
 		
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeAct.getName(),auditWho)).log(getClass());

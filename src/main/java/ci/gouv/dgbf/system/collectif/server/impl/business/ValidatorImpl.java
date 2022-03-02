@@ -288,7 +288,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
-							,LegislativeActVersionImpl.FIELD_ACT_DATE)
+							,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER,LegislativeActVersionImpl.FIELD_ACT_DATE)
 					, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
 			return new Object[] {legislativeActVersion};
 		}
