@@ -30,7 +30,8 @@ import lombok.experimental.Accessors;
 				,columnNames = {RegulatoryActLegislativeActVersionImpl.COLUMN_REGULATORY_ACT,RegulatoryActLegislativeActVersionImpl.COLUMN_LEGISLATIVE_ACT_VERSION})
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHO__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHO__,nullable = false))
+		@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHO__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHAT__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHEN__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
@@ -71,6 +72,7 @@ public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiable
 	public static final String COLUMN_INCLUDED = "INCLUS";
 	public static final String COLUMN_ACTS_GENERATED = "ACTES_GENERES";
 	
+	public static final String COLUMN___AUDIT_IDENTIFIER__ = "AUDIT_IDENTIFIANT";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
 	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";

@@ -42,14 +42,14 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		Object[] instances = ValidatorImpl.LegislativeActVersion.validateCreateInputs(code, name, number,legislativeActIdentifier, auditWho, throwablesMessages,entityManager);
 		throwablesMessages.throwIfNotEmpty();
 		//All inputs are fine
-		LegislativeActVersionImpl legislativeActVersion = create(code, name, number, (LegislativeActImpl) instances[0], auditWho, null, null, entityManager);
+		LegislativeActVersionImpl legislativeActVersion = create(code, name, number, (LegislativeActImpl) instances[0],generateAuditIdentifier(), auditWho, null, null, entityManager);
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Création de %s",legislativeActVersion.getName()));
 		return result;
 	}
 	
-	public LegislativeActVersionImpl create(String code, String name, Byte number, LegislativeActImpl legislativeAct, String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
+	public LegislativeActVersionImpl create(String code, String name, Byte number, LegislativeActImpl legislativeAct,String auditIdentifier, String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
 		if(StringHelper.isBlank(auditFunctionality))
 			auditFunctionality = CREATE_AUDIT_IDENTIFIER;
 		if(auditWhen == null)
@@ -65,17 +65,17 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		if(StringHelper.isBlank(legislativeActVersion.getName()))
 			legislativeActVersion.setName(String.format(NAME_FORMAT, legislativeActVersion.getNumber(),legislativeActVersion.getAct().getName()));
 		legislativeActVersion.setIdentifier(legislativeActVersion.getCode());
-		audit(legislativeActVersion, auditFunctionality, auditWho, auditWhen);
+		audit(legislativeActVersion,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 		//Persist instance
 		entityManager.persist(legislativeActVersion);
 		entityManager.flush();
 		
 		legislativeActVersion.setActIdentifier(legislativeAct.getIdentifier());
-		((RegulatoryActBusinessImpl)regulatoryActBusiness).includeByLegislativeActVersionIdentifier(legislativeActVersion, auditWho, auditFunctionality, auditWhen, entityManager);
+		((RegulatoryActBusinessImpl)regulatoryActBusiness).includeByLegislativeActVersionIdentifier(legislativeActVersion,auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
 		
 		//entityManager.clear();
 		//Import expenditures
-		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion, auditWho,auditFunctionality,auditWhen,null,entityManager);
+		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion,auditIdentifier, auditWho,auditFunctionality,auditWhen,null,entityManager);
 		return legislativeActVersion;
 	}
 	
@@ -90,7 +90,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		LegislativeActVersionImpl legislativeActVersionSource = (LegislativeActVersionImpl) instances[0];
 		LegislativeActVersionImpl legislativeActVersionTarget = (LegislativeActVersionImpl) instances[1];
 		
-		copy(legislativeActVersionSource, legislativeActVersionTarget, options, auditWho, COPY_AUDIT_IDENTIFIER, LocalDateTime.now(), entityManager);
+		copy(legislativeActVersionSource, legislativeActVersionTarget, options,generateAuditIdentifier(), auditWho, COPY_AUDIT_IDENTIFIER, LocalDateTime.now(), entityManager);
 		
 		// Return of message
 		result.close().setName(String.format("Copie de %s vers %s par %s",legislativeActVersionSource.getName(),legislativeActVersionTarget.getName(),auditWho)).log(getClass());
@@ -98,13 +98,13 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		return result;
 	}
 	
-	public void copy(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
+	public void copy(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditIdentifier,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
 		Long count = expenditurePersistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,source.getIdentifier()));
-		copyByOverWrite(source, destination, options, auditWho, auditFunctionality, auditWhen, entityManager, count, 1000);
+		copyByOverWrite(source, destination, options,auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager, count, 1000);
 	}
 	
-	public void copyByOverWrite(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager,Long count,Integer batchSize) {
-		((ExpenditureBusinessImpl)expenditureBusiness).copy(destination, source, auditWho,auditFunctionality,auditWhen);
+	public void copyByOverWrite(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditIdentifier,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager,Long count,Integer batchSize) {
+		((ExpenditureBusinessImpl)expenditureBusiness).copy(destination, source,auditIdentifier, auditWho,auditFunctionality,auditWhen);
 	}
 	
 	public void copyByMerge(LegislativeActVersionImpl source, LegislativeActVersionImpl destination, CopyOptions options,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
@@ -120,10 +120,12 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		throwablesMessages.throwIfNotEmpty();
 		//All inputs are fine
 		LocalDateTime auditWhen = LocalDateTime.now();
+		String auditIdentifier = generateAuditIdentifier();
 		LegislativeActVersionImpl legislativeActVersionSource = (LegislativeActVersionImpl) instances[0];
-		LegislativeActVersionImpl legislativeActVersionDestination = create(null, null, null, entityManager.find(LegislativeActImpl.class, legislativeActVersionSource.getActIdentifier()), auditWho, DUPLICATE_AUDIT_IDENTIFIER, auditWhen, entityManager);
+		LegislativeActVersionImpl legislativeActVersionDestination = create(null, null, null, entityManager.find(LegislativeActImpl.class, legislativeActVersionSource.getActIdentifier()),auditIdentifier, auditWho, DUPLICATE_AUDIT_IDENTIFIER
+				, auditWhen, entityManager);
 		
-		copy(legislativeActVersionSource, legislativeActVersionDestination, null, auditWho, DUPLICATE_AUDIT_IDENTIFIER, auditWhen, entityManager);
+		copy(legislativeActVersionSource, legislativeActVersionDestination, null,auditIdentifier, auditWho, DUPLICATE_AUDIT_IDENTIFIER, auditWhen, entityManager);
 		
 		// Return of message
 		result.close().setName(String.format("Duplication de %s par %s",legislativeActVersionSource.getName(),auditWho)).log(getClass());

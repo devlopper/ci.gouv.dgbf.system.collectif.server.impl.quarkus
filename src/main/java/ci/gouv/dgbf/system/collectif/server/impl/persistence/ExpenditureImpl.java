@@ -56,7 +56,8 @@ import lombok.experimental.Accessors;
 				+ " ORDER BY d.identifier ASC")
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
+		@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = false))
+		,@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_WHAT__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_WHEN__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
@@ -213,6 +214,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String COLUMN_PAYMENT_CREDIT_ADJUSTMENT = PaymentCreditImpl.COLUMN_ADJUSTMENT;
 	public static final String COLUMN_ACT_VERSION = "VERSION_COLLECTIF";
 	
+	public static final String COLUMN___AUDIT_IDENTIFIER__ = "AUDIT_IDENTIFIANT";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
 	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";

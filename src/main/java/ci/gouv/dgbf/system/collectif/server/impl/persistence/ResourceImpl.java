@@ -43,7 +43,8 @@ import lombok.experimental.Accessors;
 		@NamedQuery(name = ResourceImpl.QUERY_READ_BY_IDENTIIFERS,query = "SELECT t FROM ResourceImpl t WHERE t.identifier IN :identifiers")
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_WHO__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_WHO__,nullable = false))
+		@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_WHO__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_WHAT__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_WHEN__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
@@ -131,6 +132,7 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	public static final String COLUMN_REVENUE_ADJUSTMENT = RevenueImpl.COLUMN_ADJUSTMENT;
 	public static final String COLUMN_ACT_VERSION = "VERSION_COLLECTIF";
 	
+	public static final String COLUMN___AUDIT_IDENTIFIER__ = "AUDIT_IDENTIFIANT";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
 	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";

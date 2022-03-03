@@ -320,6 +320,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 					,generatedActExpenditureExists ? "" : "NOT ",GeneratedActExpenditureImpl.ENTITY_NAME,GeneratedActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,GeneratedActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
 							,GeneratedActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,GeneratedActExpenditureImpl.FIELD_LESSOR_IDENTIFIER));
 		}
+		
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.__AUDIT_IDENTIFIER__,"t",ExpenditureImpl.FIELD___AUDIT_IDENTIFIER__);
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.__AUDIT_WHO__,"t",ExpenditureImpl.FIELD___AUDIT_WHO__);
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.__AUDIT_WHEN__,"t",ExpenditureImpl.FIELD___AUDIT_WHEN__);
 	}
 	
 	private static String buildPredicateExpenditureAdjustmentsEqualZeroPredicate(Boolean isEqualToZero) {

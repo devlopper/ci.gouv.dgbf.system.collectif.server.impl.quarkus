@@ -58,11 +58,12 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		legislativeAct.setIdentifier(legislativeAct.getCode());
 		String auditFunctionality = CREATE_AUDIT_IDENTIFIER;
 		LocalDateTime auditWhen = LocalDateTime.now();
-		audit(legislativeAct , auditFunctionality,auditWho, auditWhen);
+		String auditIdentifier = generateAuditIdentifier();
+		audit(legislativeAct , auditIdentifier,auditFunctionality,auditWho, auditWhen);
 		entityManager.persist(legislativeAct);
 		
 		// Create version
-		LegislativeActVersionImpl legislativeActVersion = ((LegislativeActVersionBusinessImpl)legislativeActVersionBusiness).create(null, null, null, legislativeAct, auditWho,auditFunctionality, auditWhen,entityManager);;
+		LegislativeActVersionImpl legislativeActVersion = ((LegislativeActVersionBusinessImpl)legislativeActVersionBusiness).create(null, null, null, legislativeAct,auditIdentifier, auditWho,auditFunctionality, auditWhen,entityManager);;
 		// Set it as default version
 		legislativeAct.setDefaultVersion(legislativeActVersion);
 		// Set in progress
@@ -87,7 +88,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
 		LegislativeActImpl legislativeAct = legislativeActVersion.getAct();	
 		legislativeAct.setDefaultVersion(legislativeActVersion);
-		audit(legislativeAct, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		audit(legislativeAct,generateAuditIdentifier(), UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
 		entityManager.merge(legislativeAct);
 		// Return of message
 		result.close().setName(String.format("Mise à jour de la version par défaut de %s avec %s par %s",legislativeAct.getName(),legislativeActVersion.getName(),auditWho)).log(getClass());
@@ -105,7 +106,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		
 		LegislativeActImpl legislativeAct = (LegislativeActImpl) instances[0];
 		legislativeAct.setInProgress(inProgress);
-		audit(legislativeAct, UPDATE_DEFAULT_VERSION_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		audit(legislativeAct,generateAuditIdentifier(), UPDATE_IN_PROGRESS_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
 		entityManager.merge(legislativeAct);
 		// Return of message
 		result.close().setName(String.format("Mise à jour de <<en cours>> de %s avec %s par %s",LegislativeActVersion.NAME,legislativeAct.getName(),inProgress,auditWho)).log(getClass());

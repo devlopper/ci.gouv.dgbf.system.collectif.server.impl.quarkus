@@ -33,7 +33,8 @@ import lombok.experimental.Accessors;
 		@NamedQuery(name = GeneratedActExpenditureImpl.QUERY_READ_BY_ACT_IDENTIIFERS,query = "SELECT t FROM GeneratedActExpenditureImpl t WHERE t.act.identifier IN :actIdentifiers")
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
+		@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHAT__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHEN__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
@@ -72,6 +73,7 @@ public class GeneratedActExpenditureImpl extends AbstractIdentifiableSystemScala
 	public static final String COLUMN_ENTRY_AUTHORIZATION_AMOUNT = "montant_ae";
 	public static final String COLUMN_PAYMENT_CREDIT_AMOUNT = "montant_cp";
 	
+	public static final String COLUMN___AUDIT_IDENTIFIER__ = "AUDIT_IDENTIFIANT";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
 	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";

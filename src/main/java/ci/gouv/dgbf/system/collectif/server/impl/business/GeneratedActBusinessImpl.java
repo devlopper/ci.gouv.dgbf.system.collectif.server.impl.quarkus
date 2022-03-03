@@ -79,6 +79,8 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		
 		Result result = new Result().open();
 		LocalDateTime auditWhen = LocalDateTime.now();
+		String auditIdentifier = generateAuditIdentifier();
+		
 		Collection<GeneratedActImpl> generatedActs = entityManager.createNamedQuery(GeneratedActImpl.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIIFER,GeneratedActImpl.class).setParameter("legislativeActVersionIdentifier", legislativeActVersionIdentifier)
 				.getResultList();
 		Collection<GeneratedActExpenditureImpl> generatedActExpenditures = entityManager.createNamedQuery(GeneratedActExpenditureImpl.QUERY_READ_BY_ACT_IDENTIIFERS,GeneratedActExpenditureImpl.class)
@@ -86,13 +88,13 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		
 		if(CollectionHelper.isNotEmpty(generatedActExpenditures))
 			generatedActExpenditures.forEach(generatedActExpenditure -> {
-				audit(generatedActExpenditure, DELETE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER, auditWho, auditWhen);
+				audit(generatedActExpenditure,auditIdentifier, DELETE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER, auditWho, auditWhen);
 				entityManager.remove(generatedActExpenditure);
 			});
 		
 		if(CollectionHelper.isNotEmpty(generatedActs))
 			generatedActs.forEach(generatedAct -> {
-				audit(generatedAct, DELETE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER, auditWho, auditWhen);
+				audit(generatedAct,auditIdentifier, DELETE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER, auditWho, auditWhen);
 				entityManager.remove(generatedAct);
 			});
 		
@@ -116,6 +118,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		LegislativeActImpl legislativeAct = (LegislativeActImpl) legislativeActPersistence.readOne(legislativeActVersion.getActIdentifier(), List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_ACT_GENERATION_MODE));
 		
 		LocalDateTime auditWhen = LocalDateTime.now();
+		String auditIdentifier = generateAuditIdentifier();
 		
 		Collection<RegulatoryAct> regulatoryActs = regulatoryActPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
 				,Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE));
@@ -142,7 +145,8 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 			}
 		throwablesMessages.throwIfNotEmpty();
 		
-		Integer count = generateActsByMode(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, legislativeAct.getActGenerationMode(), throwablesMessages, auditWho, auditWho, auditWhen);		
+		Integer count = generateActsByMode(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, legislativeAct.getActGenerationMode(), throwablesMessages,auditIdentifier, GENERATE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_AUDIT_IDENTIFIER
+				, auditWho, auditWhen);		
 		throwablesMessages.throwIfNotEmpty();
 		
 		if(count == null)
@@ -156,18 +160,18 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	/* Acts Generation Methods */
 	
 	private Integer generateActsByMode(LegislativeActVersionImpl legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures,LegislativeAct.ActGenerationMode generationMode
-			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+			,ThrowablesMessages throwablesMessages,String auditIdentifier,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
 		if(CollectionHelper.isEmpty(regulatoryActs) || CollectionHelper.isEmpty(regulatoryActExpenditures))
 			return null;
 		if(generationMode == null)
 			generationMode = LegislativeAct.ActGenerationMode.DEFAULT;
 		if(LegislativeAct.ActGenerationMode.CANCELATION_ADJUSTMENT.equals(generationMode)) {
-			generateCancelationsActs(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages, auditFunctionality, auditWho, auditWhen);
-			generateCollectiveAct(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages, auditFunctionality, auditWho, auditWhen);
+			generateCancelationsActs(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages,auditIdentifier, auditFunctionality, auditWho, auditWhen);
+			generateCollectiveAct(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 			return NumberHelper.getInteger(NumberHelper.add(CollectionHelper.getSize(regulatoryActs),1));
 		}else if(LegislativeAct.ActGenerationMode.CANCELATION_REPOSITIONING_ADJUSTMENT.equals(generationMode)) {
-			generateCancelationsRepositioningsActs(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages, auditFunctionality, auditWho, auditWhen);
-			generateAdjustmentAct(legislativeActVersion, throwablesMessages, auditFunctionality, auditWho, auditWhen);
+			generateCancelationsRepositioningsActs(legislativeActVersion, regulatoryActs, regulatoryActExpenditures, throwablesMessages,auditIdentifier, auditFunctionality, auditWho, auditWhen);
+			generateAdjustmentAct(legislativeActVersion, throwablesMessages,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 		}else if(LegislativeAct.ActGenerationMode.ADJUSTMENT.equals(generationMode)) {
 			throwablesMessages.add(String.format("%s pas encore implémenté",generationMode.getValue()));
 		}
@@ -175,7 +179,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	}
 	
 	private void generateCancelationsActs(LegislativeActVersionImpl legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures
-			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+			,ThrowablesMessages throwablesMessages,String auditIdentifier,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
 		regulatoryActs.forEach(regulatoryAct -> {
 			GeneratedActImpl act = new GeneratedActImpl();
 			act.setIdentifier(String.format(CANCELATION_ACT_IDENTIFIER_FORMAT,legislativeActVersion.getIdentifier(),regulatoryAct.getIdentifier()));
@@ -185,7 +189,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 			act.setApplied(Boolean.FALSE);
 			act.setCode(String.format(CANCELATION_ACT_CODE_FORMAT,legislativeActVersion.getCode(),regulatoryAct.getCode()));
 			act.setName(String.format(CANCELATION_ACT_NAME_FORMAT, GeneratedAct.Type.CANCELATION.getValue(),regulatoryAct.getName()));
-			audit(act, auditFunctionality, auditWho, auditWhen);
+			audit(act, auditIdentifier,auditFunctionality, auditWho, auditWhen);
 			entityManager.persist(act);
 			Collection<RegulatoryActExpenditureImpl> actRegulatoryActExpenditures = CollectionHelper.cast(RegulatoryActExpenditureImpl.class
 					, regulatoryActExpenditures.stream().filter(regulatoryActExpenditure -> regulatoryActExpenditure.getActIdentifier().equals(regulatoryAct.getIdentifier())).collect(Collectors.toList()));
@@ -195,7 +199,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 							.setActivityIdentifier(regulatoryActExpenditure.getActivityIdentifier()).setEconomicNatureIdentifier(regulatoryActExpenditure.getEconomicNatureIdentifier())
 							.setFundingSourceIdentifier(regulatoryActExpenditure.getFundingSourceIdentifier()).setLessorIdentifier(regulatoryActExpenditure.getLessorIdentifier())
 							.setEntryAuthorizationAmount(regulatoryActExpenditure.getEntryAuthorizationAmount()).setPaymentCreditAmount(regulatoryActExpenditure.getPaymentCreditAmount());
-					audit(generatedActExpenditure, auditFunctionality, auditWho, auditWhen);
+					audit(generatedActExpenditure, auditIdentifier,auditFunctionality, auditWho, auditWhen);
 					entityManager.persist(generatedActExpenditure);
 				});
 			}
@@ -203,7 +207,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 	}
 	
 	private Integer generateCollectiveAct(LegislativeActVersionImpl legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures
-			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+			,ThrowablesMessages throwablesMessages,String auditIdentifier,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
 		Long count = expenditurePersistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()
 				,Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO,Boolean.TRUE));
 		LogHelper.log(String.format("Nombre de dépenses ajustées ou ayant leur mouvements inclus : %s", count),Result.getLogLevel(), getClass());
@@ -217,7 +221,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		act.setApplied(Boolean.FALSE);
 		act.setCode(legislativeActVersion.getCode());
 		act.setName(legislativeActVersion.getName());
-		audit(act, auditFunctionality, auditWho, auditWhen);
+		audit(act, auditIdentifier,auditFunctionality, auditWho, auditWhen);
 		entityManager.persist(act);
 		
 		Integer batchSize = 100;
@@ -241,7 +245,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 						.setEconomicNatureIdentifier(expenditure.getEconomicNatureIdentifier()).setFundingSourceIdentifier(expenditure.getFundingSourceIdentifier()).setLessorIdentifier(expenditure.getLessorIdentifier())
 						.setEntryAuthorizationAmount(expenditure.getEntryAuthorization().getActualMinusMovementIncludedPlusAdjustment())
 						.setPaymentCreditAmount(expenditure.getPaymentCredit().getActualMinusMovementIncludedPlusAdjustment());
-				audit(generatedActExpenditure, auditFunctionality, auditWho, auditWhen);
+				audit(generatedActExpenditure,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 				entityManager.persist(generatedActExpenditure);
 			});
 		}
@@ -249,7 +253,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		return 1;
 	}
 	
-	private void generateAdjustmentAct(LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+	private void generateAdjustmentAct(LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages,String auditIdentifier,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
 		Long adjustedCount = expenditurePersistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier(),Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE));
 		LogHelper.log(String.format("Nombre de dépenses ajustées : %s", adjustedCount),Result.getLogLevel(), getClass());
 		if(NumberHelper.isEqualToZero(adjustedCount))
@@ -262,7 +266,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 		act.setApplied(Boolean.FALSE);
 		act.setCode(legislativeActVersion.getCode());
 		act.setName(legislativeActVersion.getName());
-		audit(act, auditFunctionality, auditWho, auditWhen);
+		audit(act,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 		entityManager.persist(act);
 		
 		Integer batchSize = 100;
@@ -282,14 +286,14 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 						.setEconomicNatureIdentifier(expenditure.getEconomicNatureIdentifier()).setFundingSourceIdentifier(expenditure.getFundingSourceIdentifier()).setLessorIdentifier(expenditure.getLessorIdentifier())
 						.setEntryAuthorizationAmount(expenditure.getEntryAuthorization().getActualMinusMovementIncludedPlusAdjustment())
 						.setPaymentCreditAmount(expenditure.getPaymentCredit().getActualMinusMovementIncludedPlusAdjustment());
-				audit(generatedActExpenditure, auditFunctionality, auditWho, auditWhen);
+				audit(generatedActExpenditure,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 				entityManager.persist(generatedActExpenditure);
 			});
 		}
 	}
 	
 	private void generateCancelationsRepositioningsActs(LegislativeActVersion legislativeActVersion,Collection<RegulatoryAct> regulatoryActs,Collection<RegulatoryActExpenditure> regulatoryActExpenditures
-			,ThrowablesMessages throwablesMessages,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
+			,ThrowablesMessages throwablesMessages,String auditIdentifier,String auditFunctionality,String auditWho,LocalDateTime auditWhen) {
 		for(GeneratedAct.Type type : GeneratedAct.Type.CANCELATION_REPOSITIONING) {
 			regulatoryActs.forEach(regulatoryAct -> {
 				GeneratedActImpl act = new GeneratedActImpl();
@@ -300,7 +304,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 				act.setApplied(Boolean.FALSE);
 				act.setCode(String.format("%s%s_%s", GeneratedAct.Type.CANCELATION.equals(type) ? "A_" : "",legislativeActVersion.getCode(),regulatoryAct.getCode()));
 				act.setName(String.format("%s%s", GeneratedAct.Type.CANCELATION.equals(type) ? type.getValue() : "",regulatoryAct.getName()));
-				audit(act, auditFunctionality, auditWho, auditWhen);
+				audit(act,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 				entityManager.persist(act);
 				Collection<RegulatoryActExpenditureImpl> actRegulatoryActExpenditures = CollectionHelper.cast(RegulatoryActExpenditureImpl.class
 						, regulatoryActExpenditures.stream().filter(regulatoryActExpenditure -> regulatoryActExpenditure.getActIdentifier().equals(regulatoryAct.getIdentifier())).collect(Collectors.toList()));
@@ -310,7 +314,7 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 								.setActivityIdentifier(regulatoryActExpenditure.getActivityIdentifier()).setEconomicNatureIdentifier(regulatoryActExpenditure.getEconomicNatureIdentifier())
 								.setFundingSourceIdentifier(regulatoryActExpenditure.getFundingSourceIdentifier()).setLessorIdentifier(regulatoryActExpenditure.getLessorIdentifier())
 								.setEntryAuthorizationAmount(regulatoryActExpenditure.getEntryAuthorizationAmount()).setPaymentCreditAmount(regulatoryActExpenditure.getPaymentCreditAmount());
-						audit(generatedActExpenditure, auditFunctionality, auditWho, auditWhen);
+						audit(generatedActExpenditure,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 						entityManager.persist(generatedActExpenditure);
 					});
 				}

@@ -39,7 +39,8 @@ import lombok.experimental.Accessors;
 		@NamedQuery(name = LegislativeActImpl.QUERY_READ_BY_IDENTIIFER,query = "SELECT t FROM LegislativeActImpl t WHERE t.identifier = :identifier")
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHO__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHO__,nullable = false))
+		@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHO__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHAT__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHEN__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
@@ -148,6 +149,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN_AVAILABLE_MONITORABLE = "DISPONIBLE_SURVEILLABLE";
 	public static final String COLUMN_NUMBER = "NUMERO";
 	
+	public static final String COLUMN___AUDIT_IDENTIFIER__ = "AUDIT_IDENTIFIANT";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
 	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";
