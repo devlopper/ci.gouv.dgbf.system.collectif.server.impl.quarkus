@@ -4,14 +4,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -32,7 +29,6 @@ import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
 import org.cyk.utility.persistence.server.query.ReaderByCollection;
 import org.cyk.utility.persistence.server.view.MaterializedViewManager;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
@@ -55,12 +51,11 @@ import io.quarkus.scheduler.Scheduled;
 @ApplicationScoped
 public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
 
-	@Inject EntityManager entityManager;
 	@Inject ExpenditurePersistence persistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject @Hibernate MaterializedViewManager materializedViewManager;
-	
+
 	@Override @Transactional
 	public Result adjust(Map<String, Long[]> adjustments,String auditWho) {
 		return adjust(adjustments, auditWho, ADJUST_AUDIT_IDENTIFIER);
@@ -123,7 +118,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		throwablesMessages.throwIfNotEmpty();
 		
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
-		ValidatorImpl.Expenditure.validateImport(legislativeActVersion, auditWho, throwablesMessages, entityManager);
+		ValidatorImpl.Expenditure.validateImport(legislativeActVersion,importRunning, auditWho, throwablesMessages, entityManager);
 		throwablesMessages.throwIfNotEmpty();
 		
 		Long count = persistence.count();
@@ -141,7 +136,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 	public Result import_(String legislativeActVersionIdentifier, String auditWho) {
 		return import_(legislativeActVersionIdentifier, Boolean.TRUE, auditWho);
 	}
-	
+	/*
 	@Override @SuppressWarnings("unchecked") 
 	public void import_(LegislativeActVersionImpl legislativeActVersion, String auditWho, String auditFunctionality,LocalDateTime auditWhen,Boolean throwIfRunning, EntityManager entityManager) {
 		String finalAuditFunctionality = StringHelper.isBlank(auditFunctionality) ? IMPORT_AUDIT_IDENTIFIER : auditFunctionality;
@@ -193,7 +188,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 			IMPORT_RUNNING.remove(legislativeActVersion.getIdentifier());
 		}
 	}
-
+*/
 	@Scheduled(cron = "{cyk.expenditure.import.cron}")
 	void importAutomatically() {
 		Collection<LegislativeActImpl> legislativeActs = CollectionHelper.cast(LegislativeActImpl.class,legislativeActPersistence.readMany(new QueryExecutorArguments()
@@ -255,51 +250,32 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		return CollectionHelper.getSize(arrays);
 	}
 	
-	
 	/**/
 	
-	public static final Set<String> IMPORT_RUNNING = new HashSet<>();
-
-	@Override
-	String getImportAuditIdentifier() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	Boolean isImportRunning(LegislativeActVersion legislativeActVersion, EntityManager entityManager) {
-		// TODO Auto-generated method stub
-		return null;
+		return ValidatorImpl.Expenditure.isImportRunning(legislativeActVersion,importRunning, entityManager);
 	}
 
 	@Override
 	String formatMessageImportIsRunning(LegislativeActVersion legislativeActVersion) {
-		// TODO Auto-generated method stub
-		return null;
+		return ValidatorImpl.Expenditure.formatMessageImportIsRunning(legislativeActVersion);
 	}
-
+	
 	@Override
-	void updateMaterializedView() {
-		// TODO Auto-generated method stub
-		
+	Expenditure instantiate(LegislativeActVersion legislativeActVersion, Object[] array) {
+		return new ExpenditureImpl().setIdentifier((String)array[0]).setActVersion(legislativeActVersion).setActivityIdentifier((String)array[1]).setEconomicNatureIdentifier((String)array[2])
+				.setFundingSourceIdentifier((String)array[3]).setLessorIdentifier((String)array[4]).setEntryAuthorization(new EntryAuthorizationImpl().setInitial((Long)array[5]).setActual((Long)array[6]))
+				.setPaymentCredit(new PaymentCreditImpl().setInitial((Long)array[7]).setActual((Long)array[8]));
 	}
-
+	
 	@Override
-	Long countImportable(LegislativeActVersion legislativeActVersion) {
-		// TODO Auto-generated method stub
-		return null;
+	Class<?> getImportableClass() {
+		return ExpenditureImportableView.class;
 	}
-
+	
 	@Override
-	List<Object[]> readImportable(LegislativeActVersion legislativeActVersion) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	List<Expenditure> instantiate(LegislativeActVersion legislativeActVersion, List<Object[]> arrays, String auditWho,
-			String auditFunctionality, LocalDateTime auditWhen) {
-		// TODO Auto-generated method stub
-		return null;
+	Class<?> getViewClass() {
+		return ExpenditureView.class;
 	}
 }

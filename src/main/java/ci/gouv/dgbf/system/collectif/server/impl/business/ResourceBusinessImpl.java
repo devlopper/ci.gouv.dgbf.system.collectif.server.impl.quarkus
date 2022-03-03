@@ -136,8 +136,19 @@ public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImp
 	}
 
 	@Override
-	List<Resource> instantiate(LegislativeActVersion legislativeActVersion, List<Object[]> arrays, String auditWho,
-			String auditFunctionality, LocalDateTime auditWhen) {
+	Resource instantiate(LegislativeActVersion legislativeActVersion, Object[] array) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	Class<?> getImportableClass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	Class<?> getViewClass() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -217,19 +218,19 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			return new Object[] {legislativeActVersion};
 		}
 		
-		static void validateImport(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
-			validateImportNotRunning(legislativeActVersion, throwablesMessages, entityManager);
+		static void validateImport(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Set<String> running,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+			validateImportNotRunning(legislativeActVersion,running, throwablesMessages, entityManager);
 		}
 		
-		static Boolean validateImportNotRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
-			if(!isImportRunning(legislativeActVersion, entityManager))
+		static Boolean validateImportNotRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Set<String> running,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+			if(!isImportRunning(legislativeActVersion,running, entityManager))
 				return Boolean.TRUE;
 			throwablesMessages.add(formatMessageImportIsRunning(legislativeActVersion));
 			return Boolean.FALSE;
 		}
 		
-		static Boolean isImportRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,EntityManager entityManager) {
-			return ExpenditureBusinessImpl.IMPORT_RUNNING.contains(legislativeActVersion.getIdentifier());
+		static Boolean isImportRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Set<String> running,EntityManager entityManager) {
+			return running.contains(legislativeActVersion.getIdentifier());
 		}
 		
 		static String formatMessageImportIsRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion) {
