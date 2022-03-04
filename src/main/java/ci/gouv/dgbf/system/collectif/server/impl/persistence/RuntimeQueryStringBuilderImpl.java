@@ -351,6 +351,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				,ResourceView.FIELD_ACTIVITY_IDENTIFIER);
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.ECONOMIC_NATURE_IDENTIFIER,"v"
 				,ResourceView.FIELD_ECONOMIC_NATURE_IDENTIFIER);
+		
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.__AUDIT_IDENTIFIER__,"t",ExpenditureImpl.FIELD___AUDIT_IDENTIFIER__);
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.__AUDIT_WHO__,"t",ExpenditureImpl.FIELD___AUDIT_WHO__);
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.__AUDIT_WHEN__,"t",ExpenditureImpl.FIELD___AUDIT_WHEN__);
 	}
 	
 	public static void populatePredicateLegislativeAct(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {

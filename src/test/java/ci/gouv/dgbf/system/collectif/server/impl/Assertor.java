@@ -39,6 +39,8 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersis
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Resource;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourcePersistence;
 import ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersionController;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.AbstractAmountsImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
@@ -62,6 +64,7 @@ import io.restassured.specification.RequestSpecification;
 public class Assertor {
 
 	@Inject ExpenditurePersistence expenditurePersistence;
+	@Inject ResourcePersistence resourcePersistence;
 	@Inject LegislativeActPersistence actPersistence;
 	@Inject LegislativeActVersionPersistence actVersionPersistence;
 	@Inject GeneratedActPersistence generatedActPersistence;
@@ -403,6 +406,19 @@ public class Assertor {
 		}else {
 			assertThat(expenditures).as("Des dépenses trouvées dans la version de l'acte budgétaire identifié par "+identifier).isNotEmpty();
 			assertThat(expenditures.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly(expectedIdentifiers.toArray(new String[] {}));
+		}
+	}
+    
+    public void assertResourceByLegislativeActVersion(String identifier,Collection<String> expectedIdentifiers) {
+		QueryExecutorArguments arguments = new QueryExecutorArguments();
+		arguments.setQuery(new Query().setIdentifier(resourcePersistence.getQueryIdentifierReadDynamic()));
+		arguments.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,identifier);
+		Collection<Resource> resources = resourcePersistence.readMany(arguments);
+		if(CollectionHelper.isEmpty(expectedIdentifiers)) {
+			assertThat(resources).as("Aucune ressources trouvées dans la version de l'acte budgétaire identifié par "+identifier).isNull();
+		}else {
+			assertThat(resources).as("Des ressources trouvées dans la version de l'acte budgétaire identifié par "+identifier).isNotEmpty();
+			assertThat(resources.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly(expectedIdentifiers.toArray(new String[] {}));
 		}
 	}
     

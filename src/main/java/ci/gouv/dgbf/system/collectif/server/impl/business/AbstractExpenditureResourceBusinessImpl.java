@@ -30,6 +30,7 @@ import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.SpecificPersistence;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
+import org.cyk.utility.persistence.server.SpecificPersistenceGetter;
 import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
 import org.cyk.utility.persistence.server.view.MaterializedViewManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -46,6 +47,8 @@ import io.quarkus.scheduler.Scheduled;
 public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends AbstractSpecificBusinessImpl<ENTITY> implements ExpenditureResourceBusiness<ENTITY>,Serializable{
 
 	@Inject EntityManager entityManager;
+	@Inject SpecificPersistenceGetter specificPersistenceGetter;
+	SpecificPersistence<ENTITY> persistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject @Hibernate MaterializedViewManager materializedViewManager;
 	
@@ -88,6 +91,9 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 			countImportableByLegislativeActIdentifierQueryIdentifier = (String) FieldHelper.readStatic(entityImportableClass, "QUERY_COUNT_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER");
 		if(StringHelper.isBlank(readImportableByLegislativeActIdentifierQueryIdentifier))
 			readImportableByLegislativeActIdentifierQueryIdentifier = (String) FieldHelper.readStatic(entityImportableClass, "QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER");
+		
+		if(entityClass != null)
+			persistence = specificPersistenceGetter.get(entityClass);
 	}
 	
 	@Override @Transactional
@@ -107,7 +113,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		
 		import_(legislativeActVersion,auditIdentifier, auditWho, getImportAuditIdentifier(), auditWhen,throwIfRunning,entityManager);
 		throwablesMessages.throwIfNotEmpty();
-		Long count = getPersistence().count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.__AUDIT_IDENTIFIER__,auditIdentifier));
+		Long count = persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.__AUDIT_IDENTIFIER__,auditIdentifier));
 		
 		// Return of message
 		result.close().setName(String.format("Importation de %s %s(s) dans %s par %s",count,entityName,legislativeActVersion.getName(),auditWho)).log(getClass());
@@ -115,9 +121,17 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		return result;
 	}
 
-	abstract Object[] validateImportInputs(String legislativeActVersionIdentifier, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager);
-	abstract void validateImport(LegislativeActVersionImpl legislativeActVersion,String auditWho, ThrowablesMessages throwablesMessages, EntityManager entityManager);
+	//abstract Object[] validateImportInputs(String legislativeActVersionIdentifier, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager);
+	//abstract void validateImport(LegislativeActVersionImpl legislativeActVersion,String auditWho, ThrowablesMessages throwablesMessages, EntityManager entityManager);
 
+	Object[] validateImportInputs(String legislativeActVersionIdentifier, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager) {
+		return ValidatorImpl.validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
+	}
+	
+	void validateImport(LegislativeActVersionImpl legislativeActVersion, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager) {
+		ValidatorImpl.validateImport(legislativeActVersion,entityClass,importRunning, auditWho, throwablesMessages, entityManager);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void import_(LegislativeActVersionImpl legislativeActVersion,String auditIdentifier, String auditWho, String auditFunctionality,LocalDateTime auditWhen,Boolean throwIfRunning, EntityManager entityManager) {
 		String finalAuditFunctionality = StringHelper.isBlank(auditFunctionality) ? getImportAuditIdentifier() : auditFunctionality;
@@ -138,11 +152,11 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 			Long count = countImportable(legislativeActVersion);
 			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(), importBatchSize);		
 			if(CollectionHelper.isNotEmpty(batchSizes)) {
-				LogHelper.logInfo(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,importBatchSize,batchSizes.size()), getClass());
+				LogHelper.log(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,importBatchSize,batchSizes.size()),Result.getLogLevel(), getClass());
 				
 				List<Object[]> arrays = readImportable(legislativeActVersion);
 
-				List<ENTITY> instances = instantiate(legislativeActVersion, arrays,auditIdentifier, auditWho, finalAuditFunctionality, finalAuditWhen);
+				List<ENTITY> instances = instantiateForImport(legislativeActVersion, arrays,auditIdentifier, auditWho, finalAuditFunctionality, finalAuditWhen);
 							
 				List<Object[]> lists = new ArrayList<>();
 				for(Integer index =0; index < batchSizes.size(); index = index + 1)
@@ -202,14 +216,14 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		materializedViewManager.actualize(entityViewClass);
 	}
 	
-	abstract ENTITY instantiate(LegislativeActVersion legislativeActVersion,Object[] array);
+	abstract ENTITY instantiateForImport(LegislativeActVersion legislativeActVersion,Object[] array);
 	
-	List<ENTITY> instantiate(LegislativeActVersion legislativeActVersion, List<Object[]> arrays,String auditIdentifier, String auditWho,String auditFunctionality, LocalDateTime auditWhen) {
+	List<ENTITY> instantiateForImport(LegislativeActVersion legislativeActVersion, List<Object[]> arrays,String auditIdentifier, String auditWho,String auditFunctionality, LocalDateTime auditWhen) {
 		if(CollectionHelper.isEmpty(arrays))
 			return null;
 		List<ENTITY> list = new ArrayList<>();
 		arrays.forEach(array -> {
-			ENTITY entity = instantiate(legislativeActVersion, array);
+			ENTITY entity = instantiateForImport(legislativeActVersion, array);
 			if(entity == null)
 				return;
 			((AuditableWhoDoneWhatWhen)entity).set__auditIdentifier__(auditIdentifier).set__auditWho__(auditWho).set__auditFunctionality__(auditFunctionality).set__auditWhen__(auditWhen);
@@ -226,6 +240,4 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	List<Object[]> readImportable(LegislativeActVersion legislativeActVersion) {
 		return entityManager.createNamedQuery(readImportableByLegislativeActIdentifierQueryIdentifier).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getResultList();
 	}
-	
-	abstract SpecificPersistence<ENTITY> getPersistence();
 }

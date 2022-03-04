@@ -29,8 +29,14 @@ WHERE depense.identifiant NOT IN (SELECT depense_importee.identifiant FROM VA_DE
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- Liste des recettes importables
-CREATE OR REPLACE VIEW VA_RECETTE_IMPORTABLE AS
-SELECT l.*
-FROM VMA_RECETTE l
-WHERE l.identifiant NOT IN (SELECT a.identifiant FROM ta_recette a) AND l.activite_identifiant IS NOT NULL AND l.nature_economique_identifiant IS NOT NULL;
+-- Liste des ressources importées
+CREATE OR REPLACE VIEW VA_RESSOURCE_IMPORTEE AS
+SELECT ressource.*
+FROM VMA_RESSOURCE ressource
+JOIN TA_RESSOURCE tressource ON tressource.identifiant = ressource.identifiant;
+
+-- Liste des ressources importables
+CREATE OR REPLACE VIEW VA_RESSOURCE_IMPORTABLE AS
+SELECT ressource.*
+FROM VMA_RESSOURCE ressource
+WHERE ressource.identifiant NOT IN (SELECT ressource_importee.identifiant FROM VA_RESSOURCE_IMPORTEE ressource_importee);

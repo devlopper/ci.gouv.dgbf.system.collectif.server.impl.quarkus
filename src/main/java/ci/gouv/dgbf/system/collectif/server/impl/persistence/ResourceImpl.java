@@ -13,10 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.NamedStoredProcedureQueries;
-import javax.persistence.NamedStoredProcedureQuery;
-import javax.persistence.ParameterMode;
-import javax.persistence.StoredProcedureParameter;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -49,18 +45,6 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_WHEN__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
-@NamedStoredProcedureQueries(value = {
-		@NamedStoredProcedureQuery(
-			name = ResourceImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT
-			,procedureName = ResourceImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT
-			,parameters = {
-				@StoredProcedureParameter(name = ResourceImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHO , mode = ParameterMode.IN,type = String.class)
-				,@StoredProcedureParameter(name = ResourceImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_FUNCTIONALITY , mode = ParameterMode.IN,type = String.class)
-				,@StoredProcedureParameter(name = ResourceImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT , mode = ParameterMode.IN,type = String.class)
-				,@StoredProcedureParameter(name = ResourceImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN , mode = ParameterMode.IN,type = java.sql.Date.class)
-			}
-		)
-	})
 public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Resource,Serializable {
 
 	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false)
@@ -116,6 +100,7 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	public static final String FIELD_BUDGET_SPECIALIZATION_UNIT_AS_STRING = "budgetSpecializationUnitAsString";
 	public static final String FIELDS_STRINGS = "strings";
 	public static final String FIELDS_AMOUNTS = "amounts";
+	public static final String FIELDS_AMOUNTS_WITHOUT_AVAILABLE = "amounts_without_available";
 	public static final String FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT = "amountsInitialActualMovementAdjustmentActualPlusAdjustment";
 	public static final String FIELDS_AMOUNTS_INITIAL = "amountsInitial";
 	public static final String FIELDS_AMOUNTS_ACTUAL = "amountsActual";
@@ -124,7 +109,7 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	public static final String FIELDS_AUDITS_AS_STRINGS = "auditsAsStrings";
 		
 	public static final String ENTITY_NAME = "ResourceImpl";
-	public static final String TABLE_NAME = "TA_RECETTE";
+	public static final String TABLE_NAME = "TA_RESSOURCE";
 	
 	public static final String COLUMN_IDENTIFIER = "IDENTIFIANT";
 	public static final String COLUMN_ACTIVITY_IDENTIFIER = "ACTIVITE";
@@ -141,10 +126,4 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	public static final String QUERY_READ_BY_IDENTIIFERS = ENTITY_NAME+".readByIdentifiers";
 	
 	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
-	
-	public static final String STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT = "PA_IMPORTER_RECETTE";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHO = "audit_acteur";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_FUNCTIONALITY = "audit_fonctionnalite";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT = "audit_action";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN = "audit_date";
 }

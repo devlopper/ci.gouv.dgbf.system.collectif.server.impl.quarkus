@@ -64,16 +64,6 @@ import lombok.experimental.Accessors;
 })
 @NamedStoredProcedureQueries(value = {
 		@NamedStoredProcedureQuery(
-			name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT
-			,procedureName = ExpenditureImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT
-			,parameters = {
-				@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_LEGISLATIVE_ACT_VERSION_IDENTIFIER , mode = ParameterMode.IN,type = String.class)
-				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHO , mode = ParameterMode.IN,type = String.class)
-				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_FUNCTIONALITY , mode = ParameterMode.IN,type = String.class)
-				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT , mode = ParameterMode.IN,type = String.class)
-				,@StoredProcedureParameter(name = ExpenditureImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN , mode = ParameterMode.IN,type = java.sql.Date.class)
-			}
-		),@NamedStoredProcedureQuery(
 				name = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME
 				,procedureName = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME
 				,parameters = {
@@ -225,14 +215,6 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String QUERY_READ_FOR_COPY_BY_ACT_VERSION_IDENTIFIER_BY_SOURCE_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readForCopyByActVersionIdentifierBySourceActVersionIdentifier";
 	
 	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
-	
-	public static final String STORED_PROCEDURE_QUERY_PROCEDURE_NAME_IMPORT = "PA_IMPORTER_DEPENSE";
-	
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "p_version_collectif";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHO = "audit_acteur";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_FUNCTIONALITY = "audit_fonctionnalite";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHAT = "audit_action";
-	public static final String STORED_PROCEDURE_QUERY_PARAMETER_NAME_AUDIT_WHEN = "audit_date";
 	
 	/**/
 	

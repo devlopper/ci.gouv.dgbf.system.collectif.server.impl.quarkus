@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManager;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
+import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.klass.ClassHelper;
 import org.cyk.utility.__kernel__.map.MapHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
@@ -45,6 +46,35 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	
 	static void validateAuditWho(String auditWho,ThrowablesMessages throwablesMessages) {
 		throwablesMessages.addIfTrue("Le nom d'utilisateur est requis", StringHelper.isBlank(auditWho));
+	}
+	
+	static Object[] validateImportInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+		validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+		validateAuditWho(auditWho, throwablesMessages);
+		LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
+				: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
+						,LegislativeActVersionImpl.FIELD_NAME)
+				, __inject__(LegislativeActVersionPersistence.class), throwablesMessages);
+		return new Object[] {legislativeActVersion};
+	}
+	
+	static void validateImport(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Class<?> entityClass,Set<String> running,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+		validateImportNotRunning(legislativeActVersion,entityClass,running, throwablesMessages, entityManager);
+	}
+	
+	static Boolean validateImportNotRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Class<?> entityClass,Set<String> running,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
+		if(!isImportRunning(legislativeActVersion,running, entityManager))
+			return Boolean.TRUE;
+		throwablesMessages.add(formatMessageImportIsRunning(legislativeActVersion,entityClass));
+		return Boolean.FALSE;
+	}
+	
+	static Boolean isImportRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Set<String> running,EntityManager entityManager) {
+		return running.contains(legislativeActVersion.getIdentifier());
+	}
+	
+	static String formatMessageImportIsRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Class<?> entityClass) {
+		return String.format("%s de %s en cours d'importation",FieldHelper.readStatic(entityClass,"NAME") ,legislativeActVersion.getName());
 	}
 	
 	public static interface LegislativeAct {

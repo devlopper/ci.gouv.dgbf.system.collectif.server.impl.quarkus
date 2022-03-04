@@ -8,32 +8,31 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
-import org.cyk.utility.persistence.SpecificPersistence;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ResourceBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Resource;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImportableView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceView;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.RevenueImpl;
 
 @ApplicationScoped
 public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Resource> implements ResourceBusiness,Serializable {
 
-	@Inject EntityManager entityManager;
 	@Inject ExpenditurePersistence expenditurePersistence;
 	
 	@Override
 	void __listenPostConstruct__() {
+		entityClass = Resource.class;
 		entityViewClass = ResourceView.class;
-		//entityImportableClass = ResourceImportableView.class;
+		entityImportableClass = ResourceImportableView.class;
 		super.__listenPostConstruct__();
 	}
 	
@@ -73,49 +72,14 @@ public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImp
 	/* Import */
 
 	@Override
-	public Result import_(String legislativeActVersionIdentifier, Boolean throwIfRunning, String auditWho) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Result import_(String legislativeActVersionIdentifier, String auditWho) {
-		// TODO Auto-generated method stub
-		return null;
+	Resource instantiateForImport(LegislativeActVersion legislativeActVersion, Object[] array) {
+		return new ResourceImpl().setIdentifier((String)array[0]).setActVersion(legislativeActVersion).setActivityIdentifier((String)array[1]).setEconomicNatureIdentifier((String)array[2]).setRevenue(new RevenueImpl());
 	}
 
 	/* Copy */
 	
 	@Override
 	public Result copy(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	/**/
-	
-	@Override
-	Resource instantiate(LegislativeActVersion legislativeActVersion, Object[] array) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	Object[] validateImportInputs(String legislativeActVersionIdentifier, String auditWho,
-			ThrowablesMessages throwablesMessages, EntityManager entityManager) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	void validateImport(LegislativeActVersionImpl legislativeActVersion, String auditWho,
-			ThrowablesMessages throwablesMessages, EntityManager entityManager) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	SpecificPersistence<Resource> getPersistence() {
 		// TODO Auto-generated method stub
 		return null;
 	}

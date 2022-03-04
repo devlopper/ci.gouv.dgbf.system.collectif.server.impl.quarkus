@@ -12,8 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
@@ -21,14 +19,11 @@ import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.EntityManagerGetter;
-import org.cyk.utility.persistence.SpecificPersistence;
 import org.cyk.utility.persistence.server.query.ReaderByCollection;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAvailableMonitorableIsNotFalseReader;
@@ -41,20 +36,12 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
 @ApplicationScoped
 public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
 
-	@Inject ExpenditurePersistence persistence;
-	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
-	
 	@Override
 	void __listenPostConstruct__() {
 		entityClass = Expenditure.class;
 		entityViewClass = ExpenditureView.class;
 		entityImportableClass = ExpenditureImportableView.class;
 		super.__listenPostConstruct__();
-	}
-	
-	@Override
-	SpecificPersistence<Expenditure> getPersistence() {
-		return persistence;
 	}
 	
 	@Override @Transactional
@@ -110,16 +97,6 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> new Long[] {entry.getValue(),entry.getValue()})),generateAuditIdentifier(),auditWho,ADJUST_BY_ENTRY_AUTHORIZATIONS_AUDIT_IDENTIFIER);
 	}
 	
-	@Override
-	Object[] validateImportInputs(String legislativeActVersionIdentifier, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager) {
-		return ValidatorImpl.Expenditure.validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
-	}
-	
-	@Override
-	void validateImport(LegislativeActVersionImpl legislativeActVersion, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager) {
-		ValidatorImpl.Expenditure.validateImport(legislativeActVersion,importRunning, auditWho, throwablesMessages, entityManager);
-	}
-	
 	@Override @Transactional
 	public Result copy(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho) {
 		Result result = new Result().open();
@@ -165,12 +142,11 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		return CollectionHelper.getSize(arrays);
 	}
 	
-	/**/
+	/* Import */
 	
 	@Override
-	Expenditure instantiate(LegislativeActVersion legislativeActVersion, Object[] array) {
+	Expenditure instantiateForImport(LegislativeActVersion legislativeActVersion, Object[] array) {
 		return new ExpenditureImpl().setIdentifier((String)array[0]).setActVersion(legislativeActVersion).setActivityIdentifier((String)array[1]).setEconomicNatureIdentifier((String)array[2])
-				.setFundingSourceIdentifier((String)array[3]).setLessorIdentifier((String)array[4]).setEntryAuthorization(new EntryAuthorizationImpl().setInitial((Long)array[5]).setActual((Long)array[6]))
-				.setPaymentCredit(new PaymentCreditImpl().setInitial((Long)array[7]).setActual((Long)array[8]));
+				.setFundingSourceIdentifier((String)array[3]).setLessorIdentifier((String)array[4]).setEntryAuthorization(new EntryAuthorizationImpl()).setPaymentCredit(new PaymentCreditImpl());
 	}
 }

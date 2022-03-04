@@ -22,6 +22,11 @@ public class PaymentCreditImpl extends AbstractExpenditureAmountsImpl implements
 		return (PaymentCreditImpl) super.setActual(actual);
 	}
 	
+	@Override
+	public PaymentCreditImpl setAdjustment(Long adjustment) {
+		return (PaymentCreditImpl) super.setAdjustment(adjustment);
+	}
+	
 	private static final String COLUMN_SUFFIX = "_CP";
 	
 	public static final String COLUMN_ADJUSTMENT = AbstractAmountsImpl.COLUMN_ADJUSTMENT+COLUMN_SUFFIX;

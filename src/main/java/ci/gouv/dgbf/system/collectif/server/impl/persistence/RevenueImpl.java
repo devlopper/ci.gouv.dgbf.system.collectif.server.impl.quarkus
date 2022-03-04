@@ -12,6 +12,11 @@ import lombok.Setter;
 @Getter @Setter
 public class RevenueImpl extends AbstractResourceAmountsImpl implements Revenue,Serializable {
 
+	@Override
+	public RevenueImpl setAdjustment(Long adjustment) {
+		return (RevenueImpl) super.setAdjustment(adjustment);
+	}
+	
 	public static final String COLUMN_ADJUSTMENT = AbstractAmountsImpl.COLUMN_ADJUSTMENT;
 	public static final String COLUMN_AVAILABLE = "MONTANT_"+AbstractAmountsImpl.COLUMN_AVAILABLE;
 }

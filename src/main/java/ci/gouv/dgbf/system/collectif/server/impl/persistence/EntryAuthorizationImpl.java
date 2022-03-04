@@ -22,6 +22,11 @@ public class EntryAuthorizationImpl extends AbstractExpenditureAmountsImpl imple
 		return (EntryAuthorizationImpl) super.setActual(actual);
 	}
 	
+	@Override
+	public EntryAuthorizationImpl setAdjustment(Long adjustment) {
+		return (EntryAuthorizationImpl) super.setAdjustment(adjustment);
+	}
+	
 	private static final String COLUMN_SUFFIX = "_AE";
 	
 	public static final String COLUMN_ADJUSTMENT = AbstractAmountsImpl.COLUMN_ADJUSTMENT+COLUMN_SUFFIX;

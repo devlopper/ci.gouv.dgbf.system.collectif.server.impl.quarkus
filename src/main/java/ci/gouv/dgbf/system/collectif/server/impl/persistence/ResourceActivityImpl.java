@@ -107,7 +107,7 @@ public class ResourceActivityImpl extends AbstractIdentifiableSystemScalarString
 	public static final String FIELDS_SECTION_BUDGET_SPECIALIZATION_UNIT = "sectionBudgetSpecializationUnit";
 	
 	public static final String ENTITY_NAME = "ResourceActivityImpl";
-	public static final String TABLE_NAME = "VMA_ACTIVITE_RECETTE";
+	public static final String TABLE_NAME = "VMA_ACTIVITE_RESSOURCE";
 	
 	public static final String COLUMN_SECTION_IDENTIFIER = "section_identifiant";
 	public static final String COLUMN_SECTION_CODE = "section_code";

@@ -85,6 +85,7 @@ public class ResourceDtoImpl extends AbstractIdentifiableSystemScalarStringAudit
     			,JSON_BUDGET_SPECIALIZATION_UNIT_AS_STRING,ResourceImpl.FIELD_BUDGET_SPECIALIZATION_UNIT_AS_STRING
     			,JSONS_STRINGS,ResourceImpl.FIELDS_STRINGS
     			,JSONS_AMOUTNS,ResourceImpl.FIELDS_AMOUNTS
+    			,JSONS_AMOUTNS_WITHOUT_AVAILABLE,ResourceImpl.FIELDS_AMOUNTS_WITHOUT_AVAILABLE
     			,JSON___AUDIT__,ResourceImpl.FIELD___AUDIT__
     			));
 		AbstractServiceImpl.setProjections(ResourceDtoImpl.class, map);

@@ -167,9 +167,13 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 			if(ResourceImpl.FIELDS_STRINGS.equals(fieldName))
 				new ResourceImplAsStringsReader().readThenSet(resources, null);
 			else if(ResourceImpl.FIELDS_AMOUNTS.equals(fieldName))
-				ResourcePersistenceImpl.readAmounts(resources);
+				new ResourceImplAmountsReader().readThenSet(resources, null);
+			else if(ResourceImpl.FIELDS_AMOUNTS_WITHOUT_AVAILABLE.equals(fieldName))
+				new ResourceImplAmountsWithoutAvailableReader().readThenSet(resources, null);
 			else if(ResourceImpl.FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT.equals(fieldName))
 				new ResourceImplAmountsInitialActualMovementAdjustmentActualPlusAdjustmentReader().readThenSet(resources, null);
+			else if(ResourceImpl.FIELD___AUDIT__.equals(fieldName))
+				new ResourceImplAuditReader().readThenSet(resources, null);
 		}
 	}
 	

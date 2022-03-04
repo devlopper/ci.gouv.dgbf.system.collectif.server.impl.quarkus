@@ -269,7 +269,40 @@ public class ResourceTest {
 		assertThat(count).isEqualTo(4l);
     }
 	
-	/* ADjust */
+	/* Import */
+	
+	@Test @Order(2)
+	void business_import_2021_1_2() {
+		assertor.assertResourceByLegislativeActVersion("2021_1_2", null);
+		business.import_("2021_1_2", "meliane");
+		assertor.assertResourceByLegislativeActVersion("2021_1_2", List.of("2021_1_2_1","2021_1_2_2","2021_1_2_3","2021_1_2_4","2021_1_2_5"));
+	}
+	
+	@Test
+	void business_import_null() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			business.import_(null,null);
+	    });
+		assertThat(exception.getMessage()).isEqualTo("L'identifiant de Version collectif budgétaire est requis\r\nLe nom d'utilisateur est requis");
+	}
+	
+	@Test @Order(2)
+	void business_import_running() {
+		new Thread() {
+			public void run() {
+				business.import_("2021_1_running","christian");
+			}
+		}.start();
+		TimeHelper.pause(1l * 500);
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			business.import_("2021_1_running","christian");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("Ressource de 2021_1_running en cours d'importation");
+		TimeHelper.pause(1l * 2000);
+		business.import_("2021_1_running","christian");
+	}
+	
+	/* Adjust */
 	
 	@Test @Order(2)
 	void business_adjust() {
@@ -333,5 +366,12 @@ public class ResourceTest {
 			controller.adjust("anonymous");
 	    });
 		assertThat(exception.getMessage()).isEqualTo("Ajustements requis");
+	}
+
+	/**/
+	
+	public static String PA_ACTUALISER_VM(String tableName) {
+		TimeHelper.pause(1l * 1000l);
+		return null;
 	}
 }

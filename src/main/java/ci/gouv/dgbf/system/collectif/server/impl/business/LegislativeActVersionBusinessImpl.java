@@ -18,6 +18,7 @@ import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.business.ResourceBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
@@ -32,6 +33,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 	@Inject LegislativeActVersionPersistence persistence;
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
+	@Inject ResourceBusiness resourceBusiness;
 	@Inject RegulatoryActBusiness regulatoryActBusiness;
 
 	@Override @Transactional
@@ -71,11 +73,10 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		entityManager.flush();
 		
 		legislativeActVersion.setActIdentifier(legislativeAct.getIdentifier());
-		((RegulatoryActBusinessImpl)regulatoryActBusiness).includeByLegislativeActVersionIdentifier(legislativeActVersion,auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
 		
-		//entityManager.clear();
-		//Import expenditures
+		((RegulatoryActBusinessImpl)regulatoryActBusiness).includeByLegislativeActVersionIdentifier(legislativeActVersion,auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
 		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion,auditIdentifier, auditWho,auditFunctionality,auditWhen,null,entityManager);
+		((ResourceBusinessImpl)resourceBusiness).import_(legislativeActVersion,auditIdentifier, auditWho,auditFunctionality,auditWhen,null,entityManager);
 		return legislativeActVersion;
 	}
 	
