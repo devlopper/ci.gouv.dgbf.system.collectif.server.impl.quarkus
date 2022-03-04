@@ -30,7 +30,7 @@ import lombok.experimental.Accessors;
 		@NamedQuery(name = GeneratedActImpl.QUERY_READ_BY_LEGISLATIVE_ACT_VERSION_IDENTIIFER,query = "SELECT t FROM GeneratedActImpl t WHERE t.legislativeActVersion.identifier = :legislativeActVersionIdentifier")
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = false))
 		,@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_WHO__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_WHAT__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_WHEN__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_WHEN__,nullable = false))

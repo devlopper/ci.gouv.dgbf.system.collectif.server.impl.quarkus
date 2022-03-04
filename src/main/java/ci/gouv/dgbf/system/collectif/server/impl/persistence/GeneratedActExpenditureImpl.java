@@ -33,7 +33,7 @@ import lombok.experimental.Accessors;
 		@NamedQuery(name = GeneratedActExpenditureImpl.QUERY_READ_BY_ACT_IDENTIIFERS,query = "SELECT t FROM GeneratedActExpenditureImpl t WHERE t.act.identifier IN :actIdentifiers")
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = false))
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHO__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHAT__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHEN__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHEN__,nullable = false))

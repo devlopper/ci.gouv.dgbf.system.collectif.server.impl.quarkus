@@ -30,7 +30,7 @@ import lombok.experimental.Accessors;
 				,columnNames = {RegulatoryActLegislativeActVersionImpl.COLUMN_REGULATORY_ACT,RegulatoryActLegislativeActVersionImpl.COLUMN_LEGISLATIVE_ACT_VERSION})
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = false))
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHO__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHAT__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHEN__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHEN__,nullable = false))

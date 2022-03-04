@@ -37,7 +37,7 @@ import lombok.experimental.Accessors;
 		@NamedQuery(name = LegislativeActVersionImpl.QUERY_READ_BY_IDENTIIFER,query = "SELECT t FROM LegislativeActVersionImpl t WHERE t.identifier = :identifier")
 })
 @AttributeOverrides(value= {
-		@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = true))
+		@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = false))
 		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHO__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHO__,nullable = false))
 		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHAT__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHAT__,nullable = false))
 		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHEN__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHEN__,nullable = false))
