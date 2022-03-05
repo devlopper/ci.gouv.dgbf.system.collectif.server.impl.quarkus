@@ -62,11 +62,11 @@ public interface ResourceQueryStringBuilder {
 				amounts.setMovementIncluded(NumberHelper.getLong(array[index++],0l));
 			if(Boolean.TRUE.equals(available) && index < array.length)
 				amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
-			
+			*/
 			amounts.computeActualPlusAdjustment();
-			if(Boolean.TRUE.equals(includedMovement))
-				amounts.computeActualMinusMovementIncludedPlusAdjustment();
-			if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available))
+			/*if(Boolean.TRUE.equals(includedMovement))
+				*/amounts.computeActualMinusMovementIncludedPlusAdjustment();
+			/*if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available))
 				amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
 			*/
 			return index;

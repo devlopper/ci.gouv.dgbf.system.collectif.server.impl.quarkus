@@ -412,9 +412,19 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		}
 	}
 	
-	public static void populatePredicateResourceActivity(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+	private final String RESOURCE_ACTIVITY_PREDICATE_SEARCH = parenthesis(or(
+			LikeStringBuilder.getInstance().build("t",ResourceActivityImpl.FIELD_CODE, Parameters.SEARCH)
+			,LikeStringBuilder.getInstance().build("t", ResourceActivityImpl.FIELD_NAME,Parameters.SEARCH)
+	));
+	public void populatePredicateResourceActivity(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.BUDGET_SPECIALIZATION_UNIT_IDENTIFIER,"t"
 				,ResourceActivityImpl.FIELD_BUDGET_SPECIALIZATION_UNIT_IDENTIFIER);
+		
+		if(arguments.getFilterField(Parameters.SEARCH) != null) {
+			predicate.add(RESOURCE_ACTIVITY_PREDICATE_SEARCH);
+			String search = ValueHelper.defaultToIfBlank((String) arguments.getFilterFieldValue(Parameters.SEARCH),"");
+			filter.addField(Parameters.SEARCH, LikeStringValueBuilder.getInstance().build(search, null, null));
+		}
 	}
 	
 	public static void populatePredicateEconomicNature(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {

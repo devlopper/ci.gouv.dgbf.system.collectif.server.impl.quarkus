@@ -57,9 +57,10 @@ public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImp
 		
 		// Persist of objects
 		LocalDateTime auditWhen = LocalDateTime.now();
+		String auditIdentifier = generateAuditIdentifier();
 		resources.forEach(resource -> {
 			resource.getRevenue(Boolean.TRUE).setAdjustment(adjustments.get(resource.getIdentifier()));
-			audit(resource,generateAuditIdentifier(),ADJUST_AUDIT_IDENTIFIER,auditWho,auditWhen);
+			audit(resource,auditIdentifier,ADJUST_AUDIT_IDENTIFIER,auditWho,auditWhen);
 			entityManager.merge(resource);
 		});
 

@@ -58,6 +58,25 @@ public class ResourceTest {
 	@Inject ResourceController controller;
 	
 	@Test @Order(1)
+	void persistence_readResourceeOne_amounts_1() {
+		ResourceImpl resource = (ResourceImpl) persistence.readOne(new QueryExecutorArguments()
+				.setQuery(new Query().setIdentifier(persistence.getQueryIdentifierReadDynamicOne()).setTupleClass(ResourceImpl.class))
+				.addFilterField("identifier", "2021_1_1_1").addProjectionsFromStrings(ResourceImpl.FIELDS_AMOUNTS)
+				);
+		assertThat(resource).isNotNull();
+		
+		assertThat(resource.getRevenue()).isNotNull();
+		assertThat(resource.getRevenue().getInitial()).isEqualTo(1l);
+		assertThat(resource.getRevenue().getActual()).isEqualTo(3l);
+		assertThat(resource.getRevenue().getMovement()).isEqualTo(2l);
+		assertThat(resource.getRevenue().getAdjustment()).isEqualTo(3l);
+		assertThat(resource.getRevenue().getActualPlusAdjustment()).isEqualTo(6l);
+		assertThat(resource.getRevenue().getMovementIncluded()).isEqualTo(0l);
+		
+		assertThat(resource.getActAsString()).isNull();
+	}
+	
+	@Test @Order(1)
 	void persistence_readResourceMany() {
 		Collection<Resource> resources = persistence.readMany(null, null, null);
 		assertThat(resources).hasSize(4);
@@ -99,7 +118,7 @@ public class ResourceTest {
 		assertThat(resource).isNotNull();
 		assertThat(resource.getRevenue()).isNotNull();
 		assertThat(resource.getRevenue().getInitial()).isEqualTo(1l);
-		assertThat(resource.getRevenue().getActual()).isEqualTo(2l);
+		assertThat(resource.getRevenue().getActual()).isEqualTo(3l);
 		assertThat(resource.getActAsString()).isNull();
 	}
 	
