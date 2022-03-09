@@ -44,13 +44,9 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 
 	/**/
 	
-	static void validateAuditWho(String auditWho,ThrowablesMessages throwablesMessages) {
-		throwablesMessages.addIfTrue("Le nom d'utilisateur est requis", StringHelper.isBlank(auditWho));
-	}
-	
 	static Object[] validateImportInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 		validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-		validateAuditWho(auditWho, throwablesMessages);
+		Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
 				: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 						,LegislativeActVersionImpl.FIELD_NAME)
@@ -82,7 +78,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		static Object[] validateCreateInputs(String code, String name, String exerciseIdentifier,LocalDate date, String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(exerciseIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.Exercise.NAME, throwablesMessages);
 			throwablesMessages.addIfTrue("La date est requise", date == null);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			ExerciseImpl exercise = StringHelper.isBlank(exerciseIdentifier) ? null : (ExerciseImpl) validateExistenceAndReturn(Exercise.class, exerciseIdentifier,List.of(ExerciseImpl.FIELD_IDENTIFIER,ExerciseImpl.FIELD_YEAR)
 					, __inject__(ExercisePersistence.class), throwablesMessages);
 			if(exercise != null && exercise.getYear() != null) {
@@ -93,7 +89,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] validateUpdateDefaultVersionInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 							,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT)
@@ -112,7 +108,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		static Object[] validateUpdateInProgressInputs(String legislativeActIdentifier,Boolean inProgress,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
 			throwablesMessages.addIfTrue("La valeur <<en cours>> est requise", inProgress == null);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActImpl legislativeAct = StringHelper.isBlank(legislativeActIdentifier) ? null : validateExistenceAndReturn(LegislativeActImpl.class, legislativeActIdentifier,null,null, throwablesMessages,entityManager);			
 			if(legislativeAct != null)
 				throwablesMessages.addIfTrue(String.format("%s %sest %s en cours",legislativeAct.getName(),inProgress ? "" : "n'",inProgress ? "déja" : "pas"), legislativeAct.getInProgress() != null && inProgress == legislativeAct.getInProgress());			
@@ -124,7 +120,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] validateCreateInputs(String code,String name,Byte number,String legislativeActIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			
 			LegislativeActImpl legislativeAct = StringHelper.isBlank(legislativeActIdentifier) ? null
 					: (LegislativeActImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.class, legislativeActIdentifier,List.of(LegislativeActImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_CODE
@@ -135,7 +131,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] validateSetAsLegislativeActDefaultVersion(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 							,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER)
@@ -145,16 +141,16 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static void validateGenerateInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(identifier));
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 		
 		static void validateGenerate(Collection<Object[]> arrays,Boolean existingIgnorable,String auditWho,ThrowablesMessages throwablesMessages) {
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 		
 		static Object[] validateGenerateActsInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(identifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(identifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, identifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
@@ -165,7 +161,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] validateDuplicateInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(identifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(identifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, identifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
@@ -177,7 +173,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		static Object[] validateCopyInputs(String sourceIdentifier,String destinationIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(sourceIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
 			validateIdentifier(destinationIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			
 			LegislativeActVersionImpl legislativeActVersionSource = StringHelper.isBlank(sourceIdentifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, sourceIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
@@ -240,7 +236,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] validateImportInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 							,LegislativeActVersionImpl.FIELD_NAME)
@@ -270,7 +266,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		static Object[] validateCopyAdjustmentsInputs(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
 			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
 			validateIdentifier(legislativeActVersionSourceIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 							,LegislativeActVersionImpl.FIELD_NAME)
@@ -291,7 +287,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 
 		static void validateAdjust(Map<String, Long> adjustments,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("Ajustements requis",MapHelper.isEmpty(adjustments));
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 	}
 
@@ -299,7 +295,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		static void validateIncludeOrExcludeInputs(Collection<String> identifiers, String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("Les identifiants des actes de gestion sont requis", CollectionHelper.isEmpty(identifiers));
 			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 		
 		static void validateIncludeOrExclude(Collection<Object[]> arrays,Boolean include,Boolean existingIgnorable,ThrowablesMessages throwablesMessages) {
@@ -316,7 +312,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] validateIncludeByLegislativeActVersionIdentifierInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(legislativeActVersionIdentifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 							,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER,LegislativeActVersionImpl.FIELD_ACT_DATE)
@@ -329,7 +325,7 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static Object[] generateByLegislativeActVersionIdentifierInputs(String identifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			validateIdentifier(identifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 			LegislativeActVersionImpl legislativeActVersion = StringHelper.isBlank(identifier) ? null
 					: (LegislativeActVersionImpl) validateExistenceAndReturn(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.class, identifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER
 							,LegislativeActVersionImpl.FIELD_CODE,LegislativeActVersionImpl.FIELD_NAME,LegislativeActVersionImpl.FIELD_ACT_IDENTIFIER)
@@ -344,16 +340,16 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static void validateGenerateInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 		
 		static void validateDeleteInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 		
 		static void validateGenerate(Collection<Object[]> arrays,Boolean existingIgnorable,String auditWho,ThrowablesMessages throwablesMessages) {
-			validateAuditWho(auditWho, throwablesMessages);
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 	}
 }
