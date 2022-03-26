@@ -32,19 +32,21 @@ WHERE ld.ads_id IS NOT NULL AND ld.nat_id IS NOT NULL AND fd.sfin_id IS NOT NULL
 -- Disponibles dépenses
 CREATE OR REPLACE VIEW VA_DEPENSE_DISPONIBLE AS
 SELECT
-    fd.find_id AS "IDENTIFIANT",NVL(vlb.DISPONIBLE_AE,0) AS "AE",NVL(vlb.DISPONIBLE_CP,0) AS "CP"
+    ld.exo_num AS "EXERCICE",ld.ads_id AS "ACTIVITE",ld.nat_id AS "NATURE_ECONOMIQUE",fd.sfin_id AS "SOURCE_FINANCEMENT",fd.bai_id AS "BAILLEUR"
+    ,NVL(vlb.DISPONIBLE_AE,0) AS "AE",NVL(vlb.DISPONIBLE_CP,0) AS "CP"
 FROM financement_depenses fd
-LEFT JOIN vs_ligne_budgetaire vlb on vlb.fin_id = fd.find_id;
+LEFT JOIN ligne_de_depenses ld ON ld.ldep_id = fd.ldep_id AND ld.exo_num = fd.exo_num
+LEFT JOIN vs_ligne_budgetaire vlb on vlb.fin_id = fd.find_id AND vlb.ab_exercice = fd.exo_num;
 
 -- Ressources
 CREATE OR REPLACE VIEW VA_RESSOURCE AS
 SELECT 
-	TO_NUMBER(lr.exercice) AS "EXERCICE",lr.rec_id AS "REC_ID"
+	TO_NUMBER(lr.exo_num) AS "EXERCICE",lr.nrec_id AS "REC_ID"
 	,a.ads_code AS "ACTIVITE_IDENTIFIANT",a.ads_code AS "ACTIVITE_CODE",a.ads_code||' '||a.ads_liblg AS "ACTIVITE_CODE_LIBELLE"
 	,ne.nat_id AS "NATURE_ECONOMIQUE_IDENTIFIANT",ne.nat_code AS "NATURE_ECONOMIQUE_CODE",ne.nat_code||' '||ne.nat_liblg AS "NATURE_ECONOMIQUE_CODE_LIBELLE"
 	,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_code||' '||u.usb_liblg AS "USB_CODE_LIBELLE"
 	,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
-	,lr.MONTANT AS "BUDGET_INITIAL",lr.MONTANT AS "BUDGET_ACTUEL",0 AS "MOUVEMENT"
+	,lr.MONTANT_INITIAL AS "BUDGET_INITIAL",lr.MONTANT_ACTUEL AS "BUDGET_ACTUEL",lr.MONTANT_ACTUEL-lr.MONTANT_INITIAL AS "MOUVEMENT"
 FROM ligne_recette lr
 LEFT JOIN activite_de_recette a ON a.ads_code = lr.ads_id
 LEFT JOIN nature_economique ne ON ne.nat_id = lr.nat_id

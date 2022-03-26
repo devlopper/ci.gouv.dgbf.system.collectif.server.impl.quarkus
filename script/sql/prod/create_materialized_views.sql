@@ -23,20 +23,19 @@ ALTER TABLE VMA_ACTE_GESTION ADD CONSTRAINT VMA_ACTE_GESTION_UK_CODE UNIQUE (COD
 DROP MATERIALIZED VIEW VMA_ACTE_GESTION_DEPENSE;
 CREATE MATERIALIZED VIEW VMA_ACTE_GESTION_DEPENSE REFRESH NEXT SYSDATE + 1/24/4 COMPLETE AS
 SELECT
-    o.acte_id||o.ldep_id||o.find_id AS "IDENTIFIANT"
-    ,o.acte_id AS "ACTE"
-    ,ag.exercice AS "EXERCICE"
+    ld.acte_id||ld.ldep_id||fd.find_id AS "IDENTIFIANT"
+    ,ld.acte_id AS "ACTE"
+    ,ld.exo_num AS "EXERCICE"
     ,ld.ads_id AS "ACTIVITE"
     ,ld.nat_id AS "NATURE_ECONOMIQUE"
     ,fd.sfin_id AS "SOURCE_FINANCEMENT"
     ,fd.bai_id AS "BAILLEUR"
-    ,o.montant_ae AS "MONTANT_AE"
-    ,o.montant_cp AS "MONTANT_CP"
-FROM MEATEST.operation_acte o
-JOIN VMA_ACTE_GESTION ag ON ag.identifiant = o.acte_id
-LEFT JOIN MEATEST.ligne_de_depenses ld ON ld.ldep_id = o.ldep_id AND ld.acte_id = o.acte_id
-LEFT JOIN MEATEST.financement_depenses fd ON fd.find_id = o.find_id AND fd.acte_id = o.acte_id
-ORDER BY ag.exercice DESC,ld.ads_id ASC,ld.nat_id ASC,fd.sfin_id ASC,fd.bai_id ASC;
+    ,fd.find_montant_ae AS "MONTANT_AE"
+    ,fd.find_montant_cp AS "MONTANT_CP"
+FROM MEATEST.financement_depenses fd
+JOIN VMA_ACTE_GESTION ag ON ag.identifiant = fd.acte_id
+JOIN MEATEST.ligne_de_depenses ld ON ld.acte_id = fd.acte_id and ld.ldep_id = fd.ldep_id and ld.exo_num = fd.exo_num
+ORDER BY ld.exo_num DESC,ld.ads_id ASC,ld.nat_id ASC,fd.sfin_id ASC,fd.bai_id ASC;
 ALTER TABLE VMA_ACTE_GESTION_DEPENSE ADD CONSTRAINT VMA_ACTE_GESTION_LD_PK PRIMARY KEY (IDENTIFIANT);
 CREATE INDEX VMA_ACTE_GESTION_D_K_ACTE ON VMA_ACTE_GESTION_DEPENSE (ACTE ASC);
 CREATE INDEX VMA_ACTE_GESTION_D_K_EXERCICE ON VMA_ACTE_GESTION_DEPENSE (EXERCICE ASC);
@@ -45,7 +44,7 @@ CREATE INDEX VMA_ACTE_GESTION_D_K_NE ON VMA_ACTE_GESTION_DEPENSE (NATURE_ECONOMI
 CREATE INDEX VMA_ACTE_GESTION_D_K_SF ON VMA_ACTE_GESTION_DEPENSE (SOURCE_FINANCEMENT ASC);
 CREATE INDEX VMA_ACTE_GESTION_D_K_BAILLEUR ON VMA_ACTE_GESTION_DEPENSE (BAILLEUR ASC);
 
--- Recettes des actes de gestion
+-- Ressources des actes de gestion
 DROP MATERIALIZED VIEW VMA_ACTE_GESTION_RESSOURCE;
 CREATE MATERIALIZED VIEW VMA_ACTE_GESTION_RESSOURCE REFRESH NEXT SYSDATE + 1/24/4 COMPLETE AS
 SELECT
