@@ -230,10 +230,10 @@ public class ExpenditureTest {
 	@Test @Order(1)
     public void service_get_amounts_sums() {
 		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")))
-				.log().all()
+				//.log().all()
 				.get("/api/depenses/sommation-montants");
 		response.then()
-			.log().all()
+			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
         	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
         	;
