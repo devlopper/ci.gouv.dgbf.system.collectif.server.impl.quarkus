@@ -26,6 +26,26 @@ public interface ExpenditureQueryStringBuilder {
 	String[] REGULATORY_ACT_LEGISLATIVE_ACT_VERSION_AND_AVAILABLE = {ExpenditureImpl.FIELDS_AMOUNTS};
 	
 	public static interface Projection {
+		static void projectAmountsSums(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
+			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
+				arguments.getProjection(Boolean.TRUE).add(projectAmountSum("t", FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
+				if(Boolean.TRUE.equals(view)) {
+					arguments.getProjection().add(projectAmountSum("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
+					arguments.getProjection().add(projectAmountSum("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_MOVEMENT)));
+					arguments.getProjection().add(projectAmountSum("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_ACTUAL)));
+				}
+				if(Boolean.TRUE.equals(includedMovement))
+					arguments.getProjection().add(projectAmountSum("im", fieldName));
+				if(Boolean.TRUE.equals(available))
+					arguments.getProjection().add(projectAmountSum("available", fieldName));
+				
+			}
+		}
+		
+		static String projectAmountSum(String tupleName,String fieldName) {
+			return Language.formatSum(projectAmount(tupleName, fieldName));
+		}
+		
 		static void projectAmounts(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
 			arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
 			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
@@ -72,11 +92,15 @@ public interface ExpenditureQueryStringBuilder {
 			return index;
 		}
 		
-		static void setAmounts(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available) {
+		static void setAmounts(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available,Integer index) {
 			if(expenditure == null)
 				return;
-			Integer index = setAmounts(expenditure.getEntryAuthorization(Boolean.TRUE),array,1,view,includedMovement,available);
+			index = setAmounts(expenditure.getEntryAuthorization(Boolean.TRUE),array,index,view,includedMovement,available);
 			setAmounts(expenditure.getPaymentCredit(Boolean.TRUE),array,index,view,includedMovement,available);
+		}
+		
+		static void setAmounts(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available) {
+			setAmounts(expenditure, array, view, includedMovement, available, 1);
 		}
 		
 		/**/
@@ -271,7 +295,7 @@ public interface ExpenditureQueryStringBuilder {
 		public static void populate(QueryExecutorArguments queryExecutorArguments, Arguments arguments, WhereStringBuilder.Predicate predicate,Filter filter) {
 			Boolean availableMinusIncludedMovementPlusAdjustmentLessThanZero = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO);
 			if(availableMinusIncludedMovementPlusAdjustmentLessThanZero != null)
-				predicate.add(Language.Where.notIfTrue(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(null),availableMinusIncludedMovementPlusAdjustmentLessThanZero));
+				predicate.add(Language.Where.notIfTrue(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(null),availableMinusIncludedMovementPlusAdjustmentLessThanZero));	
 		}
 		
 		String MOVEMENT_INCLUDED_EQUAL_ZERO_FORMAT = "(im.%1$s IS NULL OR im.%1$s = 0l)";

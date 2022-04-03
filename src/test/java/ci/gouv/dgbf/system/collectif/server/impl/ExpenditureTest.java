@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.json.bind.JsonbBuilder;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 
@@ -19,6 +20,7 @@ import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.time.TimeHelper;
+import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.Query;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.ResponseHelper;
@@ -61,6 +63,12 @@ public class ExpenditureTest {
 	@Inject ExpenditureBusiness expenditureBusiness;
 	
 	@Test
+	void queryStringBuilder_projections_amoutSum() {
+		assertThat(ExpenditureQueryStringBuilder.Projection.projectAmountSum("t", "entryAuthorization.initial"))
+			.isEqualTo("SUM(CASE WHEN t.entryAuthorization.initial IS NULL THEN 0l ELSE t.entryAuthorization.initial END)");
+	}
+	
+	@Test
 	void queryStringBuilder_predicate_getMovementIncludedEqualZero() {
 		assertThat(ExpenditureQueryStringBuilder.Predicate.getMovementIncludedEqualZero(Boolean.TRUE))
 			.isEqualTo("((im.entryAuthorization IS NULL OR im.entryAuthorization = 0l) OR (im.paymentCredit IS NULL OR im.paymentCredit = 0l))");
@@ -70,6 +78,16 @@ public class ExpenditureTest {
 	void getJoinRegulatoryActExpenditure() {
 		assertThat(ExpenditureImpl.getJoinRegulatoryActExpenditure()).isEqualTo("JOIN RegulatoryActExpenditureImpl rae ON rae.year = exercise.year AND rae.activityIdentifier = t.activityIdentifier AND "
 				+ "rae.economicNatureIdentifier = t.economicNatureIdentifier AND rae.fundingSourceIdentifier = t.fundingSourceIdentifier AND rae.lessorIdentifier = t.lessorIdentifier");
+	}
+	
+	@Test @Order(1)
+	void persistence_sumsAmounts() {
+		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2",Parameters.AMOUNT_SUMABLE,Boolean.TRUE));
+		assertThat(expenditure).isNotNull();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(11l).setMovement(8l).setActual(19l).setAdjustment(33l).setAvailable(-91l).setMovementIncluded(-23l)
+				.setActualMinusMovementIncludedPlusAdjustment(75l).setAvailableMinusMovementIncludedPlusAdjustment(-35l));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(5l).setMovement(12l).setActual(17l).setAdjustment(7l).setAvailable(-95l).setMovementIncluded(-23l)
+				.setActualMinusMovementIncludedPlusAdjustment(47l).setAvailableMinusMovementIncludedPlusAdjustment(-65l));
 	}
 	
 	@Test @Order(1)
@@ -207,6 +225,18 @@ public class ExpenditureTest {
         	;
 		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test @Order(1)
+    public void service_get_amounts_sums() {
+		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")))
+				.log().all()
+				.get("/api/depenses/sommation-montants");
+		response.then()
+			.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
     }
 	
 	@Test @Order(1)

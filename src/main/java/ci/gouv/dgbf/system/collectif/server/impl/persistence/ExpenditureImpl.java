@@ -180,6 +180,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String FIELD_NATURE_AS_STRING = "natureAsString";
 	public static final String FIELD_SECTION_AS_STRING = "sectionAsString";
 	public static final String FIELD_BUDGET_SPECIALIZATION_UNIT_AS_STRING = "budgetSpecializationUnitAsString";
+	
 	public static final String FIELDS_STRINGS = "strings";
 	public static final String FIELDS_IDENTIFIERS = "identifiers";
 	public static final String FIELDS_AMOUNTS = "amounts";
@@ -189,6 +190,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String FIELDS_AMOUNTS_ACTUAL = "amountsActual";
 	public static final String FIELDS_AMOUNTS_AVAILABLE = "amountsAvailable";
 	public static final String FIELDS_AMOUNTS_MOVEMENT_INCLUDED = "amountsMovementIncluded";
+	public static final String FIELDS_AMOUNTS_SUMS = "amountsSums";
 	public static final String FIELDS_AUDITS_AS_STRINGS = "auditsAsStrings";
 		
 	public static final String ENTITY_NAME = "ExpenditureImpl";

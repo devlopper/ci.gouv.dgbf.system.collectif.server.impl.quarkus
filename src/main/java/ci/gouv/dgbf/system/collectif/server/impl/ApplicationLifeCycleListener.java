@@ -10,6 +10,7 @@ import org.cyk.utility.business.Validator;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
 import org.cyk.utility.persistence.query.EntityCounter;
 import org.cyk.utility.persistence.query.EntityReader;
+import org.cyk.utility.persistence.query.QueryResultMapper;
 import org.cyk.utility.persistence.server.TransientFieldsProcessor;
 import org.cyk.utility.persistence.server.query.RuntimeQueryBuilder;
 import org.cyk.utility.persistence.server.query.string.RuntimeQueryStringBuilder;
@@ -75,7 +76,7 @@ public class ApplicationLifeCycleListener {
     void onStart(@Observes StartupEvent startupEvent) {
     	org.cyk.quarkus.extension.hibernate.orm.ApplicationLifeCycleListener.QUALIFIER = ci.gouv.dgbf.system.collectif.server.api.System.class;
     	DependencyInjection.setQualifierClassTo(ci.gouv.dgbf.system.collectif.server.api.System.class
-    			, EntityReader.class,EntityCounter.class, RuntimeQueryBuilder.class, RuntimeQueryStringBuilder.class,TransientFieldsProcessor.class/*, Initializer.class*/,Validator.class
+    			, EntityReader.class,EntityCounter.class, RuntimeQueryBuilder.class, RuntimeQueryStringBuilder.class,QueryResultMapper.class,TransientFieldsProcessor.class/*, Initializer.class*/,Validator.class
     			);
     	VariableHelper.write(VariableName.SYSTEM_LOGGING_THROWABLE_PRINT_STACK_TRACE, Boolean.TRUE);
     	

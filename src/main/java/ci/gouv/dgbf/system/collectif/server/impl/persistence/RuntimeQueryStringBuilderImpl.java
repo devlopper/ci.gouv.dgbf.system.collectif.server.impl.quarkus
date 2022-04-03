@@ -65,6 +65,16 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	@Inject GeneratedActExpenditurePersistence generatedActExpenditurePersistence;
 	
 	@Override
+	protected void setProjection(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
+		Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
+		if(Boolean.TRUE.equals(amountSumable))
+			ExpenditureQueryStringBuilder.Projection.projectAmountsSums(builderArguments, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE);
+		else
+			super.setProjection(queryExecutorArguments, builderArguments);
+		queryExecutorArguments.getQuery().setTupleFieldsNamesIndexesFromFieldsNames("XXX");
+	}
+	
+	@Override
 	protected void setTuple(QueryExecutorArguments arguments, Arguments builderArguments) {
 		super.setTuple(arguments, builderArguments);
 		if(Boolean.TRUE.equals(legislativeActPersistence.isProcessable(arguments))) {
@@ -96,7 +106,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
 				builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 			}else {*/
-				if(arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
+				if(arguments.getFilterField(Parameters.AMOUNT_SUMABLE) != null || arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
 					/*
 					builderArguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
 					builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
