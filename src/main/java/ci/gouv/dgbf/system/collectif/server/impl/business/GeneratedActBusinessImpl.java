@@ -232,15 +232,17 @@ public class GeneratedActBusinessImpl extends AbstractSpecificBusinessImpl<Gener
 					.addProjectionsFromStrings(ExpenditureImpl.FIELD_IDENTIFIER,ExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,ExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER,ExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER
 							,ExpenditureImpl.FIELD_LESSOR_IDENTIFIER).addProcessableTransientFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS)
 					.addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier(),Parameters.ADJUSTMENTS_EQUAL_ZERO,Boolean.FALSE,Parameters.GENERATED_ACT_EXPENDITURE_EXISTS,Boolean.FALSE)
-					.setNumberOfTuples(batchSizes.get(index))));
+					.setFirstTupleIndex(index*batchSize).setNumberOfTuples(batchSizes.get(index))));
 			LogHelper.log(String.format("Traitement du lot %s/%s | %s",index+1,batchSizes.size(),CollectionHelper.getSize(expenditures)),Result.getLogLevel(), getClass());
 			if(CollectionHelper.isEmpty(expenditures))
 				break;
+			
 			expenditures.forEach(expenditure -> {
 				if(expenditure.getEntryAuthorization() == null || expenditure.getPaymentCredit() == null) {
 					LogHelper.logWarning(String.format("%s %s doit avoir AE(%s) et CP(%s)", Expenditure.NAME,expenditure.getIdentifier(),expenditure.getEntryAuthorization() != null,expenditure.getPaymentCredit() != null), getClass());
 					return;
 				}
+				
 				GeneratedActExpenditureImpl generatedActExpenditure = new GeneratedActExpenditureImpl().setIdentifier(act.getIdentifier()+"_"+expenditure.getIdentifier()).setAct(act).setActivityIdentifier(expenditure.getActivityIdentifier())
 						.setEconomicNatureIdentifier(expenditure.getEconomicNatureIdentifier()).setFundingSourceIdentifier(expenditure.getFundingSourceIdentifier()).setLessorIdentifier(expenditure.getLessorIdentifier())
 						.setEntryAuthorizationAmount(expenditure.getEntryAuthorization().getActualMinusMovementIncludedPlusAdjustment())

@@ -9,8 +9,8 @@ public class AbstractExpenditureImplAmountsReader extends AbstractExpenditureImp
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		ExpenditureQueryStringBuilder.Projection.projectAmounts(arguments,hasView(),hasIncludedMovement(),hasAvailable());
-		ExpenditureQueryStringBuilder.Tuple.joinAmounts(arguments,hasView(),hasIncludedMovement(),hasAvailable());
+		new ExpenditureQueryStringBuilder.Projection.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new ExpenditureQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		return arguments;
 	}
 	

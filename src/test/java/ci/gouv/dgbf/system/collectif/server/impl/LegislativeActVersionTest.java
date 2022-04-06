@@ -25,7 +25,9 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersio
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.service.LegislativeActVersionDto;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -37,6 +39,17 @@ public class LegislativeActVersionTest {
 	@Inject Assertor assertor;
 	@Inject LegislativeActVersionPersistence persistence;
 	@Inject LegislativeActVersionBusiness business;
+	
+	@Test @Order(1)
+	void persistence_sumsAmounts() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_AMOUNTS)
+				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
+		assertThat(legislativeActVersion).isNotNull();
+		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(0l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(0l));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(6l).setAvailable(0l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(6l).setAvailableMinusMovementIncludedPlusAdjustment(6l));
+	}
 	
 	@Test @Order(1)
 	void persistence_actFromDateAsTimestampDateAsTimestamp_2021_1_2() {
@@ -135,7 +148,7 @@ public class LegislativeActVersionTest {
 		assertThat(legislativeActVersion).isNotNull();
 		assertThat(legislativeActVersion.getIsDefaultVersionAsString()).isEqualTo("Non");
 	}
-	
+	/*
 	@Test @Order(1)
 	void persistence_readExpenditureOne_amounts_1() {
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments()
@@ -164,7 +177,7 @@ public class LegislativeActVersionTest {
 		assertThat(legislativeActVersion.getPaymentCredit().getExpectedAdjustment()).isEqualTo(20l);
 		assertThat(legislativeActVersion.getPaymentCredit().getExpectedAdjustmentMinusAdjustment()).isEqualTo(14l);
 	}
-	
+	*/
 	@Test @Order(1)
 	void persistence_readMany() {
 		Collection<LegislativeActVersion> legislativeActVersions = persistence.readMany(null, null, null);

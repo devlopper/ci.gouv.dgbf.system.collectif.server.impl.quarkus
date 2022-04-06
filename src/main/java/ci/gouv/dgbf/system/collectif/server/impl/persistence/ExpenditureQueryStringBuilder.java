@@ -4,6 +4,7 @@ import static org.cyk.utility.persistence.query.Language.parenthesis;
 import static org.cyk.utility.persistence.query.Language.Where.and;
 import static org.cyk.utility.persistence.query.Language.Where.or;
 
+import java.io.Serializable;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,6 +20,8 @@ import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Argume
 import org.cyk.utility.persistence.server.query.string.WhereStringBuilder;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 public interface ExpenditureQueryStringBuilder {
 	
@@ -26,6 +29,13 @@ public interface ExpenditureQueryStringBuilder {
 	String[] REGULATORY_ACT_LEGISLATIVE_ACT_VERSION_AND_AVAILABLE = {ExpenditureImpl.FIELDS_AMOUNTS};
 	
 	public static interface Projection {
+		
+		static void set(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
+			Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
+			if(Boolean.TRUE.equals(amountSumable))
+				new Amounts().setSumable(Boolean.TRUE).build(builderArguments);
+		}
+		
 		static void projectAmountsSums(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
 			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
 				arguments.getProjection(Boolean.TRUE).add(projectAmountSum("t", FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
@@ -38,28 +48,11 @@ public interface ExpenditureQueryStringBuilder {
 					arguments.getProjection().add(projectAmountSum("im", fieldName));
 				if(Boolean.TRUE.equals(available))
 					arguments.getProjection().add(projectAmountSum("available", fieldName));
-				
 			}
 		}
 		
 		static String projectAmountSum(String tupleName,String fieldName) {
 			return Language.formatSum(projectAmount(tupleName, fieldName));
-		}
-		
-		static void projectAmounts(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
-			arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
-			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
-				arguments.getProjection().add(projectAmount("t", FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
-				if(Boolean.TRUE.equals(view)) {
-					arguments.getProjection().add(projectAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
-					arguments.getProjection().add(projectAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_MOVEMENT)));
-					arguments.getProjection().add(projectAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_ACTUAL)));
-				}
-				if(Boolean.TRUE.equals(includedMovement))
-					arguments.getProjection().add(projectAmount("im", fieldName));
-				if(Boolean.TRUE.equals(available))
-					arguments.getProjection().add(projectAmount("available", fieldName));
-			}
 		}
 		
 		static String projectAmount(String tupleName,String fieldName) {
@@ -105,6 +98,78 @@ public interface ExpenditureQueryStringBuilder {
 		
 		/**/
 		
+		@Setter @Accessors(chain = true)
+		public static class Amounts {
+			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE;
+			protected String variableName = "t",expectedVariableName;
+			protected Boolean sumable = Boolean.FALSE;
+
+			public void build(Arguments arguments) {
+				if(isIdentifiable())
+					arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
+				for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
+					arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
+					if(StringHelper.isNotBlank(expectedVariableName))
+						arguments.getProjection().add(get(expectedVariableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
+					if(Boolean.TRUE.equals(view)) {
+						arguments.getProjection().add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
+						arguments.getProjection().add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_MOVEMENT)));
+						arguments.getProjection().add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_ACTUAL)));
+					}
+					if(Boolean.TRUE.equals(includedMovement))
+						arguments.getProjection().add(get("im", fieldName));
+					if(Boolean.TRUE.equals(available))
+						arguments.getProjection().add(get("available", fieldName));
+				}
+			}
+			
+			protected Boolean isIdentifiable() {
+				return !Boolean.TRUE.equals(sumable);
+			}
+			
+			protected String get(String tupleName,String fieldName) {
+				return get(tupleName, fieldName, sumable);
+			}
+			
+			public static String get(String tupleName,String fieldName,Boolean sumable) {
+				String string = CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild(FieldHelper.join(tupleName,fieldName),"0l");
+				if(Boolean.TRUE.equals(sumable))
+					string = Language.formatSum(string);
+				return string;
+			}
+			
+			public static Integer set(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
+				if(amounts == null || index == null || index < 0)
+					return index;
+				if(index < array.length)
+					amounts.setAdjustment(NumberHelper.getLong(array[index++],0l));
+				if(Boolean.TRUE.equals(expected)) {
+					amounts.setExpectedAdjustment(NumberHelper.getLong(array[index++],0l));
+					amounts.computeExpectedAdjustmentMinusAdjustment();
+				}
+				if(Boolean.TRUE.equals(view)) {
+					if(index < array.length)
+						amounts.setInitial(NumberHelper.getLong(array[index++],0l));
+					if(index < array.length)
+						amounts.setMovement(NumberHelper.getLong(array[index++],0l));
+					if(index < array.length)
+						amounts.setActual(NumberHelper.getLong(array[index++],0l));
+				}
+				
+				if(Boolean.TRUE.equals(includedMovement) && index < array.length)
+					amounts.setMovementIncluded(NumberHelper.getLong(array[index++],0l));
+				if(Boolean.TRUE.equals(available) && index < array.length)
+					amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
+				
+				amounts.computeActualPlusAdjustment();
+				if(Boolean.TRUE.equals(includedMovement))
+					amounts.computeActualMinusMovementIncludedPlusAdjustment();
+				if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available))
+					amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
+				return index;
+			}
+		}
+		
 		static void projectAmounts(Arguments arguments) {
 			arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
 			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
@@ -147,7 +212,7 @@ public interface ExpenditureQueryStringBuilder {
 			amounts.computeActualPlusAdjustment();
 			amounts.computeActualMinusMovementIncludedPlusAdjustment();
 			amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
-			
+			System.out.println("ExpenditureQueryStringBuilder.Projection.setAmounts() :::: "+amounts);
 			return index;
 		}
 		
@@ -161,35 +226,55 @@ public interface ExpenditureQueryStringBuilder {
 	
 	public static interface Tuple {
 		
-		public static String getView() {
-			return String.format("JOIN %3$s ev ON ev.%4$s = lav.identifier AND ev.%5$s = t.%5$s AND ev.%6$s = t.%6$s AND ev.%7$s = t.%7$s AND ev.%8$s = t.%8$s", "t","exercise"
+		public static String getView(String variableName,String actVersionVariableName) {
+			return String.format("JOIN %3$s ev ON ev.%4$s = "+actVersionVariableName+".identifier AND ev.%5$s = %1$s.%5$s AND ev.%6$s = %1$s.%6$s AND ev.%7$s = %1$s.%7$s AND ev.%8$s = %1$s.%8$s", variableName,"exercise"
 					,ExpenditureView.ENTITY_NAME,ExpenditureView.FIELD_LEGISLATIVE_ACT_VERSION_IDENTIFIER,ExpenditureView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureView.FIELD_ECONOMIC_NATURE_IDENTIFIER
 					,ExpenditureView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureView.FIELD_LESSOR_IDENTIFIER);
 		}
 		
-		public static String getIncludedMovement() {
-			return String.format("JOIN %1$s im ON im.%2$s = t.%2$s",ExpenditureIncludedMovementView.ENTITY_NAME,ExpenditureIncludedMovementView.FIELD_IDENTIFIER);
+		public static String getView() {
+			return getView("t","lav");
 		}
 		
-		public static String getAvailable() {
-			return String.format("JOIN %3$s available ON available.%4$s = exercise.%5$s AND available.%6$s = t.%6$s AND available.%7$s = t.%7$s AND available.%8$s = t.%8$s AND available.%9$s = t.%9$s", "t", "exercise"
+		public static String getIncludedMovement(String variableName) {
+			return String.format("JOIN %1$s im ON im.%2$s = %3$s.%2$s",ExpenditureIncludedMovementView.ENTITY_NAME,ExpenditureIncludedMovementView.FIELD_IDENTIFIER,variableName);
+		}
+		
+		public static String getIncludedMovement() {
+			return getIncludedMovement("t");
+		}
+		
+		public static String getAvailable(String variableName) {
+			return String.format("JOIN %3$s available ON available.%4$s = exercise.%5$s AND available.%6$s = %1$s.%6$s AND available.%7$s = %1$s.%7$s AND available.%8$s = %1$s.%8$s AND available.%9$s = %1$s.%9$s", variableName, "exercise"
 					,ExpenditureAvailableView.ENTITY_NAME,ExpenditureAvailableView.FIELD_YEAR,ExerciseImpl.FIELD_YEAR,ExpenditureAvailableView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureAvailableView.FIELD_ECONOMIC_NATURE_IDENTIFIER
 					,ExpenditureAvailableView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureAvailableView.FIELD_LESSOR_IDENTIFIER);
 		}
 		
+		public static String getAvailable() {
+			return getAvailable("t");
+		}
+		
 		/**/
 		
-		static void joinAmounts(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
-			if(Boolean.TRUE.equals(view)) {
-				arguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
-				arguments.getTuple().addJoins("LEFT "+getView());
-				arguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
-				arguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+		@Setter @Accessors(chain = true)
+		public static class Amounts implements Serializable {
+			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE,joinActVersion=Boolean.TRUE,joinAct=Boolean.TRUE;
+			protected String variableName = "t",actVersionVariableName="lav",actVariableName="la";
+			
+			public void build(Arguments arguments) {
+				if(Boolean.TRUE.equals(view)) {
+					if(Boolean.TRUE.equals(joinActVersion))
+						arguments.getTuple().addJoins(String.format("JOIN %1$s %4$s ON %4$s = %2$s.%3$s",LegislativeActVersionImpl.ENTITY_NAME,variableName,ExpenditureImpl.FIELD_ACT_VERSION,actVersionVariableName));
+					arguments.getTuple().addJoins("LEFT "+getView(variableName,actVersionVariableName));
+					if(Boolean.TRUE.equals(joinAct))
+						arguments.getTuple().addJoins(String.format("JOIN %1$s %3$s ON %3$s = %4$s.%2$s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT,actVariableName,actVersionVariableName));
+					arguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = %s.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,actVariableName,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+				}
+				if(Boolean.TRUE.equals(includedMovement))
+					arguments.getTuple().addJoins("LEFT "+getIncludedMovement(variableName));
+				if(Boolean.TRUE.equals(available))
+					arguments.getTuple().addJoins("LEFT "+getAvailable(variableName));
 			}
-			if(Boolean.TRUE.equals(includedMovement))
-				arguments.getTuple().addJoins("LEFT "+getIncludedMovement());
-			if(Boolean.TRUE.equals(available))
-				arguments.getTuple().addJoins("LEFT "+getAvailable());
 		}
 		
 		static void joinLegislativeActVersionAndExercise(Arguments arguments) {

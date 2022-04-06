@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -33,13 +32,13 @@ import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.SpecificPersistenceGetter;
 import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
 import org.cyk.utility.persistence.server.view.MaterializedViewManager;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureResourceBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.impl.Configuration;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import io.quarkus.scheduler.Scheduled;
@@ -52,23 +51,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject @Hibernate MaterializedViewManager materializedViewManager;
 	
-	@ConfigProperty(name = "cyk.import.batch.size",defaultValue = "2000")
-	Integer importBatchSize;
-	@ConfigProperty(name = "cyk.import.executor.thread.count",defaultValue = "4")
-	Integer importExecutorThreadCount;
-	@ConfigProperty(name = "cyk.import.executor.timeout.duration",defaultValue = "5")
-	Long importExecutorTimeoutDuration;
-	@ConfigProperty(name = "cyk.import.executor.timeout.unit",defaultValue = "MINUTES")
-	TimeUnit importExecutorTimeoutUnit;
-	
-	@ConfigProperty(name = "cyk.copy.batch.size",defaultValue = "2000")
-	Integer copyBatchSize;
-	@ConfigProperty(name = "cyk.copy.executor.thread.count",defaultValue = "4")
-	Integer copyExecutorThreadCount;
-	@ConfigProperty(name = "cyk.copy.executor.timeout.duration",defaultValue = "5")
-	Long copyExecutorTimeoutDuration;
-	@ConfigProperty(name = "cyk.copy.executor.timeout.unit",defaultValue = "MINUTES")
-	TimeUnit copyExecutorTimeoutUnit;
+	@Inject Configuration configuration;
 	
 	final Set<String> importRunning = new HashSet<>();
 	
@@ -150,9 +133,9 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		try {
 			updateMaterializedView();
 			Long count = countImportable(legislativeActVersion);
-			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(), importBatchSize);		
+			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(),configuration.importation().batch().size());		
 			if(CollectionHelper.isNotEmpty(batchSizes)) {
-				LogHelper.log(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,importBatchSize,batchSizes.size()),Result.getLogLevel(), getClass());
+				LogHelper.log(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,configuration.importation().batch().size(),batchSizes.size()),Result.getLogLevel(), getClass());
 				
 				List<Object[]> arrays = readImportable(legislativeActVersion);
 
@@ -160,17 +143,17 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 							
 				List<Object[]> lists = new ArrayList<>();
 				for(Integer index =0; index < batchSizes.size(); index = index + 1)
-					lists.add(new Object[] {new ArrayList<>(instances.subList(index*importBatchSize, index*importBatchSize+batchSizes.get(index))),index+1,batchSizes.size()});
+					lists.add(new Object[] {new ArrayList<>(instances.subList(index*configuration.importation().batch().size(), index*configuration.importation().batch().size()+batchSizes.get(index))),index+1,batchSizes.size()});
 				instances.clear();
 				instances = null;
-				ExecutorService executorService = Executors.newFixedThreadPool(importExecutorThreadCount);
+				ExecutorService executorService = Executors.newFixedThreadPool(configuration.importation().executor().thread().count());
 				lists.forEach(array -> {
 					executorService.execute(() -> {
 						EntityManager __entityManager__ = EntityManagerGetter.getInstance().get();
 						createBatch(new ArrayList<>((List<ENTITY>)array[0]),__entityManager__,Boolean.TRUE,null);
 					});
 				});
-				shutdownExecutorService(executorService, importExecutorTimeoutDuration, importExecutorTimeoutUnit);
+				shutdownExecutorService(executorService,configuration.importation().executor().timeout().duration(), configuration.importation().executor().timeout().unit());
 			}
 		} catch (Exception exception) {
 			throw new RuntimeException(exception);

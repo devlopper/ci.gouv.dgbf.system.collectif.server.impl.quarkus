@@ -64,7 +64,7 @@ public class ExpenditureTest {
 	
 	@Test
 	void queryStringBuilder_projections_amoutSum() {
-		assertThat(ExpenditureQueryStringBuilder.Projection.projectAmountSum("t", "entryAuthorization.initial"))
+		assertThat(ExpenditureQueryStringBuilder.Projection.Amounts.get("t", "entryAuthorization.initial",Boolean.TRUE))
 			.isEqualTo("SUM(CASE WHEN t.entryAuthorization.initial IS NULL THEN 0l ELSE t.entryAuthorization.initial END)");
 	}
 	

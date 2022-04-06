@@ -3,8 +3,13 @@ DROP MATERIALIZED VIEW VMA_ACTE_GESTION;
 CREATE MATERIALIZED VIEW VMA_ACTE_GESTION REFRESH NEXT SYSDATE + 1/24/4 COMPLETE AS
 SELECT 
     ab.acte_id AS "IDENTIFIANT"
-    ,TO_CHAR(ab.acte_numero) AS "CODE"
-    ,ab.acte_ref_externe_acte as LIBELLE
+    ,CASE 
+        WHEN INSTR(LOWER(ab.acte_ref_externe_acte),'n°') > 0 THEN TRIM(SUBSTR(ab.acte_ref_externe_acte,INSTR(LOWER(ab.acte_ref_externe_acte),'n°')+2))
+        WHEN INSTR(LOWER(ab.acte_ref_externe_acte),'arrete') > 0 THEN TRIM(SUBSTR(ab.acte_ref_externe_acte,INSTR(LOWER(ab.acte_ref_externe_acte),'arrete')+6))
+        WHEN INSTR(LOWER(ab.acte_ref_externe_acte),'decision') > 0 THEN TRIM(SUBSTR(ab.acte_ref_externe_acte,INSTR(LOWER(ab.acte_ref_externe_acte),'decision')+8))
+        ELSE ab.acte_id
+    END AS "CODE"
+    ,ab.acte_numero||' '||ab.acte_ref_externe_acte as "LIBELLE"
     ,TO_NUMBER(ab.exo_num) AS "EXERCICE"
     ,ab.acte_date_signature AS "DATE_"
     ,SUM(fd.find_montant_ae) as "MONTANT_AE"

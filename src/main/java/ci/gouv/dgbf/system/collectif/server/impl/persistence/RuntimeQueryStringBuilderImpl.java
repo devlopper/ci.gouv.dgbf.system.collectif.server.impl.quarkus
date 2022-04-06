@@ -67,11 +67,12 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	@Override
 	protected void setProjection(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
 		Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
-		if(Boolean.TRUE.equals(amountSumable))
-			ExpenditureQueryStringBuilder.Projection.projectAmountsSums(builderArguments, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE);
+		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(queryExecutorArguments)) && Boolean.TRUE.equals(amountSumable))
+			ExpenditureQueryStringBuilder.Projection.set(queryExecutorArguments, builderArguments);
+		//else if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(queryExecutorArguments)) && Boolean.TRUE.equals(amountSumable))
+		//	LegislativeActVersionQueryStringBuilder.Projection.set(queryExecutorArguments, builderArguments);
 		else
 			super.setProjection(queryExecutorArguments, builderArguments);
-		queryExecutorArguments.getQuery().setTupleFieldsNamesIndexesFromFieldsNames("XXX");
 	}
 	
 	@Override
@@ -91,13 +92,15 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		}
 		
 		if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(arguments))) {
+			LegislativeActVersionQueryStringBuilder.Tuple.set(arguments,builderArguments);
+			/*
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",LegislativeActVersionImpl.ENTITY_NAME));
 			
 			if((arguments.getFilterBackup() != null && arguments.getFilterBackup().getFieldValue(Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT) != null)) {
 				builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = t.%s AND la.%s = t",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_DEFAULT_VERSION));
 				builderArguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
 				//builderArguments.getTuple().addJoins(String.format("JOIN %s dv ON dv = t AND dv.%s = la",LegislativeActVersionImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
-			}
+			}*/
 		}
 		
 		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(arguments))) {
@@ -112,13 +115,14 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 					builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
 					builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));	
 					*/
-					ExpenditureQueryStringBuilder.Tuple.joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+					new ExpenditureQueryStringBuilder.Tuple.Amounts().build(builderArguments); //joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 					//if(!arguments.getQuery().getIdentifier().equals(expenditurePersistence.getQueryIdentifierCountDynamic()))
 					//	builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 				}
 				
 				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null) {
-					ExpenditureQueryStringBuilder.Tuple.joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+					new ExpenditureQueryStringBuilder.Tuple.Amounts().build(builderArguments);
+					//ExpenditureQueryStringBuilder.Tuple.joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 					//ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
 					//builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 				}
