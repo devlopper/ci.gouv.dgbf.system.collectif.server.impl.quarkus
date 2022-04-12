@@ -15,11 +15,11 @@
 	<groupId>ci.gouv.dgbf.system.collectif.server.impl</groupId>
 	<artifactId>collectif-server-impl-quarkus</artifactId>
 	<version>1.0.0</version>
-	
+
 	<properties>
 		<quarkus.version>2.4.0.Final</quarkus.version>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>ci.gouv.dgbf.system.collectif.server.api</groupId>
@@ -41,14 +41,23 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-smallrye-openapi</artifactId>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>io.quarkus</groupId>
-		    <artifactId>quarkus-scheduler</artifactId>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-scheduler</artifactId>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>io.smallrye.config</groupId>
+			<artifactId>smallrye-config-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.smallrye.config</groupId>
+			<artifactId>smallrye-config</artifactId>
+		</dependency>
+
 		<!-- TEST -->
-		
+
 		<dependency>
 			<groupId>ci.gouv.dgbf.system.collectif.server.client</groupId>
 			<artifactId>collectif-server-client-rest</artifactId>

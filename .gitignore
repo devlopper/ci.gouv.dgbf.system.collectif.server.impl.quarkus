@@ -36,3 +36,5 @@ nbproject/*
 
 #jrebel
 rebel.xml
+
+environment_variable.txt

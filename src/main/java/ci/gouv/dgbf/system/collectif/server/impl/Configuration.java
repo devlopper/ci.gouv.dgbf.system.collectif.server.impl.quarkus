@@ -1,5 +1,8 @@
 package ci.gouv.dgbf.system.collectif.server.impl;
 
+import org.cyk.quarkus.extension.core_.configuration.processing.Importation;
+import org.cyk.quarkus.extension.core_.configuration.processing.Copy;
+
 import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithConverter;
@@ -16,13 +19,5 @@ public interface Configuration extends org.cyk.quarkus.extension.core_.configura
 	Importation importation();
 	
 	Copy copy();
-	/**/
 	
-	public interface Importation extends org.cyk.quarkus.extension.core_.configuration.Processing {
-		
-	}
-
-	public interface Copy extends org.cyk.quarkus.extension.core_.configuration.Processing {
-		
-	}
 }

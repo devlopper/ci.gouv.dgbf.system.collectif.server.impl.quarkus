@@ -130,14 +130,14 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 				audit((ExpenditureImpl)expenditure,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 			});
 			
-			ExecutorService executorService = Executors.newFixedThreadPool(configuration.copy().executor().thread().count());
-			List<List<Expenditure>> batches = CollectionHelper.getBatches(expenditures, configuration.copy().batch().size());
+			ExecutorService executorService = Executors.newFixedThreadPool(configuration.copy().processing().executor().thread().count());
+			List<List<Expenditure>> batches = CollectionHelper.getBatches(expenditures, configuration.copy().processing().batch().size());
 			batches.forEach(batch -> {
 				executorService.execute(() -> {
 					updateBatch(batch, EntityManagerGetter.getInstance().get(), Boolean.TRUE, null);
 				});
 			});
-			shutdownExecutorService(executorService,configuration.copy().executor().timeout().duration(),configuration.copy().executor().timeout().unit());
+			shutdownExecutorService(executorService,configuration.copy().processing().executor().timeout().duration(),configuration.copy().processing().executor().timeout().unit());
 		}
 		return CollectionHelper.getSize(arrays);
 	}

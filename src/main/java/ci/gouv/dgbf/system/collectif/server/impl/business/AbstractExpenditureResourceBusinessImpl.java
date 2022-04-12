@@ -133,9 +133,9 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		try {
 			updateMaterializedView();
 			Long count = countImportable(legislativeActVersion);
-			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(),configuration.importation().batch().size());		
+			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(),configuration.importation().processing().batch().size());		
 			if(CollectionHelper.isNotEmpty(batchSizes)) {
-				LogHelper.log(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,configuration.importation().batch().size(),batchSizes.size()),Result.getLogLevel(), getClass());
+				LogHelper.log(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,configuration.importation().processing().batch().size(),batchSizes.size()),Result.getLogLevel(), getClass());
 				
 				List<Object[]> arrays = readImportable(legislativeActVersion);
 
@@ -143,17 +143,17 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 							
 				List<Object[]> lists = new ArrayList<>();
 				for(Integer index =0; index < batchSizes.size(); index = index + 1)
-					lists.add(new Object[] {new ArrayList<>(instances.subList(index*configuration.importation().batch().size(), index*configuration.importation().batch().size()+batchSizes.get(index))),index+1,batchSizes.size()});
+					lists.add(new Object[] {new ArrayList<>(instances.subList(index*configuration.importation().processing().batch().size(), index*configuration.importation().processing().batch().size()+batchSizes.get(index))),index+1,batchSizes.size()});
 				instances.clear();
 				instances = null;
-				ExecutorService executorService = Executors.newFixedThreadPool(configuration.importation().executor().thread().count());
+				ExecutorService executorService = Executors.newFixedThreadPool(configuration.importation().processing().executor().thread().count());
 				lists.forEach(array -> {
 					executorService.execute(() -> {
 						EntityManager __entityManager__ = EntityManagerGetter.getInstance().get();
 						createBatch(new ArrayList<>((List<ENTITY>)array[0]),__entityManager__,Boolean.TRUE,null);
 					});
 				});
-				shutdownExecutorService(executorService,configuration.importation().executor().timeout().duration(), configuration.importation().executor().timeout().unit());
+				shutdownExecutorService(executorService,configuration.importation().processing().executor().timeout().duration(), configuration.importation().processing().executor().timeout().unit());
 			}
 		} catch (Exception exception) {
 			throw new RuntimeException(exception);

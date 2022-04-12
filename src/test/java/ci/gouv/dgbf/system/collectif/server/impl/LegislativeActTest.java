@@ -91,24 +91,24 @@ public class LegislativeActTest {
 		assertThat(legislativeAct).isNotNull();
 		
 		assertThat(legislativeAct.getEntryAuthorization()).isNotNull();
-		assertThat(legislativeAct.getEntryAuthorization().getInitial()).isEqualTo(11l);
-		assertThat(legislativeAct.getEntryAuthorization().getActual()).isEqualTo(19l);
-		assertThat(legislativeAct.getEntryAuthorization().getMovement()).isEqualTo(8l);
+		assertThat(legislativeAct.getEntryAuthorization().getInitial()).isEqualTo(0l);
+		assertThat(legislativeAct.getEntryAuthorization().getActual()).isEqualTo(0l);
+		assertThat(legislativeAct.getEntryAuthorization().getMovement()).isEqualTo(0l);
 		assertThat(legislativeAct.getEntryAuthorization().getAdjustment()).isEqualTo(0l);
-		assertThat(legislativeAct.getEntryAuthorization().getActualPlusAdjustment()).isEqualTo(19l);
+		assertThat(legislativeAct.getEntryAuthorization().getActualPlusAdjustment()).isEqualTo(0l);
 		assertThat(legislativeAct.getEntryAuthorization().getMovementIncluded()).isEqualTo(0l);
-		assertThat(legislativeAct.getEntryAuthorization().getExpectedAdjustment()).isEqualTo(10l);
-		assertThat(legislativeAct.getEntryAuthorization().getExpectedAdjustmentMinusAdjustment()).isEqualTo(10l);
+		assertThat(legislativeAct.getEntryAuthorization().getExpectedAdjustment()).isEqualTo(50l);
+		assertThat(legislativeAct.getEntryAuthorization().getExpectedAdjustmentMinusAdjustment()).isEqualTo(50l);
 		
 		assertThat(legislativeAct.getPaymentCredit()).isNotNull();
-		assertThat(legislativeAct.getPaymentCredit().getInitial()).isEqualTo(3l);
-		assertThat(legislativeAct.getPaymentCredit().getActual()).isEqualTo(5l);
-		assertThat(legislativeAct.getPaymentCredit().getMovement()).isEqualTo(2l);
+		assertThat(legislativeAct.getPaymentCredit().getInitial()).isEqualTo(0l);
+		assertThat(legislativeAct.getPaymentCredit().getActual()).isEqualTo(0l);
+		assertThat(legislativeAct.getPaymentCredit().getMovement()).isEqualTo(0l);
 		assertThat(legislativeAct.getPaymentCredit().getAdjustment()).isEqualTo(7l);
-		assertThat(legislativeAct.getPaymentCredit().getActualPlusAdjustment()).isEqualTo(12l);
+		assertThat(legislativeAct.getPaymentCredit().getActualPlusAdjustment()).isEqualTo(7l);
 		assertThat(legislativeAct.getPaymentCredit().getMovementIncluded()).isEqualTo(0l);
-		assertThat(legislativeAct.getPaymentCredit().getExpectedAdjustment()).isEqualTo(20l);
-		assertThat(legislativeAct.getPaymentCredit().getExpectedAdjustmentMinusAdjustment()).isEqualTo(13l);
+		assertThat(legislativeAct.getPaymentCredit().getExpectedAdjustment()).isEqualTo(100l);
+		assertThat(legislativeAct.getPaymentCredit().getExpectedAdjustmentMinusAdjustment()).isEqualTo(93l);
 	}
 	
 	@Test @Order(1)

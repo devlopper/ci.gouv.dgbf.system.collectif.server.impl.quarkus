@@ -15,7 +15,7 @@ public class ResourceImplAsStringsReader extends AbstractResourceImplReader impl
 				,String.format("LEFT JOIN %s v ON v.%s = t.%s", ResourceView.ENTITY_NAME,ResourceView.FIELD_IDENTIFIER,ResourceImpl.FIELD_IDENTIFIER)
 				);
 		arguments.getProjection(Boolean.TRUE).addFromTuple("t",ResourceImpl.FIELD_IDENTIFIER).addFromTuple("la",LegislativeActImpl.FIELD_CODE).addFromTuple("lav",LegislativeActVersionImpl.FIELD_CODE);		
-		arguments.getProjection(Boolean.TRUE).addFromTuple("v",ResourceView.FIELD_SECTION_CODE,ResourceView.FIELD_BUDGET_SPECIALIZATION_UNIT_CODE,ResourceView.FIELD_ACTIVITY_CODE,ResourceView.FIELD_ECONOMIC_NATURE_CODE);
+		arguments.getProjection(Boolean.TRUE).addFromTuple("v",ResourceView.FIELD_SECTION_CODE,ResourceView.FIELD_BUDGET_SPECIALIZATION_UNIT_CODE,ResourceView.FIELD_ACTIVITY_CODE,ResourceView.FIELD_ECONOMIC_NATURE_CODE_NAME);
 		return arguments;
 	}
 	

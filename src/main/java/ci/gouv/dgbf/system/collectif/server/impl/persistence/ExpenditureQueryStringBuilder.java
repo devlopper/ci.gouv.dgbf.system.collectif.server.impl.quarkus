@@ -259,21 +259,58 @@ public interface ExpenditureQueryStringBuilder {
 		@Setter @Accessors(chain = true)
 		public static class Amounts implements Serializable {
 			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE,joinActVersion=Boolean.TRUE,joinAct=Boolean.TRUE;
-			protected String variableName = "t",actVersionVariableName="lav",actVariableName="la";
+			protected String expenditureVariableName = "t",actVersionVariableName="lav",actVariableName="la",exerciseVariableName="exercise";
 			
 			public void build(Arguments arguments) {
+				if(Boolean.TRUE.equals(view))
+					view(arguments);
+				if(Boolean.TRUE.equals(includedMovement))
+					joinIncludedMovement(arguments);
+				if(Boolean.TRUE.equals(available))
+					joinAvailable(arguments);
+			}
+			
+			protected void view(Arguments arguments) {
 				if(Boolean.TRUE.equals(view)) {
 					if(Boolean.TRUE.equals(joinActVersion))
-						arguments.getTuple().addJoins(String.format("JOIN %1$s %4$s ON %4$s = %2$s.%3$s",LegislativeActVersionImpl.ENTITY_NAME,variableName,ExpenditureImpl.FIELD_ACT_VERSION,actVersionVariableName));
-					arguments.getTuple().addJoins("LEFT "+getView(variableName,actVersionVariableName));
+						joinActVersion(arguments);
+					joinView(arguments);
 					if(Boolean.TRUE.equals(joinAct))
-						arguments.getTuple().addJoins(String.format("JOIN %1$s %3$s ON %3$s = %4$s.%2$s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT,actVariableName,actVersionVariableName));
-					arguments.getTuple().addJoins(String.format("LEFT JOIN %s exercise ON exercise.%s = %s.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,actVariableName,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+						joinAct(arguments);
+					joinExercise(arguments);
 				}
-				if(Boolean.TRUE.equals(includedMovement))
-					arguments.getTuple().addJoins("LEFT "+getIncludedMovement(variableName));
-				if(Boolean.TRUE.equals(available))
-					arguments.getTuple().addJoins("LEFT "+getAvailable(variableName));
+			}
+			
+			protected void joinActVersion(Arguments arguments) {
+				arguments.getTuple().addJoins(String.format("JOIN %1$s %4$s ON %4$s = %2$s.%3$s",LegislativeActVersionImpl.ENTITY_NAME,expenditureVariableName,ExpenditureImpl.FIELD_ACT_VERSION,actVersionVariableName));
+			}
+			
+			protected void joinAct(Arguments arguments) {
+				arguments.getTuple().addJoins(String.format("JOIN %1$s %3$s ON %3$s = %4$s.%2$s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT,actVariableName,actVersionVariableName));
+			}
+			
+			protected void joinView(Arguments arguments) {
+				arguments.getTuple().addJoins("LEFT "+getView(expenditureVariableName,actVersionVariableName));
+			}
+			
+			protected void joinExercise(Arguments arguments) {
+				arguments.getTuple().addJoins(String.format("LEFT JOIN %1$s %2$s ON %2$s.%3$s = %4$s.%5$s",ExerciseImpl.ENTITY_NAME,exerciseVariableName,ExerciseImpl.FIELD_IDENTIFIER,actVariableName,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));
+			}
+			
+			protected void joinIncludedMovement(Arguments arguments) {
+				arguments.getTuple().addJoins("LEFT "+getJoinIncludedMovement());
+			}
+			
+			protected void joinAvailable(Arguments arguments) {
+				arguments.getTuple().addJoins("LEFT "+getJoinAvailable());
+			}
+			
+			protected String getJoinIncludedMovement() {
+				return Tuple.getIncludedMovement(expenditureVariableName);
+			}
+			
+			protected String getJoinAvailable() {
+				return Tuple.getAvailable(expenditureVariableName);
 			}
 		}
 		

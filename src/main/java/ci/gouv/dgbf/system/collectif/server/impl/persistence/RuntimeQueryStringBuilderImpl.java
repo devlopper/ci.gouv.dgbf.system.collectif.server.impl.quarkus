@@ -245,6 +245,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
 				builderArguments.getOrder(Boolean.TRUE).desc("t", ExerciseImpl.FIELD_YEAR);
 			}
+		}else if(regulatoryActPersistence.getQueryIdentifierReadDynamic().equals(arguments.getQuery().getIdentifier())) {
+			if(builderArguments.getOrder() == null || CollectionHelper.isEmpty(builderArguments.getOrder().getStrings())) {
+				builderArguments.getOrder(Boolean.TRUE).desc("t", RegulatoryActImpl.FIELD_DATE);
+			}
 		}
 		
 		super.setOrder(arguments, builderArguments);
