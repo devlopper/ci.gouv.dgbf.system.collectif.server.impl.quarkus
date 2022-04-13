@@ -69,6 +69,8 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
 		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(queryExecutorArguments)) && Boolean.TRUE.equals(amountSumable))
 			ExpenditureQueryStringBuilder.Projection.set(queryExecutorArguments, builderArguments);
+		else if(Boolean.TRUE.equals(resourcePersistence.isProcessable(queryExecutorArguments)) && Boolean.TRUE.equals(amountSumable))
+			ResourceQueryStringBuilder.Projection.set(queryExecutorArguments, builderArguments);
 		//else if(Boolean.TRUE.equals(legislativeActVersionPersistence.isProcessable(queryExecutorArguments)) && Boolean.TRUE.equals(amountSumable))
 		//	LegislativeActVersionQueryStringBuilder.Projection.set(queryExecutorArguments, builderArguments);
 		else
@@ -109,42 +111,25 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
 				builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 			}else {*/
-				if(arguments.getFilterField(Parameters.AMOUNT_SUMABLE) != null || arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
-					/*
-					builderArguments.getTuple().addJoins(String.format("JOIN %s lav ON lav = t.%s",LegislativeActVersionImpl.ENTITY_NAME,ExpenditureImpl.FIELD_ACT_VERSION));
-					builderArguments.getTuple().addJoins(String.format("JOIN %s la ON la = lav.%s",LegislativeActImpl.ENTITY_NAME,LegislativeActVersionImpl.FIELD_ACT));
-					builderArguments.getTuple().addJoins(String.format("JOIN %s exercise ON exercise.%s = la.%s",ExerciseImpl.ENTITY_NAME,ExerciseImpl.FIELD_IDENTIFIER,LegislativeActImpl.FIELD_EXERCISE_IDENTIFIER));	
-					*/
-					new ExpenditureQueryStringBuilder.Tuple.Amounts().build(builderArguments); //joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
-					//if(!arguments.getQuery().getIdentifier().equals(expenditurePersistence.getQueryIdentifierCountDynamic()))
-					//	builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
-				}
-				
-				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null) {
+				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null || arguments.getFilterField(Parameters.AMOUNT_SUMABLE) != null || arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null)
 					new ExpenditureQueryStringBuilder.Tuple.Amounts().build(builderArguments);
-					//ExpenditureQueryStringBuilder.Tuple.joinAmounts(builderArguments,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
-					//ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
-					//builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
-				}
 				
-				/*String identifier = (String) arguments.getFilterFieldValue(Parameters.SECTION_IDENTIFIER);
-				if(StringHelper.isNotBlank(identifier)) {
-					builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier AND v.sectionIdentifier = '%s'",ExpenditureView.ENTITY_NAME
-							,identifier));
-					arguments.removeFilterFields(Parameters.SECTION_IDENTIFIER);
-				}
-				*/
 				if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
 					builderArguments.getTuple().addJoins(String.format("JOIN %s ev ON ev.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
 				}
 			//}
 		}else if(Boolean.TRUE.equals(resourcePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ResourceImpl.ENTITY_NAME));
+			
+			if(arguments.getFilterField(Parameters.AMOUNT_SUMABLE) != null)
+				new ResourceQueryStringBuilder.Tuple.Amounts().build(builderArguments);
+			
 			if(Boolean.TRUE.equals(isResourceJoinedToView(arguments, builderArguments))) {
 				builderArguments.getTuple().addJoins(String.format("JOIN %s v ON v.identifier = t.identifier",ResourceView.ENTITY_NAME));
 			}
 		}
 	}
+	
 	/*
 	@Override
 	protected Boolean isGroupedByIdentifier(QueryExecutorArguments arguments) {

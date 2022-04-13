@@ -13,11 +13,13 @@ import org.cyk.utility.persistence.server.query.RuntimeQueryBuilder;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourcePersistence;
 import io.quarkus.arc.Unremovable;
 
 @ApplicationScoped @ci.gouv.dgbf.system.collectif.server.api.System @Unremovable
 public class RuntimeQueryBuilderImpl extends RuntimeQueryBuilder.AbstractImpl implements Serializable {
 
+	@Inject ResourcePersistence resourcePersistence;
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	
@@ -27,6 +29,9 @@ public class RuntimeQueryBuilderImpl extends RuntimeQueryBuilder.AbstractImpl im
 		if(expenditurePersistence.isProcessable(queryExecutorArguments) && Boolean.TRUE.equals(amountSumable)) {
 			query.setResultClass(Object[].class);
 			query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_SUMS);
+		}else if(resourcePersistence.isProcessable(queryExecutorArguments) && Boolean.TRUE.equals(amountSumable)) {
+			query.setResultClass(Object[].class);
+			query.setTupleFieldsNamesIndexesFromFieldsNames(ResourceImpl.FIELDS_AMOUNTS_SUMS);
 		}else
 			super.setTupleFieldsNamesIndexesFromFieldsNames(queryExecutorArguments, query);
 	}

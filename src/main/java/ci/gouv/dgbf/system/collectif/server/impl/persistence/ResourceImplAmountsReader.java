@@ -6,11 +6,11 @@ public class ResourceImplAmountsReader extends AbstractResourceImplAmountsReader
 
 	@Override
 	protected Boolean hasIncludedMovement() {
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 	
 	@Override
 	protected Boolean hasAvailable() {
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 }

@@ -9,14 +9,14 @@ public class AbstractResourceImplAmountsReader extends AbstractResourceImplReade
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		ResourceQueryStringBuilder.Projection.projectAmounts(arguments,hasView(),hasIncludedMovement(),hasAvailable());
-		ResourceQueryStringBuilder.Tuple.joinAmounts(arguments,hasView(),null,null/*,hasIncludedMovement(),hasAvailable()*/);
+		new ResourceQueryStringBuilder.Projection.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new ResourceQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		return arguments;
 	}
 	
 	@Override
 	protected void __set__(ResourceImpl resource, Object[] array) {
-		ResourceQueryStringBuilder.Projection.setAmounts(resource, array,hasView(),null,null/*,hasIncludedMovement(),hasAvailable()*/);
+		ResourceQueryStringBuilder.Projection.setAmounts(resource, array,hasView(),hasIncludedMovement(),hasAvailable());
 	}
 	
 	protected Boolean hasView() {

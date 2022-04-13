@@ -106,6 +106,7 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	public static final String FIELDS_AMOUNTS_ACTUAL = "amountsActual";
 	public static final String FIELDS_AMOUNTS_AVAILABLE = "amountsAvailable";
 	public static final String FIELDS_AMOUNTS_MOVEMENT_INCLUDED = "amountsMovementIncluded";
+	public static final String FIELDS_AMOUNTS_SUMS = "amountsSums";
 	public static final String FIELDS_AUDITS_AS_STRINGS = "auditsAsStrings";
 		
 	public static final String ENTITY_NAME = "ResourceImpl";

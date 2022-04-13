@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
@@ -41,10 +39,6 @@ public abstract class AbstractResourceView extends AbstractIdentifiableSystemSca
 	@Column(name = COLUMN_ECONOMIC_NATURE_CODE_NAME) String economicNatureCodeName;
 	
 	@Embedded
-	@AttributeOverrides({
-		@AttributeOverride(name = RevenueView.FIELD_ACTUAL,column = @Column(name=RevenueView.COLUMN_ACTUAL))
-		,@AttributeOverride(name = RevenueView.FIELD_INITIAL,column = @Column(name=RevenueView.COLUMN_INITIAL))
-		})
 	RevenueView revenue = new RevenueView();
 	
 	@Override

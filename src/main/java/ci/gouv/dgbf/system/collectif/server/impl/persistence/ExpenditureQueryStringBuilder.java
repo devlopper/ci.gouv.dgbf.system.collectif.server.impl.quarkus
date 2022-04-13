@@ -36,66 +36,6 @@ public interface ExpenditureQueryStringBuilder {
 				new Amounts().setSumable(Boolean.TRUE).build(builderArguments);
 		}
 		
-		static void projectAmountsSums(Arguments arguments,Boolean view,Boolean includedMovement,Boolean available) {
-			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
-				arguments.getProjection(Boolean.TRUE).add(projectAmountSum("t", FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
-				if(Boolean.TRUE.equals(view)) {
-					arguments.getProjection().add(projectAmountSum("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
-					arguments.getProjection().add(projectAmountSum("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_MOVEMENT)));
-					arguments.getProjection().add(projectAmountSum("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_ACTUAL)));
-				}
-				if(Boolean.TRUE.equals(includedMovement))
-					arguments.getProjection().add(projectAmountSum("im", fieldName));
-				if(Boolean.TRUE.equals(available))
-					arguments.getProjection().add(projectAmountSum("available", fieldName));
-			}
-		}
-		
-		static String projectAmountSum(String tupleName,String fieldName) {
-			return Language.formatSum(projectAmount(tupleName, fieldName));
-		}
-		
-		static String projectAmount(String tupleName,String fieldName) {
-			return CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild(FieldHelper.join(tupleName,fieldName),"0l");
-		}
-		
-		static Integer setAmounts(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean view,Boolean includedMovement,Boolean available) {
-			if(amounts == null || index == null || index < 0)
-				return index;
-			if(index < array.length)
-				amounts.setAdjustment(NumberHelper.getLong(array[index++],0l));
-			if(Boolean.TRUE.equals(view)) {
-				if(index < array.length)
-					amounts.setInitial(NumberHelper.getLong(array[index++],0l));
-				if(index < array.length)
-					amounts.setMovement(NumberHelper.getLong(array[index++],0l));
-				if(index < array.length)
-					amounts.setActual(NumberHelper.getLong(array[index++],0l));
-			}
-			if(Boolean.TRUE.equals(includedMovement) && index < array.length)
-				amounts.setMovementIncluded(NumberHelper.getLong(array[index++],0l));
-			if(Boolean.TRUE.equals(available) && index < array.length)
-				amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
-			
-			amounts.computeActualPlusAdjustment();
-			if(Boolean.TRUE.equals(includedMovement))
-				amounts.computeActualMinusMovementIncludedPlusAdjustment();
-			if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available))
-				amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
-			return index;
-		}
-		
-		static void setAmounts(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available,Integer index) {
-			if(expenditure == null)
-				return;
-			index = setAmounts(expenditure.getEntryAuthorization(Boolean.TRUE),array,index,view,includedMovement,available);
-			setAmounts(expenditure.getPaymentCredit(Boolean.TRUE),array,index,view,includedMovement,available);
-		}
-		
-		static void setAmounts(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available) {
-			setAmounts(expenditure, array, view, includedMovement, available, 1);
-		}
-		
 		/**/
 		
 		@Setter @Accessors(chain = true)
@@ -168,59 +108,17 @@ public interface ExpenditureQueryStringBuilder {
 					amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
 				return index;
 			}
-		}
-		
-		static void projectAmounts(Arguments arguments) {
-			arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
-			for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
-				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
-				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_MOVEMENT)));
-				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmount("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_ACTUAL)));
-				
-				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmount("t", FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
-				
-				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmountMovementIncluded(fieldName));
-				
-				arguments.getProjection(Boolean.TRUE).add(projectExpenditureAmount("available", fieldName));
-			}
-		}
-		
-		static String projectExpenditureAmount(String tupleName,String fieldName) {
-			return String.format("MAX(%s)",CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild(FieldHelper.join(tupleName,fieldName),"0l"));
-		}
-		
-		static String projectExpenditureAmountMovementIncluded(String fieldName) {
-			return String.format("SUM(CASE WHEN ralav.included IS TRUE THEN rae.%sAmount ELSE 0l END)",fieldName);
-		}
-		
-		static Integer setAmounts(AbstractAmountsImpl amounts,Object[] array,Integer index) {
-			if(amounts == null || index == null || index < 0)
-				return index;
-			if(index < array.length)
-				amounts.setInitial(NumberHelper.getLong(array[index++],0l));
-			if(index < array.length)
-				amounts.setMovement(NumberHelper.getLong(array[index++],0l));
-			if(index < array.length)
-				amounts.setActual(NumberHelper.getLong(array[index++],0l));
-			if(index < array.length)
-				amounts.setAdjustment(NumberHelper.getLong(array[index++],0l));
-			if(index < array.length)
-				amounts.setMovementIncluded(NumberHelper.getLong(array[index++],0l));
-			if(index < array.length)
-				amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
 			
-			amounts.computeActualPlusAdjustment();
-			amounts.computeActualMinusMovementIncludedPlusAdjustment();
-			amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
-			System.out.println("ExpenditureQueryStringBuilder.Projection.setAmounts() :::: "+amounts);
-			return index;
-		}
-		
-		static void setAmounts(ExpenditureImpl expenditure,Object[] array) {
-			if(expenditure == null)
-				return;
-			Integer index = setAmounts(expenditure.getEntryAuthorization(Boolean.TRUE),array,1);
-			setAmounts(expenditure.getPaymentCredit(Boolean.TRUE),array,index);
+			static void set(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available,Integer index) {
+				if(expenditure == null)
+					return;
+				index = set(expenditure.getEntryAuthorization(Boolean.TRUE),array,index,null,view,includedMovement,available);
+				set(expenditure.getPaymentCredit(Boolean.TRUE),array,index,null,view,includedMovement,available);
+			}
+			
+			static void set(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available) {
+				set(expenditure, array, view, includedMovement, available, 1);
+			}
 		}
 	}
 	

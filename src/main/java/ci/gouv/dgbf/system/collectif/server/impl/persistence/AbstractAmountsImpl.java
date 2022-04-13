@@ -40,6 +40,13 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 		return this;
 	}
 	
+	@Override
+	public String toString() {
+		return String.format(STRING_FORMAT, initial,movement,actual,movementIncluded,adjustment,actualMinusMovementIncludedPlusAdjustment,available,availableMinusMovementIncludedPlusAdjustment);
+	}
+	
+	private static final String STRING_FORMAT = "INI=%s|MVT=%s|ACT=%s|MVI=%s|ADJ=%s|ACT-MVI+ADJ=%s|AVA=%s|AVA-MVI+ADJ=%s";
+	
 	public static final String FIELD_INITIAL = "initial";
 	public static final String FIELD_MOVEMENT = "movement";
 	public static final String FIELD_MOVEMENT_INCLUDED = "movementIncluded";

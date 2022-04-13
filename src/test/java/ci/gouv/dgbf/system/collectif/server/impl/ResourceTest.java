@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ResourceBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Resource;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourcePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
@@ -42,6 +43,7 @@ import ci.gouv.dgbf.system.collectif.server.client.rest.Revenue;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImplAsStringsReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImplEntryAuthorizationAdjustmentReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.RevenueImpl;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
@@ -58,7 +60,20 @@ public class ResourceTest {
 	@Inject ResourceController controller;
 	
 	@Test @Order(1)
-	void persistence_readResourceeOne_amounts_1() {
+	void persistence_sumsAmounts() {
+		/*String q = "SELECT SUM(CASE WHEN t.revenue.adjustment IS NULL THEN 0l ELSE t.revenue.adjustment END),SUM(CASE WHEN v.revenue.initial IS NULL THEN 0l ELSE v.revenue.initial END),SUM(CASE WHEN v.revenue.movement IS NULL THEN 0l ELSE v.revenue.movement END),SUM(CASE WHEN v.revenue.actual IS NULL THEN 0l ELSE v.revenue.actual END) FROM ResourceImpl t JOIN LegislativeActVersionImpl lav ON lav = t.actVersion LEFT JOIN ResourceView v ON v.legislativeActVersionIdentifier = lav.identifier AND v.activityIdentifier = t.activityIdentifier AND v.economicNatureIdentifier = t.economicNatureIdentifier JOIN LegislativeActImpl la ON la = lav.act LEFT JOIN ExerciseImpl exercise ON exercise.identifier = la.exerciseIdentifier WHERE t.actVersion.identifier = :vcol_id";
+		entityManager.createQuery(q).setParameter("vcol_id", "2021_1_1").getResultList().forEach(array -> {
+			System.out.println("ResourceTest.persistence_sumsAmounts() ARRAY : "+Arrays.deepToString((Object[])array));
+		});
+		*/
+		ResourceImpl resource = (ResourceImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(ResourceImpl.FIELDS_AMOUNTS).addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_1",Parameters.AMOUNT_SUMABLE,Boolean.TRUE));
+		assertThat(resource).isNotNull();
+		assertor.assertExpenditureAmounts(resource.getRevenue(),new RevenueImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(0l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(0l));
+	}
+	
+	@Test @Order(1)
+	void persistence_readResourceOne_amounts_1() {
 		ResourceImpl resource = (ResourceImpl) persistence.readOne(new QueryExecutorArguments()
 				.setQuery(new Query().setIdentifier(persistence.getQueryIdentifierReadDynamicOne()).setTupleClass(ResourceImpl.class))
 				.addFilterField("identifier", "2021_1_1_1").addProjectionsFromStrings(ResourceImpl.FIELDS_AMOUNTS)
