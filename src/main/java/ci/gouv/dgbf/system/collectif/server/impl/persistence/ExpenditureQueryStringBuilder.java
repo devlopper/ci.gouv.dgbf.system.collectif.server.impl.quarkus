@@ -155,7 +155,7 @@ public interface ExpenditureQueryStringBuilder {
 		/**/
 		
 		@Setter @Accessors(chain = true)
-		public static class Amounts implements Serializable {
+		public static class ExpendituresAmounts implements Serializable {
 			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE,joinActVersion=Boolean.TRUE,joinAct=Boolean.TRUE;
 			protected String expenditureVariableName = "t",actVersionVariableName="lav",actVariableName="la",exerciseVariableName="exercise";
 			

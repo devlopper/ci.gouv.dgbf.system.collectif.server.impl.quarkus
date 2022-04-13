@@ -16,9 +16,9 @@ public interface LegislativeActQueryStringBuilder {
 		}
 		
 		@Setter @Accessors(chain = true)
-		public static class Amounts extends LegislativeActVersionQueryStringBuilder.Projection.Amounts implements Serializable {
+		public static class ExpendituresAmounts extends LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts implements Serializable {
 
-			public Amounts() {
+			public ExpendituresAmounts() {
 				expectedVariableName = "t";
 			}
 			
@@ -35,7 +35,7 @@ public interface LegislativeActQueryStringBuilder {
 	public static interface Tuple {
 		
 		@Setter @Accessors(chain = true)
-		public static class Amounts extends ExpenditureQueryStringBuilder.Tuple.Amounts implements Serializable {
+		public static class Amounts extends ExpenditureQueryStringBuilder.Tuple.ExpendituresAmounts implements Serializable {
 			
 			public Amounts() {
 				joinAct = Boolean.FALSE;

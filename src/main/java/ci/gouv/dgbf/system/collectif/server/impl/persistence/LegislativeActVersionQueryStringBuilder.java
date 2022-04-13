@@ -17,13 +17,13 @@ public interface LegislativeActVersionQueryStringBuilder {
 		static void set(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
 			Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
 			if(Boolean.TRUE.equals(amountSumable))
-				new LegislativeActVersionQueryStringBuilder.Projection.Amounts().build(builderArguments);
+				new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().build(builderArguments);
 		}
 		
 		@Setter @Accessors(chain = true)
-		public static class Amounts extends ExpenditureQueryStringBuilder.Projection.Amounts implements Serializable {
+		public static class ExpendituresAmounts extends ExpenditureQueryStringBuilder.Projection.Amounts implements Serializable {
 
-			public Amounts() {
+			public ExpendituresAmounts() {
 				variableName = "e";
 				expectedVariableName = "la";
 				sumable = Boolean.TRUE;
@@ -54,7 +54,7 @@ public interface LegislativeActVersionQueryStringBuilder {
 		}
 		
 		@Setter @Accessors(chain = true)
-		public static class Amounts extends ExpenditureQueryStringBuilder.Tuple.Amounts implements Serializable {
+		public static class Amounts extends ExpenditureQueryStringBuilder.Tuple.ExpendituresAmounts implements Serializable {
 			
 			public Amounts() {
 				expenditureVariableName = "e";

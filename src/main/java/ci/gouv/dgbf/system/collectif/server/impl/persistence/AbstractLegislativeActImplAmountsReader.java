@@ -9,7 +9,7 @@ public class AbstractLegislativeActImplAmountsReader extends AbstractLegislative
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		new LegislativeActQueryStringBuilder.Projection.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new LegislativeActQueryStringBuilder.Projection.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		new LegislativeActQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		arguments.getGroup(Boolean.TRUE).add("t.identifier");
 		return arguments;
@@ -17,7 +17,7 @@ public class AbstractLegislativeActImplAmountsReader extends AbstractLegislative
 	
 	@Override
 	protected void __set__(LegislativeActImpl legislativeAct, Object[] array) {
-		LegislativeActQueryStringBuilder.Projection.Amounts.set(legislativeAct, array);
+		LegislativeActQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeAct, array);
 	}
 	
 	protected Boolean hasView() {

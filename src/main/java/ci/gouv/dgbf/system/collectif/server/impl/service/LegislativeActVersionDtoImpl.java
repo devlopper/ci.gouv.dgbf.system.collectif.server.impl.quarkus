@@ -60,6 +60,8 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
 		map.putAll(Map.of(
     			LegislativeActVersionDto.JSONS_STRINGS,LegislativeActVersionImpl.FIELDS_STRINGS
     			,LegislativeActVersionDto.JSONS_AMOUTNS,LegislativeActVersionImpl.FIELDS_AMOUNTS
+    			,LegislativeActVersionDto.JSONS_EXPENDITURES_AMOUTNS,LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS
+    			,LegislativeActVersionDto.JSONS_RESOURCES_AMOUTNS,LegislativeActVersionImpl.FIELDS_RESOURCES_AMOUNTS
     			,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE,LegislativeActVersionImpl.FIELDS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE
     			,LegislativeActVersionDto.JSONS_LEGISLATIVE_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP,LegislativeActVersionImpl.FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP
     			));

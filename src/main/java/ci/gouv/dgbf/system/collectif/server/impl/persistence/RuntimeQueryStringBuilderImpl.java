@@ -112,7 +112,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
 			}else {*/
 				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null || arguments.getFilterField(Parameters.AMOUNT_SUMABLE) != null || arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null)
-					new ExpenditureQueryStringBuilder.Tuple.Amounts().build(builderArguments);
+					new ExpenditureQueryStringBuilder.Tuple.ExpendituresAmounts().build(builderArguments);
 				
 				if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
 					builderArguments.getTuple().addJoins(String.format("JOIN %s ev ON ev.identifier = t.identifier",ExpenditureView.ENTITY_NAME));

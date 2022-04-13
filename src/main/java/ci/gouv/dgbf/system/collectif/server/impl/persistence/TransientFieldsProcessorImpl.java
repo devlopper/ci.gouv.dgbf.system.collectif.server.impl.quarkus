@@ -93,10 +93,13 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 				new LegislativeActVersionImplIsDefaultVersionReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_STRINGS.equals(fieldName))
 				new LegislativeActVersionImplAsStringsReader().readThenSet(legislativeActVersions, null);
-			else if(LegislativeActVersionImpl.FIELDS_AMOUNTS.equals(fieldName)) {
-				//LegislativeActVersionPersistenceImpl.readAmounts(legislativeActVersions);
+			else if(LegislativeActVersionImpl.FIELDS_AMOUNTS.equals(fieldName))
 				new LegislativeActVersionImplAmountsReader().readThenSet(legislativeActVersions, null);
-			}else if(LegislativeActVersionImpl.FIELDS_AMOUNTS_AVAILABLE.equals(fieldName))
+			else if(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS.equals(fieldName))
+				new LegislativeActVersionImplExpendituresAmountsReader().readThenSet(legislativeActVersions, null);
+			else if(LegislativeActVersionImpl.FIELDS_RESOURCES_AMOUNTS.equals(fieldName))
+				new LegislativeActVersionImplResourcesAmountsReader().readThenSet(legislativeActVersions, null);
+			else if(LegislativeActVersionImpl.FIELDS_AMOUNTS_AVAILABLE.equals(fieldName))
 				new LegislativeActVersionImplAmountsAvailableReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELD___AUDIT__.equals(fieldName))
 				new LegislativeActVersionImplAuditReader().readThenSet(legislativeActVersions, null);
