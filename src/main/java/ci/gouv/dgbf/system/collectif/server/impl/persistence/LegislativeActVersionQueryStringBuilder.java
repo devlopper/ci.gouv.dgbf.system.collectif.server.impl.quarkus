@@ -21,6 +21,27 @@ public interface LegislativeActVersionQueryStringBuilder {
 		}
 		
 		@Setter @Accessors(chain = true)
+		public static class ResourcesAmounts extends ResourceQueryStringBuilder.Projection.Amounts implements Serializable {
+
+			public ResourcesAmounts() {
+				variableName = "r";
+				expectedVariableName = "la";
+				sumable = Boolean.TRUE;
+			}
+			
+			@Override
+			protected Boolean isIdentifiable() {
+				return Boolean.TRUE;
+			}
+			
+			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array) {
+				if(legislativeActVersion == null)
+					return;
+				ResourceQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getRevenue(Boolean.TRUE),array,1,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+			}
+		}
+		
+		@Setter @Accessors(chain = true)
 		public static class ExpendituresAmounts extends ExpenditureQueryStringBuilder.Projection.Amounts implements Serializable {
 
 			public ExpendituresAmounts() {
@@ -40,7 +61,6 @@ public interface LegislativeActVersionQueryStringBuilder {
 				Integer index = ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getEntryAuthorization(Boolean.TRUE),array,1,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 				ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getPaymentCredit(Boolean.TRUE),array,index,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 			}
-			
 		}
 	}
 	
@@ -54,9 +74,23 @@ public interface LegislativeActVersionQueryStringBuilder {
 		}
 		
 		@Setter @Accessors(chain = true)
-		public static class Amounts extends ExpenditureQueryStringBuilder.Tuple.ExpendituresAmounts implements Serializable {
+		public static class ResourcesAmounts extends ResourceQueryStringBuilder.Tuple.Amounts implements Serializable {
 			
-			public Amounts() {
+			public ResourcesAmounts() {
+				resourceVariableName = "r";
+				actVersionVariableName = "t";
+			}
+			
+			@Override
+			protected void joinActVersion(Arguments arguments) {
+				arguments.getTuple().addJoins(String.format("JOIN %1$s %2$s ON %2$s.%3$s = %4$s",ResourceImpl.ENTITY_NAME,resourceVariableName,ResourceImpl.FIELD_ACT_VERSION,actVersionVariableName));
+			}
+		}
+		
+		@Setter @Accessors(chain = true)
+		public static class ExpendituresAmounts extends ExpenditureQueryStringBuilder.Tuple.Amounts implements Serializable {
+			
+			public ExpendituresAmounts() {
 				expenditureVariableName = "e";
 				actVersionVariableName = "t";
 			}

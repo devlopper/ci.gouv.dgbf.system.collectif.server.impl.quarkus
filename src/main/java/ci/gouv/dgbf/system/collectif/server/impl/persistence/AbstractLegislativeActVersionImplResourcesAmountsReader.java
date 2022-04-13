@@ -9,15 +9,15 @@ public class AbstractLegislativeActVersionImplResourcesAmountsReader extends Abs
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
-		new LegislativeActVersionQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new LegislativeActVersionQueryStringBuilder.Projection.ResourcesAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new LegislativeActVersionQueryStringBuilder.Tuple.ResourcesAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		arguments.getGroup(Boolean.TRUE).add("t.identifier");
 		return arguments;
 	}
 	
 	@Override
 	protected void __set__(LegislativeActVersionImpl legislativeActVersion, Object[] array) {
-		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion, array);
+		LegislativeActVersionQueryStringBuilder.Projection.ResourcesAmounts.set(legislativeActVersion, array);
 	}
 	
 	protected Boolean hasView() {

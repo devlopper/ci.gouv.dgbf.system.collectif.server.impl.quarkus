@@ -10,7 +10,7 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
 		new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
-		new LegislativeActVersionQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new LegislativeActVersionQueryStringBuilder.Tuple.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		arguments.getGroup(Boolean.TRUE).add("t.identifier");
 		return arguments;
 	}

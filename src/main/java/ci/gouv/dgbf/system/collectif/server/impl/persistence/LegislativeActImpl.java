@@ -70,6 +70,11 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	
 	@Valid
 	@Embedded
+	@AttributeOverrides({@AttributeOverride(name = RevenueImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_REVENUE_ADJUSTMENT,nullable = true))})
+	RevenueImpl revenue;
+	
+	@Valid
+	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = EntryAuthorizationImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT,nullable = true))})
 	EntryAuthorizationImpl entryAuthorization;
 	
@@ -142,6 +147,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN_EXERCISE = "EXERCICE";
 	public static final String COLUMN_DEFAULT_VERSION = "VERSION_PAR_DEFAUT";
 	public static final String COLUMN_IN_PROGRESS = "EN_COURS";
+	public static final String COLUMN_EXPECTED_REVENUE_ADJUSTMENT = "AJUSTEMENT_RESSOURCE_ATTENDU";
 	public static final String COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT = "AJUSTEMENT_AE_ATTENDU";
 	public static final String COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT = "AJUSTEMENT_CP_ATTENDU";
 	public static final String COLUMN_SIGNATORY = "SIGNATAIRE";

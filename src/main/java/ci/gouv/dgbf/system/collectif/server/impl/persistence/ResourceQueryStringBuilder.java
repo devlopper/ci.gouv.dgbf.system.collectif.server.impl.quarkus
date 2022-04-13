@@ -212,7 +212,7 @@ public interface ResourceQueryStringBuilder {
 		@Setter @Accessors(chain = true)
 		public static class Amounts implements Serializable {
 			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.FALSE,available=Boolean.FALSE,joinActVersion=Boolean.TRUE,joinAct=Boolean.TRUE;
-			protected String expenditureVariableName = "t",actVersionVariableName="lav",actVariableName="la",exerciseVariableName="exercise";
+			protected String resourceVariableName = "t",actVersionVariableName="lav",actVariableName="la",exerciseVariableName="exercise";
 			
 			public void build(Arguments arguments) {
 				if(Boolean.TRUE.equals(view))
@@ -235,7 +235,7 @@ public interface ResourceQueryStringBuilder {
 			}
 			
 			protected void joinActVersion(Arguments arguments) {
-				arguments.getTuple().addJoins(String.format("JOIN %1$s %4$s ON %4$s = %2$s.%3$s",LegislativeActVersionImpl.ENTITY_NAME,expenditureVariableName,ExpenditureImpl.FIELD_ACT_VERSION,actVersionVariableName));
+				arguments.getTuple().addJoins(String.format("JOIN %1$s %4$s ON %4$s = %2$s.%3$s",LegislativeActVersionImpl.ENTITY_NAME,resourceVariableName,ExpenditureImpl.FIELD_ACT_VERSION,actVersionVariableName));
 			}
 			
 			protected void joinAct(Arguments arguments) {
@@ -243,7 +243,7 @@ public interface ResourceQueryStringBuilder {
 			}
 			
 			protected void joinView(Arguments arguments) {
-				arguments.getTuple().addJoins("LEFT "+getView(expenditureVariableName,actVersionVariableName));
+				arguments.getTuple().addJoins("LEFT "+getView(resourceVariableName,actVersionVariableName));
 			}
 			
 			protected void joinExercise(Arguments arguments) {
@@ -259,11 +259,11 @@ public interface ResourceQueryStringBuilder {
 			}
 			
 			protected String getJoinIncludedMovement() {
-				return Tuple.getIncludedMovement(expenditureVariableName);
+				return Tuple.getIncludedMovement(resourceVariableName);
 			}
 			
 			protected String getJoinAvailable() {
-				return Tuple.getAvailable(expenditureVariableName);
+				return Tuple.getAvailable(resourceVariableName);
 			}
 		}
 	}

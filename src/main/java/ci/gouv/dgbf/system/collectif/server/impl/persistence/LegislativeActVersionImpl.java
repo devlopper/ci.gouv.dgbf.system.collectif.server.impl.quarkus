@@ -70,6 +70,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@Transient String actGeneratableAsString;
 	@Transient Boolean generatedActDeletable;
 	@Transient String generatedActDeletableAsString;
+	@Transient RevenueImpl revenue;
 	@Transient EntryAuthorizationImpl entryAuthorization;
 	@Transient PaymentCreditImpl paymentCredit;
 	
@@ -92,6 +93,12 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public LegislativeActVersionImpl setAct(LegislativeAct act) {
 		this.act = (LegislativeActImpl) act;
 		return this;
+	}
+	
+	public RevenueImpl getRevenue(Boolean instantiateIfNull) {
+		if(revenue == null && Boolean.TRUE.equals(instantiateIfNull))
+			revenue = new RevenueImpl();
+		return revenue;
 	}
 	
 	public EntryAuthorizationImpl getEntryAuthorization(Boolean instantiateIfNull) {

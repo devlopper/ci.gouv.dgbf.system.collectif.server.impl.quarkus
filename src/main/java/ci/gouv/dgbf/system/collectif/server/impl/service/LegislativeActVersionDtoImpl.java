@@ -33,8 +33,9 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
 	@JsonbProperty(value = JSON_ACT_GENERATABLE) Boolean actGeneratable;
 	@JsonbProperty(value = JSON_GENERATED_ACT_DELETABLE) Boolean generatedActDeletable;
 	@JsonbProperty(value = JSON_NUMBER) Byte number;
+	@JsonbProperty(value = JSON_REVENUE) RevenueDtoImpl revenue;	
 	@JsonbProperty(value = JSON_ENTRY_AUTHORIZATION) EntryAuthorizationDtoImpl entryAuthorization;	
-	@JsonbProperty(value = JSON_PAYMENT_CREDIT) PaymentCreditDtoImpl paymentCredit;		
+	@JsonbProperty(value = JSON_PAYMENT_CREDIT) PaymentCreditDtoImpl paymentCredit;			
 	@JsonbProperty(value = JSON___AUDIT__) String __audit__;	
 	
 	@Override @JsonbProperty(value = JSON_LEGISLATIVE_ACT)
