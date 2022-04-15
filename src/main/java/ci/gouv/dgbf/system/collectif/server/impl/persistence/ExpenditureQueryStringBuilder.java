@@ -40,7 +40,7 @@ public interface ExpenditureQueryStringBuilder {
 		
 		@Setter @Accessors(chain = true)
 		public static class Amounts {
-			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE;
+			protected Boolean adjustment=Boolean.TRUE,expected,view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE;
 			protected String variableName = "t",expectedVariableName;
 			protected Boolean sumable = Boolean.FALSE;
 
@@ -48,8 +48,9 @@ public interface ExpenditureQueryStringBuilder {
 				if(isIdentifiable())
 					arguments.getProjection(Boolean.TRUE).addFromTuple("t",ExpenditureImpl.FIELD_IDENTIFIER);
 				for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
-					arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
-					if(StringHelper.isNotBlank(expectedVariableName))
+					if(Boolean.TRUE.equals(adjustment))
+						arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
+					if(Boolean.TRUE.equals(expected) && StringHelper.isNotBlank(expectedVariableName))
 						arguments.getProjection().add(get(expectedVariableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
 					if(Boolean.TRUE.equals(view)) {
 						arguments.getProjection().add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
@@ -78,10 +79,11 @@ public interface ExpenditureQueryStringBuilder {
 				return string;
 			}
 			
-			public static Integer set(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
+			public static Integer set(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
 				if(amounts == null || index == null || index < 0)
 					return index;
-				if(index < array.length)
+				amounts.nullify();
+				if(Boolean.TRUE.equals(adjustment) && index < array.length)
 					amounts.setAdjustment(NumberHelper.getLong(array[index++],0l));
 				if(Boolean.TRUE.equals(expected)) {
 					amounts.setExpectedAdjustment(NumberHelper.getLong(array[index++],0l));
@@ -109,15 +111,15 @@ public interface ExpenditureQueryStringBuilder {
 				return index;
 			}
 			
-			static void set(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available,Integer index) {
+			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available,Integer index) {
 				if(expenditure == null)
 					return;
-				index = set(expenditure.getEntryAuthorization(Boolean.TRUE),array,index,null,view,includedMovement,available);
-				set(expenditure.getPaymentCredit(Boolean.TRUE),array,index,null,view,includedMovement,available);
+				index = set(expenditure.getEntryAuthorization(Boolean.TRUE),array,index,adjustment,expected,view,includedMovement,available);
+				set(expenditure.getPaymentCredit(Boolean.TRUE),array,index,adjustment,expected,view,includedMovement,available);
 			}
 			
-			static void set(ExpenditureImpl expenditure,Object[] array,Boolean view,Boolean includedMovement,Boolean available) {
-				set(expenditure, array, view, includedMovement, available, 1);
+			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
+				set(expenditure, array,adjustment,expected, view, includedMovement, available, 1);
 			}
 		}
 	}
@@ -162,10 +164,20 @@ public interface ExpenditureQueryStringBuilder {
 			public void build(Arguments arguments) {
 				if(Boolean.TRUE.equals(view))
 					view(arguments);
-				if(Boolean.TRUE.equals(includedMovement))
+				if(Boolean.TRUE.equals(includedMovement)) {
+					if(!Boolean.TRUE.equals(view)) {
+						joinActVersion(arguments);
+					}
 					joinIncludedMovement(arguments);
-				if(Boolean.TRUE.equals(available))
+				}
+				if(Boolean.TRUE.equals(available)) {
+					if(!Boolean.TRUE.equals(view)) {
+						joinActVersion(arguments);
+						joinAct(arguments);
+						joinExercise(arguments);
+					}
 					joinAvailable(arguments);
+				}
 			}
 			
 			protected void view(Arguments arguments) {

@@ -40,6 +40,22 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 		return this;
 	}
 	
+	void nullify() {
+		adjustment = null;
+		expectedAdjustment = null;
+		expectedAdjustmentMinusAdjustment = null;
+		
+		initial = null;
+		movement = null;
+		movementIncluded = null;
+		actual = null;
+		actualMinusMovementIncluded = null;
+		available = null;	
+		actualPlusAdjustment = null;
+		actualMinusMovementIncludedPlusAdjustment = null;
+		availableMinusMovementIncludedPlusAdjustment = null;
+	}
+	
 	@Override
 	public String toString() {
 		return String.format(STRING_FORMAT, initial,movement,actual,movementIncluded,adjustment,actualMinusMovementIncludedPlusAdjustment,available,availableMinusMovementIncludedPlusAdjustment);

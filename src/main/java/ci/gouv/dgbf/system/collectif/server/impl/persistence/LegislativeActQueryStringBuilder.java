@@ -25,8 +25,8 @@ public interface LegislativeActQueryStringBuilder {
 			public static void set(LegislativeActImpl legislativeAct,Object[] array) {
 				if(legislativeAct == null)
 					return;
-				Integer index = ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeAct.getEntryAuthorization(Boolean.TRUE),array,1,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
-				ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeAct.getPaymentCredit(Boolean.TRUE),array,index,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+				Integer index = ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeAct.getEntryAuthorization(Boolean.TRUE),array,1,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeAct.getPaymentCredit(Boolean.TRUE),array,index,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
 			}
 			
 		}

@@ -17,7 +17,7 @@ public class QueryResultMapperImpl extends org.cyk.utility.persistence.query.Que
 	protected <T> T instantiateArray(Class<T> klass, Map<String, Integer> fieldsNamesIndexes, Object[] array) {
 		if((Expenditure.class.equals(klass) || ExpenditureImpl.class.equals(klass)) && fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_SUMS)) {
 			ExpenditureImpl expenditure = new ExpenditureImpl();
-			ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,0);
+			ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,0);
 			expenditure.getEntryAuthorization().setExpectedAdjustment(null);
 			expenditure.getEntryAuthorization().setExpectedAdjustmentMinusAdjustment(null);
 			return (T) expenditure;

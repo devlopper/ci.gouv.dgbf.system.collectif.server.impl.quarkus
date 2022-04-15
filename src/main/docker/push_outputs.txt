@@ -304,3 +304,60 @@ d7dd9b60abe8: Layer already exists
 443de04d9810: Pushed
 11cd69187882: Pushed
 v0.0.0-202204140910: digest: sha256:f7b767e342beb9e40737901b05048c417441334b698a03001a7fcf2d193c0508 size: 1790
+Publishing with time stamp : v0.0.0-202204141402 
+The push refers to repository [10.3.4.18:5000/mic-collectif-api]
+5ebb585ae862: Preparing
+af49237ff7ce: Preparing
+6cf97c8ffb4f: Preparing
+bdf4f84eb57b: Preparing
+d7dd9b60abe8: Preparing
+1323ffbff4dd: Preparing
+744c86b54390: Preparing
+1323ffbff4dd: Waiting
+d7dd9b60abe8: Layer already exists
+1323ffbff4dd: Layer already exists
+744c86b54390: Layer already exists
+6cf97c8ffb4f: Pushed
+af49237ff7ce: Pushed
+5ebb585ae862: Pushed
+bdf4f84eb57b: Pushed
+v0.0.0-202204141402: digest: sha256:c053111d32f1962ab908c42dd0244134480f811def256ea8a03f41e32e93a626 size: 1790
+Publishing with time stamp : v0.0.0-202204142136 
+The push refers to repository [10.3.4.18:5000/mic-collectif-api]
+5ebb585ae862: Preparing
+af49237ff7ce: Preparing
+6cf97c8ffb4f: Preparing
+bdf4f84eb57b: Preparing
+d7dd9b60abe8: Preparing
+1323ffbff4dd: Preparing
+744c86b54390: Preparing
+1323ffbff4dd: Waiting
+744c86b54390: Waiting
+d7dd9b60abe8: Layer already exists
+bdf4f84eb57b: Layer already exists
+af49237ff7ce: Layer already exists
+6cf97c8ffb4f: Layer already exists
+5ebb585ae862: Layer already exists
+1323ffbff4dd: Layer already exists
+744c86b54390: Layer already exists
+v0.0.0-202204142136: digest: sha256:c053111d32f1962ab908c42dd0244134480f811def256ea8a03f41e32e93a626 size: 1790
+Publishing with time stamp : v0.0.0-202204142139 
+The push refers to repository [10.3.4.18:5000/mic-collectif-api]
+4f7c013adcb8: Preparing
+555ca766d93e: Preparing
+df1d20ed6fcd: Preparing
+ae5420058854: Preparing
+d7dd9b60abe8: Preparing
+1323ffbff4dd: Preparing
+744c86b54390: Preparing
+d7dd9b60abe8: Waiting
+1323ffbff4dd: Waiting
+744c86b54390: Waiting
+df1d20ed6fcd: Pushed
+d7dd9b60abe8: Layer already exists
+1323ffbff4dd: Layer already exists
+744c86b54390: Layer already exists
+555ca766d93e: Pushed
+4f7c013adcb8: Pushed
+ae5420058854: Pushed
+v0.0.0-202204142139: digest: sha256:9592a1d05227c449d42de9a5fa9e3c85616e9feaaa8455dcc8f0072885dd417b size: 1790

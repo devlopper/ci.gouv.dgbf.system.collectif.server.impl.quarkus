@@ -34,10 +34,10 @@ public interface LegislativeActVersionQueryStringBuilder {
 				return Boolean.TRUE;
 			}
 			
-			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array) {
+			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
 				if(legislativeActVersion == null)
 					return;
-				ResourceQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getRevenue(Boolean.TRUE),array,1,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+				ResourceQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getRevenue(Boolean.TRUE),array,1,expected,view,includedMovement,available);
 			}
 		}
 		
@@ -46,6 +46,7 @@ public interface LegislativeActVersionQueryStringBuilder {
 
 			public ExpendituresAmounts() {
 				variableName = "e";
+				expected = Boolean.TRUE;
 				expectedVariableName = "la";
 				sumable = Boolean.TRUE;
 			}
@@ -55,11 +56,11 @@ public interface LegislativeActVersionQueryStringBuilder {
 				return Boolean.TRUE;
 			}
 			
-			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array) {
+			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
 				if(legislativeActVersion == null)
 					return;
-				Integer index = ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getEntryAuthorization(Boolean.TRUE),array,1,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
-				ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getPaymentCredit(Boolean.TRUE),array,index,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE);
+				Integer index = ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getEntryAuthorization(Boolean.TRUE),array,1,adjustment,expected,view,includedMovement,available);
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getPaymentCredit(Boolean.TRUE),array,index,adjustment,expected,view,includedMovement,available);
 			}
 		}
 	}

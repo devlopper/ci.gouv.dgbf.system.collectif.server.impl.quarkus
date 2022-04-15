@@ -9,7 +9,7 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().setAdjustment(hasAdjustment()).setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		new LegislativeActVersionQueryStringBuilder.Tuple.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		arguments.getGroup(Boolean.TRUE).add("t.identifier");
 		return arguments;
@@ -17,7 +17,15 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 	
 	@Override
 	protected void __set__(LegislativeActVersionImpl legislativeActVersion, Object[] array) {
-		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion, array);
+		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion, array,hasAdjustment(),hasExpectedAdjustment(),hasView(),hasIncludedMovement(),hasAvailable());
+	}
+	
+	protected Boolean hasAdjustment() {
+		return Boolean.TRUE;
+	}
+	
+	protected Boolean hasExpectedAdjustment() {
+		return Boolean.TRUE;
 	}
 	
 	protected Boolean hasView() {

@@ -46,10 +46,10 @@ public class LegislativeActVersionTest {
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_AMOUNTS)
 				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
 		assertThat(legislativeActVersion).isNotNull();
-		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(0l).setMovementIncluded(0l)
-				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(0l));
-		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(6l).setAvailable(0l).setMovementIncluded(0l)
-				.setActualMinusMovementIncludedPlusAdjustment(6l).setAvailableMinusMovementIncludedPlusAdjustment(6l));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(8l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(8l));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(6l).setAvailable(5l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(6l).setAvailableMinusMovementIncludedPlusAdjustment(11l));
 	}
 	
 	@Test @Order(1)
@@ -57,10 +57,54 @@ public class LegislativeActVersionTest {
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS)
 				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
 		assertThat(legislativeActVersion).isNotNull();
-		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(0l).setMovementIncluded(0l)
-				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(0l));
-		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(6l).setAvailable(0l).setMovementIncluded(0l)
-				.setActualMinusMovementIncludedPlusAdjustment(6l).setAvailableMinusMovementIncludedPlusAdjustment(6l));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(8l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(8l));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(6l).setAvailable(5l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(6l).setAvailableMinusMovementIncludedPlusAdjustment(11l));
+	}
+	
+	@Test @Order(1)
+	void persistence_sumsExpendituresAmountsWithoutAvailable() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITHOUT_AVAILABLE)
+				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
+		assertThat(legislativeActVersion).isNotNull();
+		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(null).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(6l).setAvailable(null).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(6l).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
+	void persistence_sumsExpendituresAmountsWithoutIncludedMovementAndAvailable() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE)
+				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
+		assertThat(legislativeActVersion).isNotNull();
+		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(0l).setAvailable(null).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(0l).setMovement(0l).setActual(0l).setAdjustment(6l).setAvailable(null).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
+	void persistence_sumsExpendituresAmountsAvailableOnly() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITH_AVAILABLE_ONLY)
+				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
+		assertThat(legislativeActVersion).isNotNull();
+		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(8l).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(5l).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
+	void persistence_sumsExpendituresAmountMovementIncludedOnly() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY)
+				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
+		assertThat(legislativeActVersion).isNotNull();
+		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(null).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(null).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(null));
 	}
 	
 	//@Test @Order(1)

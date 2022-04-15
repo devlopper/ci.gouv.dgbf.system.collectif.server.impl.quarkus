@@ -17,7 +17,7 @@ public class AbstractLegislativeActVersionImplResourcesAmountsReader extends Abs
 	
 	@Override
 	protected void __set__(LegislativeActVersionImpl legislativeActVersion, Object[] array) {
-		LegislativeActVersionQueryStringBuilder.Projection.ResourcesAmounts.set(legislativeActVersion, array);
+		LegislativeActVersionQueryStringBuilder.Projection.ResourcesAmounts.set(legislativeActVersion, array,Boolean.TRUE,hasView(),hasIncludedMovement(),hasAvailable());
 	}
 	
 	protected Boolean hasView() {

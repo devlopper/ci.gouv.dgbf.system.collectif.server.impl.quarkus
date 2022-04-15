@@ -17,7 +17,7 @@ public class AbstractLegislativeActVersionImplAmountsReader extends AbstractLegi
 	
 	@Override
 	protected void __set__(LegislativeActVersionImpl legislativeActVersion, Object[] array) {
-		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion, array);
+		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion, array,Boolean.TRUE,Boolean.TRUE,hasView(),hasIncludedMovement(),hasAvailable());
 	}
 	
 	protected Boolean hasView() {

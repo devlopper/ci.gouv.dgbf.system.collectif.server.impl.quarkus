@@ -16,7 +16,7 @@ public class AbstractExpenditureImplAmountsReader extends AbstractExpenditureImp
 	
 	@Override
 	protected void __set__(ExpenditureImpl expenditure, Object[] array) {
-		ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure, array,hasView(),hasIncludedMovement(),hasAvailable());
+		ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure, array,Boolean.TRUE,null,hasView(),hasIncludedMovement(),hasAvailable());
 	}
 	
 	protected Boolean hasView() {
