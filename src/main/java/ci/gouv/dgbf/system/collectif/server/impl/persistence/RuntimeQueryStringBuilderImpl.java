@@ -266,6 +266,11 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LESSOR_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_LESSOR_IDENTIFIER);
 		
+		if(arguments.getFilterFieldValue(Parameters.EXPENDITURES_IDENTIFIERS) != null) {
+			predicate.add("t.identifier IN :identifiers");
+			filter.addField("identifiers", arguments.getFilterFieldValue(Parameters.EXPENDITURES_IDENTIFIERS));
+		}
+		
 		if(arguments.getFilterFieldValue(Parameters.ACTIVITIES_IDENTIFIERS) != null) {
 			predicate.add("t.activityIdentifier IN :activitiesIdentifiers");
 			filter.addField("activitiesIdentifiers", arguments.getFilterFieldValue(Parameters.ACTIVITIES_IDENTIFIERS));

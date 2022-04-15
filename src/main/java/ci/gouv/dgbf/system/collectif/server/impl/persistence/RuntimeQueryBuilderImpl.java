@@ -28,7 +28,14 @@ public class RuntimeQueryBuilderImpl extends RuntimeQueryBuilder.AbstractImpl im
 		Boolean amountSumable = queryExecutorArguments.getFilterBackup() == null ? null : ValueHelper.convertToBoolean(queryExecutorArguments.getFilterBackup().getFieldValue(Parameters.AMOUNT_SUMABLE));
 		if(expenditurePersistence.isProcessable(queryExecutorArguments) && Boolean.TRUE.equals(amountSumable)) {
 			query.setResultClass(Object[].class);
-			query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_SUMS);
+			if(Boolean.TRUE.equals(ValueHelper.convertToBoolean(queryExecutorArguments.getFilterBackup().getFieldValue(Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))))
+				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE);
+			else if(Boolean.TRUE.equals(ValueHelper.convertToBoolean(queryExecutorArguments.getFilterBackup().getFieldValue(Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY))))
+				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY);
+			else if(Boolean.TRUE.equals(ValueHelper.convertToBoolean(queryExecutorArguments.getFilterBackup().getFieldValue(Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY))))
+				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY);
+			else
+				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_SUMS);
 		}else if(resourcePersistence.isProcessable(queryExecutorArguments) && Boolean.TRUE.equals(amountSumable)) {
 			query.setResultClass(Object[].class);
 			query.setTupleFieldsNamesIndexesFromFieldsNames(ResourceImpl.FIELDS_AMOUNTS_SUMS);

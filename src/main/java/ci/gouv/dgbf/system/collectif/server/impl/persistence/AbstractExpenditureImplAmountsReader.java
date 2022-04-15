@@ -9,7 +9,7 @@ public class AbstractExpenditureImplAmountsReader extends AbstractExpenditureImp
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		new ExpenditureQueryStringBuilder.Projection.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new ExpenditureQueryStringBuilder.Projection.Amounts().setAdjustment(hasAdjustment()).setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		new ExpenditureQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		return arguments;
 	}
@@ -17,6 +17,14 @@ public class AbstractExpenditureImplAmountsReader extends AbstractExpenditureImp
 	@Override
 	protected void __set__(ExpenditureImpl expenditure, Object[] array) {
 		ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure, array,Boolean.TRUE,null,hasView(),hasIncludedMovement(),hasAvailable());
+	}
+	
+	protected Boolean hasAdjustment() {
+		return Boolean.TRUE;
+	}
+	
+	protected Boolean hasExpectedAdjustment() {
+		return Boolean.FALSE;
 	}
 	
 	protected Boolean hasView() {

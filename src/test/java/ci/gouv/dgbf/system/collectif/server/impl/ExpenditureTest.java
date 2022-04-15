@@ -90,6 +90,39 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
+	void persistence_sumsAmounts_withoutIncludedMovmentAndAvailable() {
+		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2"
+				,Parameters.AMOUNT_SUMABLE,Boolean.TRUE,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE,Boolean.TRUE));
+		assertThat(expenditure).isNotNull();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(11l).setMovement(8l).setActual(19l).setAdjustment(33l).setAvailable(null).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(5l).setMovement(12l).setActual(17l).setAdjustment(7l).setAvailable(null).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
+	void persistence_sumsAmounts_includedMovementOnly() {
+		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2"
+				,Parameters.AMOUNT_SUMABLE,Boolean.TRUE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY,Boolean.TRUE));
+		assertThat(expenditure).isNotNull();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(null).setMovementIncluded(-23l)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(null).setMovementIncluded(-23l)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
+	void persistence_sumsAmounts_availableOnly() {
+		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2"
+				,Parameters.AMOUNT_SUMABLE,Boolean.TRUE,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY,Boolean.TRUE));
+		assertThat(expenditure).isNotNull();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(-91l).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(-95l).setMovementIncluded(null)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
 	void persistence_readAmounts_array() {
 		Collection<ExpenditureImpl> expenditures = new ExpenditureImplAmountsReader().readByIdentifiersThenInstantiate(List.of("2022_1_2_9"), null);
 		assertThat(expenditures).isNotNull();
@@ -218,6 +251,45 @@ public class ExpenditureTest {
 	@Test @Order(1)
     public void service_get_amounts_sums() {
 		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")))
+				//.log().all()
+				.get("/api/depenses/sommation-montants");
+		response.then()
+			//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
+    }
+	
+	@Test @Order(1)
+    public void service_get_amounts_sums_without_includedMovementAndAvailable() {
+		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")
+				.addField(Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE, "true")))
+				//.log().all()
+				.get("/api/depenses/sommation-montants");
+		response.then()
+			//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
+    }
+	
+	@Test @Order(1)
+    public void service_get_amounts_sums_with_includedMovementOnly() {
+		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")
+				.addField(Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY, "true")))
+				//.log().all()
+				.get("/api/depenses/sommation-montants");
+		response.then()
+			//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
+    }
+	
+	@Test @Order(1)
+    public void service_get_amounts_sums_with_availableOnly() {
+		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")
+				.addField(Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY, "true")))
 				//.log().all()
 				.get("/api/depenses/sommation-montants");
 		response.then()

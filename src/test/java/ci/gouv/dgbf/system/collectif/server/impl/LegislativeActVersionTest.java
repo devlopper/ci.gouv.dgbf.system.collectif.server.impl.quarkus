@@ -102,9 +102,9 @@ public class LegislativeActVersionTest {
 				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
 		assertThat(legislativeActVersion).isNotNull();
 		assertor.assertExpenditureAmounts(legislativeActVersion.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(null).setMovementIncluded(0l)
-				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(null));
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
 		assertor.assertExpenditureAmounts(legislativeActVersion.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(null).setMovementIncluded(0l)
-				.setActualMinusMovementIncludedPlusAdjustment(0l).setAvailableMinusMovementIncludedPlusAdjustment(null));
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
 	}
 	
 	//@Test @Order(1)

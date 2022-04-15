@@ -102,6 +102,12 @@ public class ExpenditureDtoImpl extends AbstractIdentifiableSystemScalarStringAu
     			,JSONS_AMOUTNS_WITHOUT_AVAILABLE,ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_AVAILABLE
     			,JSON___AUDIT__,ExpenditureImpl.FIELD___AUDIT__
     			));
+		
+		map.putAll(Map.of(
+				JSONS_AMOUTNS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE,ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE
+				,JSONS_AMOUTNS_WITH_INCLUDED_MOVEMENT_ONLY,ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY
+				,JSONS_AMOUTNS_WITH_AVAILABLE_ONLY,ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY
+    			));
 		AbstractServiceImpl.setProjections(ExpenditureDtoImpl.class, map);
 	}
 }

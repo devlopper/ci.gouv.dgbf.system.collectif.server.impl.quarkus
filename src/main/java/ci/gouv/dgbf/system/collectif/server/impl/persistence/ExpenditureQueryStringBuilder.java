@@ -32,8 +32,16 @@ public interface ExpenditureQueryStringBuilder {
 		
 		static void set(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
 			Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
-			if(Boolean.TRUE.equals(amountSumable))
-				new Amounts().setSumable(Boolean.TRUE).build(builderArguments);
+			if(Boolean.TRUE.equals(amountSumable)) {
+				Amounts amounts = new Amounts().setSumable(Boolean.TRUE);
+				if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE)))
+					amounts.setIncludedMovement(null).setAvailable(null);
+				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY)))
+					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(Boolean.TRUE).setAvailable(null);
+				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY)))
+					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(null).setAvailable(Boolean.TRUE);
+				amounts.build(builderArguments);
+			}
 		}
 		
 		/**/
@@ -51,16 +59,16 @@ public interface ExpenditureQueryStringBuilder {
 					if(Boolean.TRUE.equals(adjustment))
 						arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
 					if(Boolean.TRUE.equals(expected) && StringHelper.isNotBlank(expectedVariableName))
-						arguments.getProjection().add(get(expectedVariableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
+						arguments.getProjection(Boolean.TRUE).add(get(expectedVariableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
 					if(Boolean.TRUE.equals(view)) {
-						arguments.getProjection().add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
+						arguments.getProjection(Boolean.TRUE).add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_INITIAL)));
 						arguments.getProjection().add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_MOVEMENT)));
 						arguments.getProjection().add(get("ev", FieldHelper.join(fieldName,AbstractAmountsView.FIELD_ACTUAL)));
 					}
 					if(Boolean.TRUE.equals(includedMovement))
-						arguments.getProjection().add(get("im", fieldName));
+						arguments.getProjection(Boolean.TRUE).add(get("im", fieldName));
 					if(Boolean.TRUE.equals(available))
-						arguments.getProjection().add(get("available", fieldName));
+						arguments.getProjection(Boolean.TRUE).add(get("available", fieldName));
 				}
 			}
 			
@@ -104,9 +112,9 @@ public interface ExpenditureQueryStringBuilder {
 					amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
 				
 				amounts.computeActualPlusAdjustment();
-				if(Boolean.TRUE.equals(includedMovement))
+				if(Boolean.TRUE.equals(view) && Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(adjustment))
 					amounts.computeActualMinusMovementIncludedPlusAdjustment();
-				if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available))
+				if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available)  && Boolean.TRUE.equals(adjustment))
 					amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
 				return index;
 			}

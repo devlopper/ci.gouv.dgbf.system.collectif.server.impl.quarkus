@@ -15,18 +15,23 @@ public class QueryResultMapperImpl extends org.cyk.utility.persistence.query.Que
 	@SuppressWarnings("unchecked")
 	@Override
 	protected <T> T instantiateArray(Class<T> klass, Map<String, Integer> fieldsNamesIndexes, Object[] array) {
-		if((Expenditure.class.equals(klass) || ExpenditureImpl.class.equals(klass)) && fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_SUMS)) {
+		if((Expenditure.class.equals(klass) || ExpenditureImpl.class.equals(klass)) && (fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_SUMS) 
+				|| fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE) || fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY)
+				|| fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY))) {
 			ExpenditureImpl expenditure = new ExpenditureImpl();
-			ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,0);
-			expenditure.getEntryAuthorization().setExpectedAdjustment(null);
-			expenditure.getEntryAuthorization().setExpectedAdjustmentMinusAdjustment(null);
+			if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,0);
+			else if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY))
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,0);
+			else if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY))
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,0);
+			else
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,0);
 			return (T) expenditure;
 		}
 		if((Resource.class.equals(klass) || ResourceImpl.class.equals(klass)) && fieldsNamesIndexes.containsKey(ResourceImpl.FIELDS_AMOUNTS_SUMS)) {
 			ResourceImpl resource = new ResourceImpl();
 			ResourceQueryStringBuilder.Projection.Amounts.set(resource,array,Boolean.TRUE,0);
-			resource.getRevenue().setExpectedAdjustment(null);
-			resource.getRevenue().setExpectedAdjustmentMinusAdjustment(null);
 			return (T) resource;
 		}
 		return super.instantiateArray(klass, fieldsNamesIndexes, array);
