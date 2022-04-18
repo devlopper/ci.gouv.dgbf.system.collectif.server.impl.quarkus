@@ -123,6 +123,17 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
+	void persistence_sumsAmounts_includedMovementOnlyAndAvailable() {
+		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2"
+				,Parameters.AMOUNT_SUMABLE,Boolean.TRUE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY,Boolean.TRUE));
+		assertThat(expenditure).isNotNull();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(-91l).setMovementIncluded(-23l)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(-95l).setMovementIncluded(-23l)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
 	void persistence_readAmounts_array() {
 		Collection<ExpenditureImpl> expenditures = new ExpenditureImplAmountsReader().readByIdentifiersThenInstantiate(List.of("2022_1_2_9"), null);
 		assertThat(expenditures).isNotNull();

@@ -34,6 +34,8 @@ public class RuntimeQueryBuilderImpl extends RuntimeQueryBuilder.AbstractImpl im
 				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY);
 			else if(Boolean.TRUE.equals(ValueHelper.convertToBoolean(queryExecutorArguments.getFilterBackup().getFieldValue(Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY))))
 				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY);
+			else if(Boolean.TRUE.equals(ValueHelper.convertToBoolean(queryExecutorArguments.getFilterBackup().getFieldValue(Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY))))
+				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY);
 			else
 				query.setTupleFieldsNamesIndexesFromFieldsNames(ExpenditureImpl.FIELDS_AMOUNTS_SUMS);
 		}else if(resourcePersistence.isProcessable(queryExecutorArguments) && Boolean.TRUE.equals(amountSumable)) {

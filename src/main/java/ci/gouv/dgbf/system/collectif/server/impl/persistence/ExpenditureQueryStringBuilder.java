@@ -40,6 +40,8 @@ public interface ExpenditureQueryStringBuilder {
 					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(Boolean.TRUE).setAvailable(null);
 				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY)))
 					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(null).setAvailable(Boolean.TRUE);
+				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY)))
+					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE);
 				amounts.build(builderArguments);
 			}
 		}

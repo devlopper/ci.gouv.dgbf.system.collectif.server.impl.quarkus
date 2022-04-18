@@ -17,7 +17,7 @@ public class QueryResultMapperImpl extends org.cyk.utility.persistence.query.Que
 	protected <T> T instantiateArray(Class<T> klass, Map<String, Integer> fieldsNamesIndexes, Object[] array) {
 		if((Expenditure.class.equals(klass) || ExpenditureImpl.class.equals(klass)) && (fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_SUMS) 
 				|| fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE) || fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY)
-				|| fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY))) {
+				|| fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY)) || fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY)) {
 			ExpenditureImpl expenditure = new ExpenditureImpl();
 			if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))
 				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,0);
@@ -25,6 +25,8 @@ public class QueryResultMapperImpl extends org.cyk.utility.persistence.query.Que
 				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,0);
 			else if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY))
 				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,0);
+			else if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY))
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE,0);
 			else
 				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,0);
 			return (T) expenditure;
