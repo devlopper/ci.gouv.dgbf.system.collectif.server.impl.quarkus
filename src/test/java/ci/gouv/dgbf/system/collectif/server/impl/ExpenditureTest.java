@@ -134,6 +134,17 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
+	void persistence_includedMovementAndAvailableOnly() {
+		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY)
+				.addFilterFieldsValues(Parameters.EXPENDITURES_IDENTIFIERS,List.of("2022_1_2_1")));
+		assertThat(expenditure).isNotNull();
+		assertor.assertExpenditureAmounts(expenditure.getEntryAuthorization(),new EntryAuthorizationImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(4l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(5l).setMovementIncluded(0l)
+				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
 	void persistence_readAmounts_array() {
 		Collection<ExpenditureImpl> expenditures = new ExpenditureImplAmountsReader().readByIdentifiersThenInstantiate(List.of("2022_1_2_9"), null);
 		assertThat(expenditures).isNotNull();
