@@ -13,6 +13,7 @@ import org.cyk.utility.service.server.AbstractServiceImpl;
 import ci.gouv.dgbf.system.collectif.server.api.service.ActionDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ActivityDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.AdministrativeUnitDto;
+import ci.gouv.dgbf.system.collectif.server.api.service.BudgetCategoryDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.BudgetSpecializationUnitDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureNatureDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.SectionDto;
@@ -28,6 +29,7 @@ public class ActivityDtoImpl extends AbstractIdentifiableSystemScalarStringIdent
 	@JsonbProperty(value = JSON_SECTION) SectionDtoImpl section;
 	@JsonbProperty(value = JSON_ADMINISTRATIVE_UNIT) AdministrativeUnitDtoImpl administrativeUnit;
 	@JsonbProperty(value = JSON_BUDGET_SPECIALIZATION_UNIT) BudgetSpecializationUnitDtoImpl budgetSpecializationUnit;
+	@JsonbProperty(value = JSON_BUDGET_CATEGORY) BudgetCategoryDtoImpl budgetCategory;
 	@JsonbProperty(value = JSON_ACTION) ActionDtoImpl action;
 	@JsonbProperty(value = JSON_ECONOMIC_NATURES) ArrayList<EconomicNatureDtoImpl> economicNatures;
 	@JsonbProperty(value = JSON_FUNDING_SOURCES) ArrayList<FundingSourceDtoImpl> fundingSources;
@@ -92,6 +94,12 @@ public class ActivityDtoImpl extends AbstractIdentifiableSystemScalarStringIdent
 		this.action = (ActionDtoImpl) action;
 		return this;
 	}
+	
+	@Override
+	public ActivityDto setBudgetCategory(BudgetCategoryDto budgetCategory) {
+		this.budgetCategory = (BudgetCategoryDtoImpl) budgetCategory;
+		return null;
+	}
 	/*
 	@Override
 	public ActivityDto setEconomicNatures(ArrayList<? extends EconomicNatureDto> economicNatures) {
@@ -128,6 +136,7 @@ public class ActivityDtoImpl extends AbstractIdentifiableSystemScalarStringIdent
     			,JSON_FUNDING_SOURCES,ActivityImpl.FIELD_FUNDING_SOURCES
     			,JSON_LESSORS,ActivityImpl.FIELD_LESSORS
     			,JSONS_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION,ActivityImpl.FIELDS_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION
+    			,JSONS_BUDGET_CATEGORY_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION,ActivityImpl.FIELDS_BUDGET_CATEGORY_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION
     			));
 		AbstractServiceImpl.setProjections(ActivityDtoImpl.class, map);
 	}

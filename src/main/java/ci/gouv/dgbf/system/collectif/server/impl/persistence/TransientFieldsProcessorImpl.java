@@ -118,6 +118,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 		for(String fieldName : fieldsNames) {
 			if(ActivityImpl.FIELDS_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION.equals(fieldName))
 				new ActivityImplSectionAdministrativeUnitExpenditureNatureBudgetSpecializationUnitActionReader().readThenSet(activities, null);
+			else if(ActivityImpl.FIELDS_BUDGET_CATEGORY_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION.equals(fieldName))
+				new ActivityImplBudgetCategorySectionAdministrativeUnitExpenditureNatureBudgetSpecializationUnitActionReader().readThenSet(activities, null);
 			else if(ActivityImpl.FIELD_ECONOMIC_NATURES.equals(fieldName))
 				new ActivityImplEconomicNaturesReader().readThenSet(activities, null);
 			else if(ActivityImpl.FIELD_FUNDING_SOURCES.equals(fieldName))

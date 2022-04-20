@@ -58,7 +58,9 @@ SELECT usb.usb_id AS "IDENTIFIANT",usb.usb_code AS "CODE",usb.usb_liblg AS "LIBE
 ,c.uuid AS "CATEGORIE_IDENTIFIANT",c.cusb_code||' '||c.cusb_lib AS "CATEGORIE_CODE_LIBELLE"
 ,tu.uuid AS "TYPE_IDENTIFIANT",tu.tusb_code||' '||tu.tusb_liblg AS "TYPE_CODE_LIBELLE"
 ,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_liblg AS "SECTION_LIBELLE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
+,cb.uuid AS "CATEGORIE_BUDGET_IDENTIFIANT",cb.cbud_code AS "CATEGORIE_BUDGET_CODE",cb.cbud_liblg AS "CATEGORIE_BUDGET_LIBELLE",cb.cbud_code||' '||cb.cbud_liblg AS "CATEGORIE_BUDGET_CODE_LIBELLE"
 FROM unite_spec_bud@dblink_elabo_bidf usb
+LEFT JOIN categorie_budget@dblink_elabo_bidf cb ON cb.uuid = usb.cbud_id
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = usb.secb_id
 LEFT JOIN UT_BIDF_TAMP.categorie_usb@dblink_elabo_bidf c ON c.uuid = usb.cusb_code
 LEFT JOIN UT_BIDF_TAMP.type_usb@dblink_elabo_bidf tu ON tu.uuid = c.tusb_id;
@@ -68,8 +70,10 @@ CREATE MATERIALIZED VIEW VMA_ACTION REFRESH NEXT SYSDATE + 1/(24) COMPLETE AS
 SELECT t.adp_id AS "IDENTIFIANT",t.adp_code AS "CODE",t.adp_liblg AS "LIBELLE"
 ,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_liblg AS "SECTION_LIBELLE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
 ,usb.usb_id AS "USB_IDENTIFIANT",usb.usb_code AS "USB_CODE",usb.usb_liblg AS "USB_LIBELLE",usb.usb_code||' '||usb.usb_liblg AS "USB_CODE_LIBELLE"
+,cb.uuid AS "CATEGORIE_BUDGET_IDENTIFIANT",cb.cbud_code AS "CATEGORIE_BUDGET_CODE",cb.cbud_liblg AS "CATEGORIE_BUDGET_LIBELLE",cb.cbud_code||' '||cb.cbud_liblg AS "CATEGORIE_BUDGET_CODE_LIBELLE"
 FROM action@dblink_elabo_bidf t
 LEFT JOIN unite_spec_bud@dblink_elabo_bidf usb ON usb.usb_id = t.usb_id
+LEFT JOIN categorie_budget@dblink_elabo_bidf cb ON cb.uuid = usb.cbud_id
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = usb.secb_id;
 
 DROP MATERIALIZED VIEW VMA_CATEGORIE_BUDGET;
@@ -95,12 +99,14 @@ SELECT t.ads_id AS "IDENTIFIANT",t.ads_code AS "CODE",t.ads_liblg AS "LIBELLE"
 ,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_liblg AS "USB_LIBELLE",u.usb_code||' '||u.usb_liblg AS "USB_CODE_LIBELLE"
 ,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_liblg AS "SECTION_LIBELLE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
 ,ua.ua_id AS "UA_IDENTIFIANT",ua.ua_code AS "UA_CODE",ua.ua_liblg AS "UA_LIBELLE",ua.ua_code||' '||ua.ua_liblg AS "UA_CODE_LIBELLE"
+,cb.uuid AS "CATEGORIE_BUDGET_IDENTIFIANT",cb.cbud_code AS "CATEGORIE_BUDGET_CODE",cb.cbud_liblg AS "CATEGORIE_BUDGET_LIBELLE",cb.cbud_code||' '||cb.cbud_liblg AS "CATEGORIE_BUDGET_CODE_LIBELLE"
 FROM activite_de_service@dblink_elabo_bidf t
 LEFT JOIN unite_administrative@dblink_elabo_bidf ua ON ua.ua_id = t.ua_id
 LEFT JOIN categorie_activite@dblink_elabo_bidf ca ON ca.catv_id = t.catv_id
 LEFT JOIN nature_depenses@dblink_elabo_bidf n ON n.ndep_id = t.ndep_id
 LEFT JOIN action@dblink_elabo_bidf a ON a.adp_id = t.adp_id
 LEFT JOIN unite_spec_bud@dblink_elabo_bidf u ON u.usb_id = a.usb_id
+LEFT JOIN categorie_budget@dblink_elabo_bidf cb ON cb.uuid = u.cbud_id
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = u.secb_id;
 
 DROP MATERIALIZED VIEW VMA_ACTIVITE_RESSOURCE;

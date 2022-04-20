@@ -9,6 +9,7 @@ import org.cyk.quarkus.extension.hibernate.orm.AbstractSpecificPersistenceGetter
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ActionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ActivityPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetCategoryPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecializationUnitPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.EconomicNaturePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
@@ -37,6 +38,7 @@ public class SpecificPersistenceGetterImpl extends AbstractSpecificPersistenceGe
 	@Inject GeneratedActExpenditurePersistence generatedActExpenditurePersistence;
 	
 	@Inject SectionPersistence sectionPersistence;
+	@Inject BudgetCategoryPersistence budgetCategoryPersistence;
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
 	@Inject ActionPersistence actionPersistence;
 	@Inject ActivityPersistence activityPersistence;

@@ -63,6 +63,12 @@ public class ActivityImpl extends AbstractIdentifiableSystemScalarStringIdentifi
 	@Column(name = COLUMN_ACTION_CODE_NAME) String actionCodeName;
 	@Transient ActionImpl action;
 	
+	@Column(name = COLUMN_BUDGET_CATEGORY_IDENTIFIER) String budgetCategoryIdentifier;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE) String budgetCategoryCode;
+	@Column(name = COLUMN_BUDGET_CATEGORY_NAME) String budgetCategoryName;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE_NAME) String budgetCategoryCodeName;
+	@Transient BudgetCategoryImpl budgetCategory;
+	
 	@Transient private Collection<EconomicNatureImpl> economicNatures;
 	@Transient private Collection<FundingSourceImpl> fundingSources;
 	@Transient private Collection<LessorImpl> lessors;
@@ -169,6 +175,12 @@ public class ActivityImpl extends AbstractIdentifiableSystemScalarStringIdentifi
 		return addLessors(CollectionHelper.listOf(lessors));
 	}
 	
+	public static final String FIELD_BUDGET_CATEGORY_IDENTIFIER = "budgetCategoryIdentifier";
+	public static final String FIELD_BUDGET_CATEGORY_CODE = "budgetCategoryCode";
+	public static final String FIELD_BUDGET_CATEGORY_NAME = "budgetCategoryName";
+	public static final String FIELD_BUDGET_CATEGORY_CODE_NAME = "budgetCategoryCodeName";
+	public static final String FIELD_BUDGET_CATEGORY = "budgetCategory";
+	
 	public static final String FIELD_EXPENDITURE_NATURE_IDENTIFIER = "expenditureNatureIdentifier";
 	public static final String FIELD_EXPENDITURE_NATURE_CODE = "expenditureNatureCode";
 	public static final String FIELD_EXPENDITURE_NATURE_NAME = "expenditureNatureName";
@@ -204,6 +216,7 @@ public class ActivityImpl extends AbstractIdentifiableSystemScalarStringIdentifi
 	public static final String FIELD_LESSORS = "lessors";
 	
 	public static final String FIELDS_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION = "expenditureNatureSectionAdministrativeUnitBudgetSpecializationUnitAction";
+	public static final String FIELDS_BUDGET_CATEGORY_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION = "budgetCategorySectionAdministrativeUnitExpenditureNatureBudgetSpecializationUnitAction";
 	
 	public static final String ENTITY_NAME = "ActivityImpl";
 	public static final String TABLE_NAME = "VMA_ACTIVITE";
@@ -232,4 +245,9 @@ public class ActivityImpl extends AbstractIdentifiableSystemScalarStringIdentifi
 	public static final String COLUMN_ACTION_CODE = "action_code";
 	public static final String COLUMN_ACTION_NAME = "action_libelle";
 	public static final String COLUMN_ACTION_CODE_NAME = "action_code_libelle";
+	
+	public static final String COLUMN_BUDGET_CATEGORY_IDENTIFIER = "categorie_budget_identifiant";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE = "categorie_budget_code";
+	public static final String COLUMN_BUDGET_CATEGORY_NAME = "categorie_budget_libelle";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE_NAME = "categorie_budget_code_libelle";
 }

@@ -7,6 +7,7 @@ import org.cyk.utility.mapping.Mapper;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.AdministrativeUnitImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.BudgetCategoryImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.BudgetSpecializationUnitImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureNatureImpl;
@@ -25,6 +26,9 @@ public interface ActivityDtoImplMapper extends Mapper<ActivityImpl, ActivityDtoI
 	
 	AdministrativeUnitDtoImpl map(AdministrativeUnitImpl entity);	
 	AdministrativeUnitImpl map(AdministrativeUnitDtoImpl entity);
+	
+	BudgetCategoryDtoImpl map(BudgetCategoryImpl entity);	
+	BudgetCategoryImpl map(BudgetCategoryDtoImpl entity);
 	
 	BudgetSpecializationUnitDtoImpl map(BudgetSpecializationUnitImpl entity);	
 	BudgetSpecializationUnitImpl map(BudgetSpecializationUnitDtoImpl entity);

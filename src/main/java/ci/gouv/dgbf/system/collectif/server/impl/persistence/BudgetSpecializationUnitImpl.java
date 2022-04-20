@@ -29,8 +29,13 @@ public class BudgetSpecializationUnitImpl extends AbstractIdentifiableSystemScal
 	@Column(name = COLUMN_SECTION_CODE) String sectionCode;
 	@Column(name = COLUMN_SECTION_NAME) String sectionName;
 	@Column(name = COLUMN_SECTION_CODE_NAME) String sectionCodeName;
-	
 	@Transient SectionImpl section;
+	
+	@Column(name = COLUMN_BUDGET_CATEGORY_IDENTIFIER) String budgetCategoryIdentifier;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE) String budgetCategoryCode;
+	@Column(name = COLUMN_BUDGET_CATEGORY_NAME) String budgetCategoryName;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE_NAME) String budgetCategoryCodeName;
+	@Transient BudgetCategoryImpl budgetCategory;
 	
 	@Override
 	public BudgetSpecializationUnitImpl setIdentifier(String identifier) {
@@ -67,4 +72,8 @@ public class BudgetSpecializationUnitImpl extends AbstractIdentifiableSystemScal
 	public static final String COLUMN_SECTION_NAME = "section_libelle";
 	public static final String COLUMN_SECTION_CODE_NAME = "section_code_libelle";
 	
+	public static final String COLUMN_BUDGET_CATEGORY_IDENTIFIER = "categorie_budget_identifiant";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE = "categorie_budget_code";
+	public static final String COLUMN_BUDGET_CATEGORY_NAME = "categorie_budget_libelle";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE_NAME = "categorie_budget_code_libelle";
 }

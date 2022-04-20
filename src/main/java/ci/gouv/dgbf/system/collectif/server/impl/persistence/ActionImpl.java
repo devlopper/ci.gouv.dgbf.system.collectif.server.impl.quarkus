@@ -38,6 +38,12 @@ public class ActionImpl extends AbstractIdentifiableSystemScalarStringIdentifiab
 	@Column(name = COLUMN_BUDGET_SPECIALIZATION_UNIT_CODE_NAME) String budgetSpecializationUnitCodeName;
 	@Transient BudgetSpecializationUnitImpl budgetSpecializationUnit;
 	
+	@Column(name = COLUMN_BUDGET_CATEGORY_IDENTIFIER) String budgetCategoryIdentifier;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE) String budgetCategoryCode;
+	@Column(name = COLUMN_BUDGET_CATEGORY_NAME) String budgetCategoryName;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE_NAME) String budgetCategoryCodeName;
+	@Transient BudgetCategoryImpl budgetCategory;
+	
 	@Override
 	public ActionImpl setIdentifier(String identifier) {
 		return (ActionImpl) super.setIdentifier(identifier);
@@ -92,4 +98,9 @@ public class ActionImpl extends AbstractIdentifiableSystemScalarStringIdentifiab
 	public static final String COLUMN_BUDGET_SPECIALIZATION_UNIT_CODE = "usb_code";
 	public static final String COLUMN_BUDGET_SPECIALIZATION_UNIT_NAME = "usb_libelle";
 	public static final String COLUMN_BUDGET_SPECIALIZATION_UNIT_CODE_NAME = "usb_code_libelle";
+	
+	public static final String COLUMN_BUDGET_CATEGORY_IDENTIFIER = "categorie_budget_identifiant";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE = "categorie_budget_code";
+	public static final String COLUMN_BUDGET_CATEGORY_NAME = "categorie_budget_libelle";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE_NAME = "categorie_budget_code_libelle";
 }

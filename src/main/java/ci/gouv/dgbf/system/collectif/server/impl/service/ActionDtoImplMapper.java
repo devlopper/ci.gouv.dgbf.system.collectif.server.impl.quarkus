@@ -3,6 +3,7 @@ package ci.gouv.dgbf.system.collectif.server.impl.service;
 import org.cyk.utility.mapping.Mapper;
 
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActionImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.BudgetCategoryImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.BudgetSpecializationUnitImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.SectionImpl;
 
@@ -14,4 +15,7 @@ public interface ActionDtoImplMapper extends Mapper<ActionImpl, ActionDtoImpl> {
 	
 	BudgetSpecializationUnitDtoImpl map(BudgetSpecializationUnitImpl entity);	
 	BudgetSpecializationUnitImpl map(BudgetSpecializationUnitDtoImpl entity);
+	
+	BudgetCategoryDtoImpl map(BudgetCategoryImpl entity);	
+	BudgetCategoryImpl map(BudgetCategoryDtoImpl entity);
 }

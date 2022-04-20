@@ -18,6 +18,7 @@ import org.cyk.utility.service.server.PersistenceEntityClassGetterImpl;
 
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.BudgetCategoryImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.BudgetSpecializationUnitImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
@@ -36,6 +37,8 @@ import ci.gouv.dgbf.system.collectif.server.impl.service.ActionDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ActionDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ActivityDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ActivityDtoImplMapper;
+import ci.gouv.dgbf.system.collectif.server.impl.service.BudgetCategoryDtoImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.service.BudgetCategoryDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.BudgetSpecializationUnitDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.BudgetSpecializationUnitDtoImplMapper;
 import ci.gouv.dgbf.system.collectif.server.impl.service.EconomicNatureDtoImpl;
@@ -104,6 +107,9 @@ public class ApplicationLifeCycleListener {
     	
     	MapperClassGetter.MAP.put(BudgetSpecializationUnitDtoImpl.class, BudgetSpecializationUnitDtoImplMapper.class);
     	PersistenceEntityClassGetterImpl.MAP.put(BudgetSpecializationUnitDtoImpl.class,BudgetSpecializationUnitImpl.class);
+    	
+    	MapperClassGetter.MAP.put(BudgetCategoryDtoImpl.class, BudgetCategoryDtoImplMapper.class);
+    	PersistenceEntityClassGetterImpl.MAP.put(BudgetCategoryDtoImpl.class,BudgetCategoryImpl.class);
     	
     	MapperClassGetter.MAP.put(ActionDtoImpl.class, ActionDtoImplMapper.class);
     	PersistenceEntityClassGetterImpl.MAP.put(ActionDtoImpl.class,ActionImpl.class);

@@ -18,7 +18,8 @@ public class MapperGetterImpl extends AbstractMapperGetterImpl implements Serial
 	@Inject ResourceDtoImplMapper resourceDtoImplMapper;
 	@Inject GeneratedActDtoImplMapper generatedActDtoImplMapper;
 	
-	@Inject SectionDtoImplMapper sectionDtoImplMapper;	
+	@Inject SectionDtoImplMapper sectionDtoImplMapper;
+	@Inject BudgetCategoryDtoImplMapper budgetCategoryDtoImplMapper;
 	@Inject BudgetSpecializationUnitDtoImplMapper budgetSpecializationUnitDtoImplMapper;
 	@Inject ActionDtoImplMapper actionDtoImplMapper;
 	@Inject ActivityDtoImplMapper activityDtoImplMapper;
