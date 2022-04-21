@@ -9,6 +9,7 @@ import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringImpl;
 
@@ -23,6 +24,12 @@ public class AbstractExpenditureView extends AbstractIdentifiableSystemScalarStr
 	@Column(name = COLUMN_LEGISLATIVE_ACT_VERSION_IDENTIFIER) String legislativeActVersionIdentifier;
 	
 	@Column(name = COLUMN_EXERCISE) Short exercise;
+	
+	@Column(name = COLUMN_BUDGET_CATEGORY_IDENTIFIER) String budgetCategoryIdentifier;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE) String budgetCategoryCode;
+	@Column(name = COLUMN_BUDGET_CATEGORY_NAME) String budgetCategoryName;
+	@Column(name = COLUMN_BUDGET_CATEGORY_CODE_NAME) String budgetCategoryCodeName;
+	@Transient BudgetCategoryImpl budgetCategory;
 	
 	@Column(name = COLUMN_NATURE_IDENTIFIER) String natureIdentifier;
 	@Column(name = COLUMN_NATURE_CODE) String natureCode;
@@ -90,6 +97,12 @@ public class AbstractExpenditureView extends AbstractIdentifiableSystemScalarStr
 	public static final String FIELD_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "legislativeActVersionIdentifier";
 	public static final String FIELD_EXERCISE = "exercise";
 	
+	public static final String FIELD_BUDGET_CATEGORY_IDENTIFIER = "budgetCategoryIdentifier";
+	public static final String FIELD_BUDGET_CATEGORY_CODE = "budgetCategoryCode";
+	public static final String FIELD_BUDGET_CATEGORY_NAME = "budgetCategoryName";
+	public static final String FIELD_BUDGET_CATEGORY_CODE_NAME = "budgetCategoryCodeName";
+	public static final String FIELD_BUDGET_CATEGORY = "budgetCategory";
+	
 	public static final String FIELD_NATURE_IDENTIFIER = "natureIdentifier";
 	public static final String FIELD_NATURE_CODE = "natureCode";
 	public static final String FIELD_NATURE_CODE_NAME = "natureCodeName";
@@ -135,6 +148,11 @@ public class AbstractExpenditureView extends AbstractIdentifiableSystemScalarStr
 	
 	public static final String COLUMN_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "version_collectif";
 	public static final String COLUMN_EXERCISE = "exercice";
+	
+	public static final String COLUMN_BUDGET_CATEGORY_IDENTIFIER = "categorie_budget_identifiant";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE = "categorie_budget_code";
+	public static final String COLUMN_BUDGET_CATEGORY_NAME = "categorie_budget_libelle";
+	public static final String COLUMN_BUDGET_CATEGORY_CODE_NAME = "categorie_budget_code_libelle";
 	
 	public static final String COLUMN_NATURE_IDENTIFIER = "nature_depense_identifiant";
 	public static final String COLUMN_NATURE_CODE = "nature_depense_code";

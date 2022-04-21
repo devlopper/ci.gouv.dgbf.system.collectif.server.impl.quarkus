@@ -14,6 +14,7 @@ SELECT
 	,ac.adp_id AS "ACTION_IDENTIFIANT",ac.adp_code AS "ACTION_CODE",ac.adp_code||' '||ac.adp_liblg AS "ACTION_CODE_LIBELLE"
 	,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_code||' '||u.usb_liblg AS "USB_CODE_LIBELLE"
 	,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
+	,cb.uuid AS "CATEGORIE_BUDGET_IDENTIFIANT",cb.cbud_code AS "CATEGORIE_BUDGET_CODE",cb.cbud_liblg AS "CATEGORIE_BUDGET_LIBELLE",cb.cbud_code||' '||cb.cbud_liblg AS "CATEGORIE_BUDGET_CODE_LIBELLE"
 	,fd.FIND_BVOTE_AE AS "BUDGET_INITIAL_AE",fd.FIND_BVOTE_CP AS "BUDGET_INITIAL_CP"
 	,fd.FIND_MONTANT_AE - fd.FIND_BVOTE_AE AS "MOUVEMENT_AE",fd.FIND_MONTANT_CP - fd.FIND_BVOTE_CP AS "MOUVEMENT_CP"
 	,fd.FIND_MONTANT_AE AS "BUDGET_ACTUEL_AE",fd.FIND_MONTANT_CP AS "BUDGET_ACTUEL_CP"
@@ -26,6 +27,7 @@ LEFT JOIN source_financement sf ON sf.sfin_id = fd.sfin_id
 LEFT JOIN bailleur b ON b.bai_id = fd.bai_id
 LEFT JOIN action ac ON ac.adp_id = a.adp_id
 LEFT JOIN unite_spec_bud u ON u.usb_id = ac.usb_id
+LEFT JOIN categorie_budget cb ON cb.uuid = u.cbud_id
 LEFT JOIN section_budgetaire s ON s.secb_id = u.secb_id
 WHERE ld.ads_id IS NOT NULL AND ld.nat_id IS NOT NULL AND fd.sfin_id IS NOT NULL AND fd.bai_id IS NOT NULL;
 

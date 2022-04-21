@@ -247,6 +247,8 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"t"
 				,FieldHelper.join(ExpenditureImpl.FIELD_ACT_VERSION,LegislativeActImpl.FIELD_IDENTIFIER));
 		
+		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.BUDGET_CATEGORY_IDENTIFIER,"ev"
+				,ExpenditureView.FIELD_BUDGET_CATEGORY_IDENTIFIER);
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.SECTION_IDENTIFIER,"ev"
 				,ExpenditureView.FIELD_SECTION_IDENTIFIER);
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.EXPENDITURE_NATURE_IDENTIFIER,"ev"
