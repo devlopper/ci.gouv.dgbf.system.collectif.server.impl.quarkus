@@ -165,7 +165,7 @@ public class LegislativeActTest {
 				.param(EntityReader.PARAMETER_NAME_PROJECTIONS,LegislativeActDto.JSONS_STRINGS,LegislativeActDto.JSONS_AMOUTNS,LegislativeActDto.JSON___AUDIT__)
 				.when()
 				//.log().all()
-				.get("/api/collectifs_budgetaires");
+				.get("/api/collectifs-budgetaires");
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())

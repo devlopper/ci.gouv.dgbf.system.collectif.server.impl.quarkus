@@ -284,7 +284,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void service_get_many() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null, null, null, null, null, null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("9");
@@ -298,7 +298,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void service_get_many_identifier_generatedActCount() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null, List.of(LegislativeActVersionDto.JSON_IDENTIFIER
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null,null, List.of(LegislativeActVersionDto.JSON_IDENTIFIER
 				,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
@@ -339,7 +339,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void service_count() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).count(null,null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).count(null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);
@@ -348,7 +348,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void client_get_many() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null, null, null, null, null, null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("9");
@@ -362,7 +362,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void client_get_many_identifier_generatedActCount() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null, List.of(LegislativeActVersionDto.JSON_IDENTIFIER
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).get(null,null,null, List.of(LegislativeActVersionDto.JSON_IDENTIFIER
 				,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
@@ -403,7 +403,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void client_count() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).count(null,null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).count(null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);

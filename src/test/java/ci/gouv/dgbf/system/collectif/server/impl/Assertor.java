@@ -251,7 +251,7 @@ public class Assertor {
     }
 	
     public <T> List<T> assertClientGetManyNamable(Class<T> klass,Collection<String> expectedCodes,String expectedTotalCount) {
-		Response response = specificServiceGetter.get(klass).get(null,null, null, Boolean.TRUE, Boolean.TRUE, null, 3);
+		Response response = specificServiceGetter.get(klass).get(null,null,null, null, Boolean.TRUE, Boolean.TRUE, null, 3);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).as(String.format("GET %s has status OK", klass.getSimpleName())).isEqualTo(Response.Status.OK.getStatusCode());
 		//assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).as(String.format("GET %s has xTotalCount %s", klass.getSimpleName(),expectedTotalCount)).isEqualTo(expectedTotalCount);
@@ -282,7 +282,7 @@ public class Assertor {
     }
 	
     public void assertClientCountNamable(Class<?> klass,Long expectedCount) {
-		Response response = specificServiceGetter.get(klass).count(null,null);
+		Response response = specificServiceGetter.get(klass).count(null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);

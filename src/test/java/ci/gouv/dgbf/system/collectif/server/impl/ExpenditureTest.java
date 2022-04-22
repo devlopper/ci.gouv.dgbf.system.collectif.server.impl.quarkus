@@ -323,7 +323,7 @@ public class ExpenditureTest {
 	
 	@Test @Order(1)
     public void client_get_many() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, null, null, null, null, null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
@@ -334,7 +334,7 @@ public class ExpenditureTest {
 		assertThat(expenditures).hasSize(13);
 		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
 		
-		response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, null, null, null, null, null);
+		response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, null,null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
@@ -348,7 +348,7 @@ public class ExpenditureTest {
 	
 	@Test @Order(1)
     public void client_get_many_asStrings() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, List.of("astrings"), null, null, null, null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null,null, List.of("astrings"), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
@@ -387,7 +387,7 @@ public class ExpenditureTest {
 	
 	@Test @Order(1)
     public void client_count() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).count(null,null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).count(null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);

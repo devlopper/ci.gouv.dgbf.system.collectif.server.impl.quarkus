@@ -72,7 +72,7 @@ public class GeneratedActTest {
 	void service_generate_notYetGenerated() {
 		io.restassured.response.Response response = given().when().contentType(ContentType.JSON).queryParam(GeneratedActDto.JSON_LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2021_1_1").queryParam(GeneratedActDto.JSON___AUDIT_WHO__, "meliane")
 				//.log().all()
-				.post("/api/actes_generes/generation-par-version-collectif-budgetaire");
+				.post("/api/actes-generes/generation-par-version-collectif-budgetaire");
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
@@ -88,7 +88,7 @@ public class GeneratedActTest {
 	void service_generate_alreadyGenerated() {
 		io.restassured.response.Response response = given().when().contentType(ContentType.JSON)
 				//.log().all()
-				.post("/api/actes_generes/generation-par-version-collectif-budgetaire");
+				.post("/api/actes-generes/generation-par-version-collectif-budgetaire");
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.BAD_REQUEST.getStatusCode())
@@ -100,7 +100,7 @@ public class GeneratedActTest {
 	void service_delete_generated_notApplied() {
 		io.restassured.response.Response response = given().when().contentType(ContentType.JSON).queryParam(GeneratedActDto.JSON_LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2021_1_1").queryParam(GeneratedActDto.JSON___AUDIT_WHO__, "meliane")
 				//.log().all()
-				.post("/api/actes_generes/suppression-par-version-collectif-budgetaire");
+				.post("/api/actes-generes/suppression-par-version-collectif-budgetaire");
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
@@ -114,7 +114,7 @@ public class GeneratedActTest {
 	void service_deleteByLegislativeActVersionIdentifier_notGenerated() {
 		io.restassured.response.Response response = given().when().contentType(ContentType.JSON)
 				//.log().all()
-				.post("/api/actes_generes/suppression-par-version-collectif-budgetaire");
+				.post("/api/actes-generes/suppression-par-version-collectif-budgetaire");
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.BAD_REQUEST.getStatusCode())

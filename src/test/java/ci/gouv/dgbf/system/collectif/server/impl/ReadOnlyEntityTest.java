@@ -13,14 +13,19 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.DependencyInjection;
+import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.ResponseHelper;
 import org.cyk.utility.service.client.SpecificServiceGetter;
 import org.junit.jupiter.api.Test;
 
+import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetCategory;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetCategoryPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Exercise;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.api.service.BudgetCategoryDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExerciseDto;
-import ci.gouv.dgbf.system.collectif.server.api.service.ResourceDto;
+import ci.gouv.dgbf.system.collectif.server.client.rest.BudgetCategoryController;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -29,9 +34,62 @@ import io.quarkus.test.junit.TestProfile;
 public class ReadOnlyEntityTest {
 
 	@Inject Assertor assertor;
+	@Inject Configuration configuration;
 	@Inject ExercisePersistence exercisePersistence;
+	@Inject BudgetCategoryPersistence budgetCategoryPersistence;
+	@Inject BudgetCategoryController budgetCategoryController;
 	
 	/* Persistence */
+	
+	@Test
+	void persistence_budgetCategory_readMany() {
+		Collection<BudgetCategory> budgetCategories = budgetCategoryPersistence.readMany(null, null, null);
+		assertThat(budgetCategories).hasSize(5);
+	}
+	
+	@Test
+	void persistence_budgetCategory_readMany_2022_1_1() {
+		Collection<BudgetCategory> budgetCategories = budgetCategoryPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_1"));
+		assertThat(budgetCategories).isNull();
+	}
+	
+	@Test
+	void persistence_budgetCategory_readMany_2022_1_2() {
+		Collection<BudgetCategory> budgetCategories = budgetCategoryPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_2"));
+		assertThat(budgetCategories.stream().map(bc -> bc.getCode()).collect(Collectors.toList())).containsExactly("1","2");
+	}
+	
+	@Test
+	void persistence_budgetCategory_readMany_2022_1_3() {
+		Collection<BudgetCategory> budgetCategories = budgetCategoryPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_3"));
+		assertThat(budgetCategories.stream().map(bc -> bc.getCode()).collect(Collectors.toList())).containsExactly("3","4","5");
+	}
+	
+	@Test
+	void persistence_budgetCategory_readMany_2022_1_4() {
+		Collection<BudgetCategory> budgetCategories = budgetCategoryPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_4"));
+		assertThat(budgetCategories.stream().map(bc -> bc.getCode()).collect(Collectors.toList())).containsExactly("1","2","3","4","5");
+	}
+	
+	@Test
+	void persistence_budgetCategory_readMany_2022_1_5() {
+		Collection<BudgetCategory> budgetCategories = budgetCategoryPersistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2022_1_5"));
+		assertThat(budgetCategories.stream().map(bc -> bc.getCode()).collect(Collectors.toList())).containsExactly("1","2","4");
+	}
+	
+	@Test
+	void persistence_budgetCategory_readOne() {
+		BudgetCategory budgetCategory = budgetCategoryPersistence.readOne("5");
+		assertThat(budgetCategory).isNotNull();
+		assertThat(budgetCategory.getCode()).isEqualTo("5");
+	}
+	
+	@Test
+	void persistence_budgetCategory_default() {
+		BudgetCategory budgetCategory = budgetCategoryPersistence.readDefault();
+		assertThat(budgetCategory).isNotNull();
+		assertThat(budgetCategory.getIdentifier()).isEqualTo(configuration.budgetCategory().defaultIdentifier());
+	}
 	
 	@Test
 	void persistence_exercise_readMany() {
@@ -70,17 +128,29 @@ public class ReadOnlyEntityTest {
 		response.then()
 		//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
-        	.body(ResourceDto.JSON_IDENTIFIER, equalTo("2021"))
+        	.body(ExerciseDto.JSON_IDENTIFIER, equalTo("2021"))
         	;
 		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
+    }
+	
+	@Test
+    public void service_budgetCategory_get_default() {
+		io.restassured.response.Response response = given()
+				//.log().all()
+				.when().param("df", Boolean.TRUE).get("/api/categories-budgets/");
+		response.then()
+		//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.body(BudgetCategoryDto.JSON_IDENTIFIER, equalTo(configuration.budgetCategory().defaultIdentifier()))
+        	;
     }
 	
 	/* Client */
 	
 	@Test
     public void client_exercise_get_many() {		
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Exercise.class).get(null,null, null, null, null, null, null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Exercise.class).get(null,null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("3");

@@ -12,12 +12,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.value.ValueHelper;
 import org.cyk.utility.persistence.query.Filter;
+import org.cyk.utility.persistence.query.Language;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.query.string.LikeStringBuilder;
 import org.cyk.utility.persistence.server.query.string.LikeStringValueBuilder;
@@ -27,6 +29,7 @@ import org.cyk.utility.persistence.server.query.string.WhereStringBuilder.Predic
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ActionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ActivityPersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetCategoryPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetSpecializationUnitPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.EconomicNaturePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExercisePersistence;
@@ -42,6 +45,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActExpendi
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourceActivityPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourcePersistence;
+import ci.gouv.dgbf.system.collectif.server.impl.Configuration;
 import io.quarkus.arc.Unremovable;
 
 @ApplicationScoped @ci.gouv.dgbf.system.collectif.server.api.System @Unremovable
@@ -63,6 +67,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	@Inject RegulatoryActExpenditurePersistence regulatoryActExpenditurePersistence;
 	@Inject GeneratedActPersistence generatedActPersistence;
 	@Inject GeneratedActExpenditurePersistence generatedActExpenditurePersistence;
+	@Inject BudgetCategoryPersistence budgetCategoryPersistence;
 	
 	@Override
 	protected void setProjection(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
@@ -171,6 +176,8 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			populatePredicateGeneratedAct(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(generatedActExpenditurePersistence.isProcessable(arguments)))
 			populatePredicateGeneratedActExpenditure(arguments, builderArguments, predicate, filter);
+		else if(Boolean.TRUE.equals(budgetCategoryPersistence.isProcessable(arguments)))
+			populatePredicateBudgetCateory(arguments, builderArguments, predicate, filter);
 	}
 	
 	@Override
@@ -240,6 +247,23 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	}
 	
 	/**/
+	
+	public static void populatePredicateBudgetCateory(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+		if(arguments.getFilterField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER) != null) {
+			predicate.add(String.format("EXISTS(SELECT e.identifier FROM %s e JOIN %s v ON v.identifier = e.identifier WHERE t.identifier = v.%s AND e.%s.identifier = :%s)",ExpenditureImpl.ENTITY_NAME,ExpenditureView.ENTITY_NAME
+					,ExpenditureView.FIELD_BUDGET_CATEGORY_IDENTIFIER,ExpenditureImpl.FIELD_ACT_VERSION,Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
+			filter.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
+		}
+		
+		Boolean defaultValue = arguments.getFilterFieldValueAsBoolean(null,DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue());
+		if(defaultValue != null) {
+			String defaultIdentifier = DependencyInjection.inject(Configuration.class).budgetCategory().defaultIdentifier();
+			if(StringHelper.isNotBlank(defaultIdentifier)) {
+				predicate.add(String.format("t.identifier %s :%s",Language.formatOperatorEqual(defaultValue),DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue()));
+				filter.addField(DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue(),defaultIdentifier);
+			}
+		}
+	}
 	
 	public static void populatePredicateExpenditure(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_IDENTIFIER,"t"

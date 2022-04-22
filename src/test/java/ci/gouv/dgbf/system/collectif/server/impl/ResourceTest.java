@@ -245,7 +245,7 @@ public class ResourceTest {
 	
 	@Test @Order(1)
     public void client_get_many() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).get(null,null, null, null, null, null, null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).get(null,null, null, null, null, null, null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("4");
@@ -259,7 +259,7 @@ public class ResourceTest {
 	
 	@Test @Order(1)
     public void client_get_many_asStrings() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).get(null,null, List.of("astrings"), null, null, null, null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).get(null,null,null, List.of("astrings"), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("4");
@@ -296,7 +296,7 @@ public class ResourceTest {
 	
 	@Test @Order(1)
     public void client_count() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).count(null,null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).count(null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);
