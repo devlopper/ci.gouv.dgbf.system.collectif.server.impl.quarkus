@@ -8,16 +8,18 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.__kernel__.object.AbstractObject;
+import org.hibernate.envers.Audited;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Amounts;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-@Getter @Setter @Accessors(chain=true) @MappedSuperclass
+@Getter @Setter @Accessors(chain=true) @MappedSuperclass @Audited(withModifiedFlag = true)
 public abstract class AbstractAmountsImpl extends AbstractObject implements Amounts,Serializable  {
 
 	@NotNull @Column(name = COLUMN_ADJUSTMENT,nullable = false) Long adjustment = 0l;
+	
 	@Transient Long expectedAdjustment = 0l;
 	@Transient Long expectedAdjustmentMinusAdjustment = 0l;
 	

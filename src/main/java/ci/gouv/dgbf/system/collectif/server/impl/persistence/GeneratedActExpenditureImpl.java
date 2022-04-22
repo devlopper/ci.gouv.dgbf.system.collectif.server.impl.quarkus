@@ -17,6 +17,10 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringAuditedImpl;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.AuditOverrides;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedActExpenditure;
 import lombok.Getter;
@@ -39,15 +43,18 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_WHEN__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = GeneratedActExpenditureImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=GeneratedActExpenditureImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
+@AuditOverrides({
+	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringAuditedImpl.class)
+})
 public class GeneratedActExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements GeneratedActExpenditure,Serializable {
 
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false,updatable = false) GeneratedActImpl act;
-	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false,updatable = false) String activityIdentifier;
-	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false,updatable = false) String economicNatureIdentifier;
-	@NotNull @Column(name = COLUMN_FUNDING_SOURCE_IDENTIFIER,nullable = false,updatable = false) String fundingSourceIdentifier;
-	@NotNull @Column(name = COLUMN_LESSOR_IDENTIFIER,nullable = false,updatable = false) String lessorIdentifier;	
-	@NotNull @Column(name = COLUMN_ENTRY_AUTHORIZATION_AMOUNT,nullable = false,updatable = false) Long entryAuthorizationAmount;
-	@NotNull @Column(name = COLUMN_PAYMENT_CREDIT_AMOUNT,nullable = false,updatable = false) Long paymentCreditAmount;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false,updatable = false) @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED) GeneratedActImpl act;
+	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false,updatable = false) @Audited String activityIdentifier;
+	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false,updatable = false) @Audited String economicNatureIdentifier;
+	@NotNull @Column(name = COLUMN_FUNDING_SOURCE_IDENTIFIER,nullable = false,updatable = false) @Audited String fundingSourceIdentifier;
+	@NotNull @Column(name = COLUMN_LESSOR_IDENTIFIER,nullable = false,updatable = false) @Audited String lessorIdentifier;	
+	@NotNull @Column(name = COLUMN_ENTRY_AUTHORIZATION_AMOUNT,nullable = false,updatable = false) @Audited Long entryAuthorizationAmount;
+	@NotNull @Column(name = COLUMN_PAYMENT_CREDIT_AMOUNT,nullable = false,updatable = false) @Audited Long paymentCreditAmount;
 	
 	@Override
 	public GeneratedActExpenditureImpl setIdentifier(String identifier) {

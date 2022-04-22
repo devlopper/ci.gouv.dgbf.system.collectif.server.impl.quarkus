@@ -28,6 +28,9 @@ import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarString
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
 import org.cyk.utility.persistence.server.view.MaterializedViewManager;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.AuditOverrides;
+import org.hibernate.envers.Audited;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.EntryAuthorization;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
@@ -71,6 +74,9 @@ import lombok.experimental.Accessors;
 				}
 			)
 	})
+@AuditOverrides({
+	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringAuditedImpl.class)
+})
 public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Expenditure,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
 	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false) String activityIdentifier;
@@ -81,11 +87,13 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	@Valid
 	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = EntryAuthorizationImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_ENTRY_AUTHORIZATION_ADJUSTMENT,nullable = false))})
+	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_ENTRY_AUTHORIZATION_ADJUSTMENT+"_MOD")
 	EntryAuthorizationImpl entryAuthorization;
 	
 	@Valid
 	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = PaymentCreditImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_PAYMENT_CREDIT_ADJUSTMENT,nullable = false))})
+	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_PAYMENT_CREDIT_ADJUSTMENT+"_MOD")
 	PaymentCreditImpl paymentCredit;
 	
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT_VERSION)

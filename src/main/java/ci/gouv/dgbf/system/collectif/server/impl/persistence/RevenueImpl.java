@@ -4,11 +4,13 @@ import java.io.Serializable;
 
 import javax.persistence.Embeddable;
 
+import org.hibernate.envers.Audited;
+
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Revenue;
 import lombok.Getter;
 import lombok.Setter;
 
-@Embeddable
+@Embeddable @Audited
 @Getter @Setter
 public class RevenueImpl extends AbstractResourceAmountsImpl implements Revenue,Serializable {
 

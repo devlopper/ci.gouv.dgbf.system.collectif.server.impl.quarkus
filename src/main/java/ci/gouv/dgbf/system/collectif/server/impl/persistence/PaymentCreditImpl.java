@@ -4,11 +4,14 @@ import java.io.Serializable;
 
 import javax.persistence.Embeddable;
 
+import org.hibernate.envers.Audited;
+
 import ci.gouv.dgbf.system.collectif.server.api.persistence.PaymentCredit;
 import lombok.Getter;
 import lombok.Setter;
 
 @Embeddable
+@Audited(withModifiedFlag = true)
 @Getter @Setter
 public class PaymentCreditImpl extends AbstractExpenditureAmountsImpl implements PaymentCredit,Serializable {
 

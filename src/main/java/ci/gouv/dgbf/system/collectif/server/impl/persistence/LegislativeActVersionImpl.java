@@ -20,6 +20,9 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.AuditOverrides;
+import org.hibernate.envers.Audited;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditureAmountsEntryAuthorizationPaymentCredit;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
@@ -43,9 +46,12 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_WHEN__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = LegislativeActVersionImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=LegislativeActVersionImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
+@AuditOverrides({
+	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl.class)
+})
 public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeActVersion,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) LegislativeActImpl act;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT,nullable = false) @Audited LegislativeActImpl act;
 	@Transient String actIdentifier;
 	@Transient LocalDate actDate;
 	@Transient Long actDateAsTimestamp;
@@ -53,7 +59,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@Transient String actAsString;
 	@Transient Long actFromDateAsTimestamp;
 	
-	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
+	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) @Audited Byte number;
 	
 	@Transient Boolean isDefaultVersion;
 	@Transient String isDefaultVersionAsString;

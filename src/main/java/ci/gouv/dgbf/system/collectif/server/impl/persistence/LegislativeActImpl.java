@@ -23,6 +23,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.AuditOverrides;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditureAmountsEntryAuthorizationPaymentCredit;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
@@ -45,47 +50,56 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_WHEN__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
+@AuditOverrides({
+	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl.class)
+})
+@AuditTable(value = LegislativeActImpl.AUDIT_TABLE_NAME)
 public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements LegislativeAct,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
-	@Column(name = COLUMN_EXERCISE) String exerciseIdentifier;
+	@Column(name = COLUMN_EXERCISE) @Audited String exerciseIdentifier;
 	@Transient ExerciseImpl exercise;
 	@Transient Short exerciseYear;
 	@Transient String exerciseAsString;
 	
-	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) Byte number;
+	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) @Audited Byte number;
 	
-	@NotNull @Column(name = COLUMN_DATE,nullable = false) LocalDate date;
+	@NotNull @Column(name = COLUMN_DATE,nullable = false) @Audited LocalDate date;
 	@Transient Long dateAsTimestamp;
 	@Transient String dateAsString;
 	
 	@Transient Long fromDateAsTimestamp;
 	@Transient String fromDateAsString;
 	
-	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION) LegislativeActVersionImpl defaultVersion;
+	@ManyToOne @JoinColumn(name = COLUMN_DEFAULT_VERSION)
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED,withModifiedFlag = true,modifiedColumnName = COLUMN_DEFAULT_VERSION+"_MOD") LegislativeActVersionImpl defaultVersion;
 	@Transient String defaultVersionAsString;
 	@Transient String defaultVersionIdentifier;
 	
-	@NotNull @Column(name = COLUMN_IN_PROGRESS,nullable = false) Boolean inProgress;
+	@NotNull @Column(name = COLUMN_IN_PROGRESS,nullable = false) @Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_IN_PROGRESS+"_MOD") Boolean inProgress;
 	@Transient String inProgressAsString;
 	
 	@Valid
 	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = RevenueImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_REVENUE_ADJUSTMENT,nullable = true))})
+	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_EXPECTED_REVENUE_ADJUSTMENT+"_M")
 	RevenueImpl revenue;
 	
 	@Valid
 	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = EntryAuthorizationImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT,nullable = true))})
+	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_EXPECTED_ENTRY_AUTHORIZATION_ADJUSTMENT+"_MOD")
 	EntryAuthorizationImpl entryAuthorization;
 	
 	@Valid
 	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = PaymentCreditImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT,nullable = true))})
+	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_EXPECTED_PAYMENT_CREDIT_ADJUSTMENT+"_MOD")
 	PaymentCreditImpl paymentCredit;
 	
-	@Column(name = COLUMN_ACT_GENERATION_MODE) @Enumerated(EnumType.STRING) ActGenerationMode actGenerationMode;
+	@Column(name = COLUMN_ACT_GENERATION_MODE) @Enumerated(EnumType.STRING)
+	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_ACT_GENERATION_MODE+"_MOD") ActGenerationMode actGenerationMode;
 	
-	@Column(name = COLUMN_AVAILABLE_MONITORABLE) Boolean availableMonitorable;
+	@Column(name = COLUMN_AVAILABLE_MONITORABLE) @Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_AVAILABLE_MONITORABLE+"_MOD") Boolean availableMonitorable;
 	@Transient String availableMonitorableAsString;
 	
 	@Override
@@ -141,6 +155,7 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	
 	public static final String ENTITY_NAME = "LegislativeActImpl";
 	public static final String TABLE_NAME = "TA_COLLECTIF";
+	public static final String AUDIT_TABLE_NAME = "TA_COLLECTIF_AUD";
 	
 	public static final String COLUMN_DATE = "DATE_";
 	public static final String COLUMN_ACT_GENERATION_MODE = "MODE_GENERATION_ACTE";

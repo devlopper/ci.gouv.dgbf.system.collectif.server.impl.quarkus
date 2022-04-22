@@ -15,6 +15,11 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringAuditedImpl;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.AuditOverrides;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct;
@@ -36,11 +41,15 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_WHEN__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = RegulatoryActLegislativeActVersionImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=RegulatoryActLegislativeActVersionImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
+@AuditOverrides({
+	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringAuditedImpl.class)
+})
+@AuditTable(value = RegulatoryActLegislativeActVersionImpl.AUDIT_TABLE_NAME)
 public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements RegulatoryActLegislativeActVersion,Serializable {
 
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_REGULATORY_ACT,nullable = false) RegulatoryActImpl regulatoryAct;
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_LEGISLATIVE_ACT_VERSION,nullable = false) LegislativeActVersionImpl legislativeActVersion;
-	@NotNull @Column(name = COLUMN_INCLUDED,nullable = false) Boolean included;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_REGULATORY_ACT,nullable = false) @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED) RegulatoryActImpl regulatoryAct;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_LEGISLATIVE_ACT_VERSION,nullable = false) @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED) LegislativeActVersionImpl legislativeActVersion;
+	@NotNull @Column(name = COLUMN_INCLUDED,nullable = false) @Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_INCLUDED+"_MOD") Boolean included;
 	
 	@Override
 	public RegulatoryActLegislativeActVersionImpl setIdentifier(String identifier) {
@@ -66,6 +75,7 @@ public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiable
 	
 	public static final String ENTITY_NAME = "RegulatoryActLegislativeActVersionImpl";
 	public static final String TABLE_NAME = "TA_ACTE_GESTION_V_COLLECTIF";
+	public static final String AUDIT_TABLE_NAME = "TA_ACTE_GESTION_V_COL_AUD";
 	
 	public static final String COLUMN_REGULATORY_ACT = "ACTE_GESTION";
 	public static final String COLUMN_LEGISLATIVE_ACT_VERSION = "VERSION_COLLECTIF";

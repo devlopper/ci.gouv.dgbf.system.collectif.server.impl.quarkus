@@ -8,6 +8,8 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -17,6 +19,10 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.AuditOverrides;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.GeneratedAct;
 import lombok.Getter;
@@ -36,12 +42,15 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_WHEN__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = GeneratedActImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=GeneratedActImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
+@AuditOverrides({
+	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl.class)
+})
 public class GeneratedActImpl extends AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableAuditedImpl implements GeneratedAct,Serializable {
 
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_LEGISLATIVE_ACT_VERSION,nullable = false,updatable = false) LegislativeActVersionImpl legislativeActVersion;
-	@NotNull @Column(name = COLUMN_TYPE,nullable = false,updatable = false) Type type;
-	@NotNull @Column(name = COLUMN_ACT_SOURCE_IDENTIFIER,nullable = false,updatable = false) String actSourceIdentifier;
-	@NotNull @Column(name = COLUMN_APPLIED,nullable = false) Boolean applied;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_LEGISLATIVE_ACT_VERSION,nullable = false,updatable = false) @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED) LegislativeActVersionImpl legislativeActVersion;
+	@NotNull @Column(name = COLUMN_TYPE,nullable = false,updatable = false) @Enumerated(EnumType.STRING) @Audited Type type;
+	@NotNull @Column(name = COLUMN_ACT_SOURCE_IDENTIFIER,nullable = false,updatable = false) @Audited String actSourceIdentifier;
+	@NotNull @Column(name = COLUMN_APPLIED,nullable = false) @Audited Boolean applied;
 	
 	@Override
 	public GeneratedActImpl setIdentifier(String identifier) {

@@ -20,6 +20,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringAuditedImpl;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.AuditOverrides;
+import org.hibernate.envers.Audited;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Resource;
@@ -45,21 +48,21 @@ import lombok.experimental.Accessors;
 		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_WHEN__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_WHEN__,nullable = false))
 		,@AttributeOverride(name = ResourceImpl.FIELD___AUDIT_FUNCTIONALITY__,column = @Column(name=ResourceImpl.COLUMN___AUDIT_FUNCTIONALITY__,nullable = false))
 })
+@AuditOverrides({
+	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringAuditedImpl.class)
+})
 public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Resource,Serializable {
 
-	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false)
-	String activityIdentifier;
-	
-	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false)
-	String economicNatureIdentifier;
+	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false) String activityIdentifier;	
+	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false) String economicNatureIdentifier;
 	
 	@Valid
 	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = RevenueImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_REVENUE_ADJUSTMENT,nullable = false))})
+	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_REVENUE_ADJUSTMENT+"_MOD")
 	RevenueImpl revenue;
 	
-	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT_VERSION)
-	LegislativeActVersionImpl actVersion;
+	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT_VERSION) LegislativeActVersionImpl actVersion;
 	
 	@Transient String actAsString;
 	@Transient String actVersionAsString;
