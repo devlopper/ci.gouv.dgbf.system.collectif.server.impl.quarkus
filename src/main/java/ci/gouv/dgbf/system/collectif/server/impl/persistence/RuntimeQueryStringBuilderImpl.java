@@ -405,6 +405,12 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			predicate.add(String.format("(t.%s = :%s)",LegislativeActImpl.FIELD_IN_PROGRESS,Parameters.LEGISLATIVE_ACT_IN_PROGRESS));
 			filter.addField(Parameters.LEGISLATIVE_ACT_IN_PROGRESS, inProgress);
 		}
+		
+		Boolean defaultValue = arguments.getFilterFieldValueAsBoolean(null,DependencyInjection.inject(LegislativeActPersistence.class).getParameterNameDefaultValue());
+		if(defaultValue != null) {
+			predicate.add(String.format("t.identifier %1$s (SELECT la.identifier FROM %2$s la WHERE la.%3$s = TRUE AND la.%4$s = (SELECT MAX(la_.%4$s) FROM %2$s la_))",Language.formatOperatorIn(defaultValue),LegislativeActImpl.ENTITY_NAME
+					,LegislativeActImpl.FIELD_IN_PROGRESS,LegislativeActImpl.FIELD_DATE));
+		}
 	}
 	
 	public static void populatePredicateLegislativeActVersion(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {

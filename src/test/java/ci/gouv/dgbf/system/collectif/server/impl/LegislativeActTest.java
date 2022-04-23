@@ -41,6 +41,13 @@ public class LegislativeActTest {
 	@Inject LegislativeActBusiness business;
 	
 	@Test @Order(1)
+	void persistence_read_default() {
+		LegislativeActImpl legislativeAct = (LegislativeActImpl) persistence.readDefault();
+		assertThat(legislativeAct).isNotNull();
+		assertThat(legislativeAct.getIdentifier()).isEqualTo("2022_1");
+	}
+	
+	@Test @Order(1)
 	void persistence_fromDateAsTimestamp_2020_1() {
 		LegislativeActImpl legislativeAct = (LegislativeActImpl) persistence.readOne(new QueryExecutorArguments().addFilterField(persistence.getParameterNameIdentifier(), "2020_1").addProjectionsFromStrings(LegislativeActImpl.FIELD_FROM_DATE_AS_TIMESTAMP));
 		assertThat(legislativeAct).isNotNull();
