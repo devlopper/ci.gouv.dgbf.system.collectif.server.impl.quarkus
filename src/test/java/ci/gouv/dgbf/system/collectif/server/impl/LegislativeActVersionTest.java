@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.DependencyInjection;
+import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.persistence.query.Query;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.ResponseHelper;
@@ -163,6 +164,20 @@ public class LegislativeActVersionTest {
 		assertThat(legislativeActVersion).isNotNull();
 		assertThat(legislativeActVersion.getIdentifier()).as("Identifiant").isEqualTo("2022_1_2");
 		assertThat(legislativeActVersion.getActDateAsTimestamp()).as("Date as timestamp").isEqualTo(1640995200000L);
+	}
+	
+	@Test @Order(1)
+	void persistence_defaults() {
+		Collection<LegislativeActVersionImpl> legislativeActVersions = CollectionHelper.cast(LegislativeActVersionImpl.class, persistence.readDefaults(List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_IS_DEFAULT_VERSION)));
+		assertThat(legislativeActVersions).isNotNull();
+		assertThat(legislativeActVersions.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("2022_1_2");
+	}
+	
+	@Test @Order(1)
+	void persistence_default() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readDefault(List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_IS_DEFAULT_VERSION));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getIdentifier()).isEqualTo("2022_1_2");
 	}
 	
 	@Test @Order(1)

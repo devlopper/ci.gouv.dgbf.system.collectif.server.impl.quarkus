@@ -142,7 +142,7 @@ public class ReadOnlyEntityTest {
 		response.then()
 		//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
-        	.body(BudgetCategoryDto.JSON_IDENTIFIER, equalTo(configuration.budgetCategory().defaultIdentifier()))
+        	.body(BudgetCategoryDto.JSON_IDENTIFIER, hasItems(configuration.budgetCategory().defaultIdentifier()))
         	;
     }
 	
@@ -171,5 +171,19 @@ public class ReadOnlyEntityTest {
 		assertThat(exercise).isNotNull();
 		assertThat(exercise.getIdentifier()).isEqualTo("2021");
 		assertThat(exercise.getYear()).isEqualTo(Short.valueOf("2021"));
+    }
+	
+	@Test
+    public void client_exercise_get_default() {
+		ci.gouv.dgbf.system.collectif.server.client.rest.BudgetCategory budgetCategory = budgetCategoryController.getDefault();
+		assertThat(budgetCategory).isNotNull();
+		assertThat(budgetCategory.getIdentifier()).isEqualTo(configuration.budgetCategory().defaultIdentifier());
+    }
+	
+	@Test
+    public void client_exercise_get_defaults() {
+		Collection<ci.gouv.dgbf.system.collectif.server.client.rest.BudgetCategory> budgetCategories = budgetCategoryController.getDefaults();
+		assertThat(budgetCategories).isNotNull();
+		assertThat(budgetCategories.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly(configuration.budgetCategory().defaultIdentifier());
     }
 }

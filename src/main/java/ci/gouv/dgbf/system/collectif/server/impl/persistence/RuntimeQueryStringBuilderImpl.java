@@ -413,6 +413,13 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_IDENTIFIER,"t"
 				,FieldHelper.join(LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_IDENTIFIER));
+		
+		Boolean defaultValue = arguments.getFilterFieldValueAsBoolean(null,DependencyInjection.inject(LegislativeActVersionPersistence.class).getParameterNameDefaultValue());
+		if(defaultValue != null) {
+			predicate.add(String.format("t.identifier %1$s (SELECT la.%2$s.identifier FROM %3$s la WHERE la.%4$s = TRUE AND la.%5$s = (SELECT MAX(la_.%5$s) FROM %3$s la_))",Language.formatOperatorIn(defaultValue),LegislativeActImpl.FIELD_DEFAULT_VERSION
+					,LegislativeActImpl.ENTITY_NAME,LegislativeActImpl.FIELD_IN_PROGRESS,LegislativeActImpl.FIELD_DATE));
+		}
+		
 		/*Boolean defaultVersionInLatestLegislativeAct = arguments.getFilterFieldValueAsBoolean(null,Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT);
 		if(defaultVersionInLatestLegislativeAct != null) {
 			predicate.add(String.format("EXISTS(SELECT p FROM %s p WHERE p.%s = t)",LegislativeActImpl.ENTITY_NAME,LegislativeActImpl.FIELD_DEFAULT_VERSION));
