@@ -10,6 +10,19 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 
 public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 
+	public class Actor implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(Actor.class);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(Actor.class);
+		}
+	}
+	
 	public class LegislativeAct implements QuarkusTestProfile{
 		@Override
 		public Map<String, String> getConfigOverrides() {
@@ -66,6 +79,7 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		@Override
 		public Map<String, String> getConfigOverrides() {
 			Map<String, String> map = Profile.buildConfig(ReadOnlyEntity.class);
+			map.put("collectif.actor.visibilities.enabled", "false");
 			return map;
 		}
 		

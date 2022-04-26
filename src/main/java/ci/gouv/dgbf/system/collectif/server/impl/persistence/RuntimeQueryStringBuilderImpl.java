@@ -14,10 +14,12 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
+import org.cyk.utility.__kernel__.constant.ConstantEmpty;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.value.ValueHelper;
+import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringImpl;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.Language;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -26,6 +28,7 @@ import org.cyk.utility.persistence.server.query.string.LikeStringValueBuilder;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
 import org.cyk.utility.persistence.server.query.string.RuntimeQueryStringBuilder;
 import org.cyk.utility.persistence.server.query.string.WhereStringBuilder.Predicate;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ActionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ActivityPersistence;
@@ -45,16 +48,21 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActExpendi
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourceActivityPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ResourcePersistence;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.SectionPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.Configuration;
+import ci.gouv.dgbf.system.collectif.server.impl.client.ActorClient;
 import io.quarkus.arc.Unremovable;
 
 @ApplicationScoped @ci.gouv.dgbf.system.collectif.server.api.System @Unremovable
 public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.AbstractImpl implements Serializable {
 
+	@Inject Configuration configuration;
+	
 	@Inject ExercisePersistence exercisePersistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject BudgetSpecializationUnitPersistence budgetSpecializationUnitPersistence;
+	@Inject SectionPersistence sectionPersistence;
 	@Inject ActionPersistence actionPersistence;
 	@Inject ActivityPersistence activityPersistence;
 	@Inject ResourceActivityPersistence resourceActivityPersistence;
@@ -69,6 +77,8 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	@Inject GeneratedActExpenditurePersistence generatedActExpenditurePersistence;
 	@Inject BudgetCategoryPersistence budgetCategoryPersistence;
 	
+	@Inject @RestClient ActorClient actorClient;
+	
 	@Override
 	protected void setProjection(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
 		Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
@@ -81,6 +91,7 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		else
 			super.setProjection(queryExecutorArguments, builderArguments);
 	}
+	
 	
 	@Override
 	protected void setTuple(QueryExecutorArguments arguments, Arguments builderArguments) {
@@ -143,6 +154,30 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		return super.isGroupedByIdentifier(arguments);
 	}*/
 	
+	protected Boolean isVisibilityCheckable(QueryExecutorArguments arguments, Arguments builderArguments) {
+		if(!configuration.actor().visibilities().enabled())
+			return Boolean.FALSE;
+		if(budgetCategoryPersistence.isProcessable(arguments))
+			return configuration.actor().visibilities().scopesTypes().contains(ActorClient.CODE_TYPE_DOMAINE_CATEGORIE_BUDGET);
+		if(sectionPersistence.isProcessable(arguments))
+			return configuration.actor().visibilities().scopesTypes().contains(ActorClient.CODE_TYPE_DOMAINE_SECTION);
+		if(budgetSpecializationUnitPersistence.isProcessable(arguments))
+			return configuration.actor().visibilities().scopesTypes().contains(ActorClient.CODE_TYPE_DOMAINE_USB);
+		if(actionPersistence.isProcessable(arguments))
+			return configuration.actor().visibilities().scopesTypes().contains(ActorClient.CODE_TYPE_DOMAINE_ACTION);
+		return Boolean.FALSE;
+	}
+	
+	@Override
+	protected void setPredicate(QueryExecutorArguments arguments, Arguments builderArguments) {
+		if(Boolean.TRUE.equals(isVisibilityCheckable(arguments, builderArguments))) {
+			String username = (String) arguments.getFilterFieldValue(Parameters.USER_NAME);
+			if(StringHelper.isBlank(username))
+				throw new RuntimeException(String.format("Query parameter <<%s>> is required to get <<%s>>",Parameters.USER_NAME,arguments.getQueryIdentifier()));
+		}
+		super.setPredicate(arguments, builderArguments);
+	}
+	
 	@Override
 	protected void populatePredicate(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		super.populatePredicate(arguments, builderArguments, predicate, filter);
@@ -156,6 +191,8 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 			populatePredicateLegislativeActVersion(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(budgetSpecializationUnitPersistence.isProcessable(arguments)))
 			populatePredicateBudgetSpecializationUnit(arguments, builderArguments, predicate, filter);
+		else if(Boolean.TRUE.equals(sectionPersistence.isProcessable(arguments)))
+			populatePredicateSection(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(actionPersistence.isProcessable(arguments)))
 			populatePredicateAction(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(activityPersistence.isProcessable(arguments)))
@@ -177,8 +214,9 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		else if(Boolean.TRUE.equals(generatedActExpenditurePersistence.isProcessable(arguments)))
 			populatePredicateGeneratedActExpenditure(arguments, builderArguments, predicate, filter);
 		else if(Boolean.TRUE.equals(budgetCategoryPersistence.isProcessable(arguments)))
-			populatePredicateBudgetCateory(arguments, builderArguments, predicate, filter);
+			populatePredicateBudgetCategory(arguments, builderArguments, predicate, filter);
 	}
+	
 	
 	@Override
 	protected void setOrder(QueryExecutorArguments arguments, Arguments builderArguments) {
@@ -248,23 +286,8 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	
 	/**/
 	
-	public static void populatePredicateBudgetCateory(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
-		if(arguments.getFilterField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER) != null) {
-			predicate.add(String.format("EXISTS(SELECT e.identifier FROM %s e JOIN %s v ON v.identifier = e.identifier WHERE t.identifier = v.%s AND e.%s.identifier = :%s)",ExpenditureImpl.ENTITY_NAME,ExpenditureView.ENTITY_NAME
-					,ExpenditureView.FIELD_BUDGET_CATEGORY_IDENTIFIER,ExpenditureImpl.FIELD_ACT_VERSION,Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
-			filter.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
-		}
 		
-		Boolean defaultValue = arguments.getFilterFieldValueAsBoolean(null,DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue());
-		if(defaultValue != null) {
-			String defaultIdentifier = DependencyInjection.inject(Configuration.class).budgetCategory().defaultIdentifier();
-			if(StringHelper.isNotBlank(defaultIdentifier)) {
-				predicate.add(String.format("t.identifier %s :%s",Language.formatOperatorEqual(defaultValue),DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue()));
-				filter.addField(DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue(),defaultIdentifier);
-			}
-		}
-	}
-	
+
 	public static void populatePredicateExpenditure(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.LEGISLATIVE_ACT_IDENTIFIER,"t"
 				,FieldHelper.join(ExpenditureImpl.FIELD_ACT_VERSION,LegislativeActVersionImpl.FIELD_ACT,LegislativeActImpl.FIELD_IDENTIFIER));
@@ -432,9 +455,42 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		}*/
 	}
 	
-	public static void populatePredicateBudgetSpecializationUnit(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+	public void populatePredicateBudgetCategory(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+		if(arguments.getFilterField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER) != null) {
+			predicate.add(String.format("EXISTS(SELECT e.identifier FROM %s e JOIN %s v ON v.identifier = e.identifier WHERE t.identifier = v.%s AND e.%s.identifier = :%s)",ExpenditureImpl.ENTITY_NAME,ExpenditureView.ENTITY_NAME
+					,ExpenditureView.FIELD_BUDGET_CATEGORY_IDENTIFIER,ExpenditureImpl.FIELD_ACT_VERSION,Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
+			filter.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, arguments.getFilterFieldValue(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER));
+		}
+		
+		Boolean defaultValue = arguments.getFilterFieldValueAsBoolean(null,DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue());
+		if(defaultValue != null) {
+			String defaultIdentifier = DependencyInjection.inject(Configuration.class).budgetCategory().defaultIdentifier();
+			if(StringHelper.isNotBlank(defaultIdentifier)) {
+				predicate.add(String.format("t.identifier %s :%s",Language.formatOperatorEqual(defaultValue),DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue()));
+				filter.addField(DependencyInjection.inject(BudgetCategoryPersistence.class).getParameterNameDefaultValue(),defaultIdentifier);
+			}
+		}
+		
+		populatePredicateVisibilities(arguments, builderArguments, predicate, filter, ActorClient.CODE_TYPE_DOMAINE_CATEGORIE_BUDGET);
+	}
+	
+	protected void populatePredicateVisibilities(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter,String codeTypeDomaine) {
+		if(!Boolean.TRUE.equals(isVisibilityCheckable(arguments, builderArguments)))
+			return;
+		String username = (String) arguments.getFilterFieldValue(Parameters.USER_NAME);
+		Collection<ActorClient.VisibilityDto> visibilities = actorClient.getVisibilities(codeTypeDomaine, username);
+		predicate.add(String.format("t.%s IN :%s", AbstractIdentifiableSystemScalarStringImpl.FIELD_IDENTIFIER,Parameters.IDENTIFIERS));
+		filter.addField(Parameters.IDENTIFIERS, CollectionHelper.isEmpty(visibilities) ? ConstantEmpty.STRINGS : visibilities.stream().map(x -> x.getIdentifier()).collect(Collectors.toList()));
+	}
+	
+	public void populatePredicateSection(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+		populatePredicateVisibilities(arguments, builderArguments, predicate, filter, ActorClient.CODE_TYPE_DOMAINE_SECTION);
+	}
+	
+	public void populatePredicateBudgetSpecializationUnit(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.SECTION_IDENTIFIER,"t"
 				,BudgetSpecializationUnitImpl.FIELD_SECTION_IDENTIFIER);
+		populatePredicateVisibilities(arguments, builderArguments, predicate, filter, ActorClient.CODE_TYPE_DOMAINE_USB);
 	}
 	
 	public static void populatePredicateAdministrativeUnit(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
@@ -442,9 +498,10 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				,AdministrativeUnitImpl.FIELD_SECTION_IDENTIFIER);
 	}
 	
-	public static void populatePredicateAction(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
+	public void populatePredicateAction(QueryExecutorArguments arguments, Arguments builderArguments, Predicate predicate,Filter filter) {
 		addEqualsIfFilterHasFieldWithPath(arguments, builderArguments, predicate, filter, Parameters.BUDGET_SPECIALIZATION_UNIT_IDENTIFIER,"t"
 				,ActionImpl.FIELD_BUDGET_SPECIALIZATION_UNIT_IDENTIFIER);
+		populatePredicateVisibilities(arguments, builderArguments, predicate, filter, ActorClient.CODE_TYPE_DOMAINE_ACTION);
 	}
 	
 	private final String ACTIVITY_PREDICATE_SEARCH = parenthesis(or(

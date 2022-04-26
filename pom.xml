@@ -18,6 +18,7 @@
 
 	<properties>
 		<quarkus.version>2.4.0.Final</quarkus.version>
+		<com.github.tomakehurst.wiremock-jre8.version>2.33.1</com.github.tomakehurst.wiremock-jre8.version>
 	</properties>
 
 	<dependencies>
@@ -59,6 +60,13 @@
 			<artifactId>collectif-server-client-rest</artifactId>
 			<version>0.0.1</version>
 			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.github.tomakehurst</groupId>
+		    <artifactId>wiremock-jre8</artifactId>
+		    <version>${com.github.tomakehurst.wiremock-jre8.version}</version> 
+		    <scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

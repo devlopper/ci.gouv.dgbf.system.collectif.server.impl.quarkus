@@ -1,7 +1,9 @@
 package ci.gouv.dgbf.system.collectif.server.impl;
 
-import org.cyk.quarkus.extension.core_.configuration.processing.Importation;
+import java.util.List;
+
 import org.cyk.quarkus.extension.core_.configuration.processing.Copy;
+import org.cyk.quarkus.extension.core_.configuration.processing.Importation;
 
 import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
@@ -28,4 +30,19 @@ public interface Configuration extends org.cyk.quarkus.extension.core_.configura
 		@WithDefault("1")
 		String defaultIdentifier();
 	}
+	
+	Actor actor();
+	
+	interface Actor {
+		Visibilities visibilities();
+		
+		interface Visibilities {
+			@WithDefault("true")
+			Boolean enabled();
+			
+			//@WithDefault("CATEGORIE_BUDGET,SECTION,USB,ACTION")
+			@WithDefault("CATEGORIE_BUDGET,SECTION,USB")
+			List<String> scopesTypes();
+		}
+	}	
 }

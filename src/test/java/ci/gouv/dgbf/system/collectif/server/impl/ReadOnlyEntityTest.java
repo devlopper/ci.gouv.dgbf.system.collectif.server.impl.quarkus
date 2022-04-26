@@ -15,7 +15,10 @@ import javax.ws.rs.core.Response;
 import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.ResponseHelper;
+import org.cyk.utility.service.SpecificService;
+import org.cyk.utility.service.client.Controller;
 import org.cyk.utility.service.client.SpecificServiceGetter;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetCategory;
@@ -38,6 +41,11 @@ public class ReadOnlyEntityTest {
 	@Inject ExercisePersistence exercisePersistence;
 	@Inject BudgetCategoryPersistence budgetCategoryPersistence;
 	@Inject BudgetCategoryController budgetCategoryController;
+	
+	@BeforeAll
+	static void listenBeforeAll() {
+		Controller.GetArguments.PROCESSABLE_BY_USER.clear();
+	}
 	
 	/* Persistence */
 	
@@ -138,7 +146,7 @@ public class ReadOnlyEntityTest {
     public void service_budgetCategory_get_default() {
 		io.restassured.response.Response response = given()
 				//.log().all()
-				.when().param("df", Boolean.TRUE).get("/api/categories-budgets/");
+				.when().param(SpecificService.PARAMETER_NAME_DEFAULTABLE, Boolean.TRUE).get("/api/categories-budgets/");
 		response.then()
 		//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
@@ -174,14 +182,14 @@ public class ReadOnlyEntityTest {
     }
 	
 	@Test
-    public void client_exercise_get_default() {
+    public void client_budgetCategory_get_default() {
 		ci.gouv.dgbf.system.collectif.server.client.rest.BudgetCategory budgetCategory = budgetCategoryController.getDefault();
 		assertThat(budgetCategory).isNotNull();
 		assertThat(budgetCategory.getIdentifier()).isEqualTo(configuration.budgetCategory().defaultIdentifier());
     }
 	
 	@Test
-    public void client_exercise_get_defaults() {
+    public void client_budgetCategory_get_defaults() {
 		Collection<ci.gouv.dgbf.system.collectif.server.client.rest.BudgetCategory> budgetCategories = budgetCategoryController.getDefaults();
 		assertThat(budgetCategories).isNotNull();
 		assertThat(budgetCategories.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly(configuration.budgetCategory().defaultIdentifier());
