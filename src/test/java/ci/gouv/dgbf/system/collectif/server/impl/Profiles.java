@@ -23,6 +23,20 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		}
 	}
 	
+	public class ActorWithVisibilitiesDisabled implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(Actor.class);
+			map.put("collectif.actor.visibilities.enabled", "false");
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(Actor.class);
+		}
+	}
+	
 	public class LegislativeAct implements QuarkusTestProfile{
 		@Override
 		public Map<String, String> getConfigOverrides() {

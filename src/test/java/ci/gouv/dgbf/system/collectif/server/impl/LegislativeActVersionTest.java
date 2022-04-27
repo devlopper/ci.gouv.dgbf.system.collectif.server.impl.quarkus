@@ -331,7 +331,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void service_get_one() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1", null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1", null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion legislativeActVersion = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class,response);
@@ -342,7 +342,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void service_get_one_generatedActCount() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1", List.of(LegislativeActVersionDto.JSON_IDENTIFIER
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1",null,null, List.of(LegislativeActVersionDto.JSON_IDENTIFIER
 				,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE));
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
@@ -395,7 +395,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void client_get_one() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1", null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1", null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion legislativeActVersion = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class,response);
@@ -406,7 +406,7 @@ public class LegislativeActVersionTest {
 	
 	@Test @Order(1)
     public void client_get_one_generatedActCount() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1", List.of(LegislativeActVersionDto.JSON_IDENTIFIER
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion.class).getByIdentifier("2022_1_1",null,null, List.of(LegislativeActVersionDto.JSON_IDENTIFIER
 				,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE));
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());

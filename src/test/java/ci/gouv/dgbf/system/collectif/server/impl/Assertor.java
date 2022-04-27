@@ -272,7 +272,7 @@ public class Assertor {
     }
 	
     public <T> void assertClientGetOneNamable(Class<T> klass,String identifier,String expectedCode,String expectedName) {
-		Response response = specificServiceGetter.get(klass).getByIdentifier(identifier, null);
+		Response response = specificServiceGetter.get(klass).getByIdentifier(identifier, null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		T entity = ResponseHelper.getEntity(klass,response);

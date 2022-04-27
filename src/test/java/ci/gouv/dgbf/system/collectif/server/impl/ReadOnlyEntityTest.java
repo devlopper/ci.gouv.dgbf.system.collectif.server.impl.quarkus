@@ -172,7 +172,7 @@ public class ReadOnlyEntityTest {
 	
 	@Test
     public void client_exercise_get_one() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Exercise.class).getByIdentifier("2021", List.of(ExerciseDto.JSON_IDENTIFIER,ExerciseDto.JSON_YEAR));
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Exercise.class).getByIdentifier("2021",null,null, List.of(ExerciseDto.JSON_IDENTIFIER,ExerciseDto.JSON_YEAR));
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		ci.gouv.dgbf.system.collectif.server.client.rest.Exercise exercise = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.Exercise.class,response);

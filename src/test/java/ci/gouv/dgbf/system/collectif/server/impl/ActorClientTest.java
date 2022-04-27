@@ -54,7 +54,7 @@ public class ActorClientTest extends org.cyk.quarkus.extension.test.AbstractTest
 	}
 	
 	@Test
-	void get_sections() {
+	void persistence_sections() {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			sectionPersistence.readMany(new QueryExecutorArguments());
 	    });
@@ -62,10 +62,17 @@ public class ActorClientTest extends org.cyk.quarkus.extension.test.AbstractTest
 	}
 	
 	@Test
-	void get_sections_christian() {
+	void persistence_sections_readMany_christian() {
 		Collection<Section> sections = sectionPersistence.readMany(new QueryExecutorArguments().addFilterField(Parameters.USER_NAME, "christian"));
 		assertThat(sections).isNotNull();
 		assertThat(sections.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("1","2");
+	}
+	
+	@Test
+	void persistence_sections_readOne_christian() {
+		Section section = sectionPersistence.readOne(new QueryExecutorArguments().addFilterField(sectionPersistence.getParameterNameIdentifier(), "2").addFilterField(Parameters.USER_NAME, "christian"));
+		assertThat(section).isNotNull();
+		assertThat(section.getIdentifier()).isEqualTo("2");
 	}
 	
 	@Test
@@ -96,10 +103,17 @@ public class ActorClientTest extends org.cyk.quarkus.extension.test.AbstractTest
 	}
 	
 	@Test
-    void client_budgetCategories() {
+    void client_budgetCategory_get() {
 		Collection<ci.gouv.dgbf.system.collectif.server.client.rest.BudgetCategory> budgetCategories = budgetCategoryController.get();
 		assertThat(budgetCategories).isNotNull();
 		assertThat(budgetCategories.stream().map(x -> x.getIdentifier()).collect(Collectors.toList())).containsExactly("1","2");
+    }
+	
+	@Test
+    void client_budgetCategory_getByIdentifier() {
+		ci.gouv.dgbf.system.collectif.server.client.rest.BudgetCategory budgetCategory = budgetCategoryController.getByIdentifier("2");
+		assertThat(budgetCategory).isNotNull();
+		assertThat(budgetCategory.getIdentifier()).isEqualTo("2");
     }
 	
 	@Test

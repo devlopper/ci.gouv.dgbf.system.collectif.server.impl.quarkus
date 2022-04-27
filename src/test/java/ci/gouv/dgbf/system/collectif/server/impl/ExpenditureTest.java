@@ -362,7 +362,7 @@ public class ExpenditureTest {
 	
 	@Test @Order(1)
     public void client_get_one() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).getByIdentifier("2022_1_2_1", null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).getByIdentifier("2022_1_2_1", null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure expenditure = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
@@ -374,7 +374,7 @@ public class ExpenditureTest {
 	@Test @Order(1)
     public void client_get_one_entryAuthorization() {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).getByIdentifier("2022_1_2_1"
-				, List.of(ExpenditureImpl.FIELD_IDENTIFIER,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT));
+				,null,null, List.of(ExpenditureImpl.FIELD_IDENTIFIER,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT));
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure expenditure = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);

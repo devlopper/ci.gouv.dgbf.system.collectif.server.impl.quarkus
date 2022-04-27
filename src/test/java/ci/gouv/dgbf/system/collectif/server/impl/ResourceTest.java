@@ -273,7 +273,7 @@ public class ResourceTest {
 	
 	@Test @Order(1)
     public void client_get_one() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).getByIdentifier("2021_1_1_1", null);
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).getByIdentifier("2021_1_1_1", null,null,null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		ci.gouv.dgbf.system.collectif.server.client.rest.Resource resource = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class,response);
@@ -284,7 +284,7 @@ public class ResourceTest {
 	
 	@Test @Order(1)
     public void client_get_one_revenue() {
-		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).getByIdentifier("2021_1_1_1", List.of(ResourceDto.JSON_IDENTIFIER,ResourceDto.JSON_REVENUE));
+		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class).getByIdentifier("2021_1_1_1",null,null, List.of(ResourceDto.JSON_IDENTIFIER,ResourceDto.JSON_REVENUE));
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		ci.gouv.dgbf.system.collectif.server.client.rest.Resource resource = ResponseHelper.getEntity(ci.gouv.dgbf.system.collectif.server.client.rest.Resource.class,response);
