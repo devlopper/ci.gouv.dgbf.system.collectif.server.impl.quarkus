@@ -1,0 +1,2 @@
+INSERT INTO TA_PROPRIETE_CONFIGURATION(IDENTIFIANT,CODE,LIBELLE,VALEUR) VALUES ('collectif-actor-visibilities-enabled','collectif.actor.visibilities.enabled','collectif-actor-visibilities-enabled','false');
+INSERT INTO TA_PROPRIETE_CONFIGURATION(IDENTIFIANT,CODE,LIBELLE,VALEUR) VALUES ('unknown','unknown','unknown','xyz');
