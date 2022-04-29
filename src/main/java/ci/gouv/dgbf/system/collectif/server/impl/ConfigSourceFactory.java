@@ -7,7 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,17 +23,25 @@ import io.smallrye.config.PropertiesConfigSource;
 
 public class ConfigSourceFactory implements io.smallrye.config.ConfigSourceFactory,Serializable {
 
+	private static final String CYK_CONFIG_SOURCE_FACTORY_TIMESTAMP = "cyk.config.source.factory.timestamp";
 	private static final String CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_NAME = "cyk.config.source.factory.data.source.name";
-	private static final String CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_USERNAME = "quarkus.datasource.username";
-	private static final String CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_PASSWORD = "quarkus.datasource.password";
-	private static final String CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_URL = "quarkus.datasource.jdbc.url";
 	private static final String CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_QUERY_STRING = "cyk.config.source.factory.data.source.query.string";
+	
+	private static Boolean isRuntimePhase() {
+		try {
+			Class.forName("io.quarkus.deployment.steps.RuntimeConfigSetup");
+			return Boolean.TRUE;
+		} catch (ClassNotFoundException exception) {
+			return Boolean.FALSE;
+		}
+	}
 	
 	@Override
 	public Iterable<ConfigSource> getConfigSources(ConfigSourceContext configSourceContext) {
-		// FIXME +++++++++++++++++++++++++++++++++ AVOID INIT TO BE DONE TWICE!!! +++++++++++++++++++++++++++++++++++++++++++++
+		if(Boolean.TRUE.equals(isRuntimePhase()))
+			return Collections.emptyList();
+		ArrayList<ConfigSource> collection = new ArrayList<>();
 		ConfigSource dataSourceConfigSource = instantiateFromDataSource(configSourceContext);
-		Collection<ConfigSource> collection = new ArrayList<>();
 		if(dataSourceConfigSource != null)
 			collection.add(dataSourceConfigSource);
 		return collection;
@@ -56,10 +64,8 @@ public class ConfigSourceFactory implements io.smallrye.config.ConfigSourceFacto
 			return null;
 		try {
 			try (Connection connection = getJdbcConnection(configSourceContext)) {
-				if(connection == null) {
-					LogHelper.logWarning("Configuration from data source will not be read because jdbc connection cannot be acquired", getClass());
+				if(connection == null)
 					return null;
-				}
 				PreparedStatement preparedStatement = connection.prepareStatement(query);
 	            ResultSet resultSet = preparedStatement.executeQuery();
 	            Map<String,String> map = new HashMap<>();
@@ -71,6 +77,7 @@ public class ConfigSourceFactory implements io.smallrye.config.ConfigSourceFacto
 	            if(MapHelper.isEmpty(map))
 	            	return null;
 	            LogHelper.logInfo(String.format("Configuration from data source : %s", map), getClass());
+	            map.put(CYK_CONFIG_SOURCE_FACTORY_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
 				return new PropertiesConfigSource(map, getJdbcName(configSourceContext), 900);
 			}
 		} catch (Exception exception) {
@@ -88,24 +95,19 @@ public class ConfigSourceFactory implements io.smallrye.config.ConfigSourceFacto
 	}
 	
 	private static Connection getJdbcConnection(ConfigSourceContext configSourceContext) {
-		String url = read(configSourceContext, CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_URL);
-		if(StringHelper.isBlank(url)) {
-			LogHelper.logWarning(String.format("Configuration data source url has not been set using %s",CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_URL), ConfigSourceFactory.class);
+		String url = read(configSourceContext, "quarkus.datasource.jdbc.url");
+		if(StringHelper.isBlank(url))
 			return null;
-		}
-		String username = read(configSourceContext, CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_USERNAME);
-		if(StringHelper.isBlank(username)) {
-			LogHelper.logWarning(String.format("Configuration data source username has not been set using %s",CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_USERNAME), ConfigSourceFactory.class);
+		String username = read(configSourceContext, "quarkus.datasource.username");
+		if(StringHelper.isBlank(username))
 			return null;
-		}
-		String password = read(configSourceContext, CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_PASSWORD);
-		if(StringHelper.isBlank(password)) {
-			LogHelper.logWarning(String.format("Configuration data source password has not been set using %s",CYK_CONFIG_SOURCE_FACTORY_DATA_SOURCE_PASSWORD), ConfigSourceFactory.class);
+		String password = read(configSourceContext, "quarkus.datasource.password");
+		if(StringHelper.isBlank(password))
 			return null;
-		}
 		try {
 			return DriverManager.getConnection(url, username, password);
 		} catch (SQLException exception) {
+			LogHelper.logWarning(String.format("Data source jdbc connection cannot be acquired : %s",exception.getMessage()), ConfigSourceFactory.class);
 			exception.printStackTrace();
 			return null;
 		}
@@ -141,7 +143,13 @@ public class ConfigSourceFactory implements io.smallrye.config.ConfigSourceFacto
 	private static String read(ConfigSourceContext configSourceContext,String name) {
 		if(StringHelper.isBlank(name))
 			return null;
-		ConfigValue configValue = configSourceContext.getValue(name);
+		ConfigValue configValue;
+		try {
+			configValue = configSourceContext.getValue(name);
+		} catch (Exception exception) {
+			LogHelper.logWarning(String.format("Exception while reading %s : %s",name,exception.getMessage()), ConfigSourceFactory.class);
+			return null;
+		}
 		if (configValue == null)
 			return null;
 		return configValue.getValue();
