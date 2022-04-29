@@ -16,9 +16,7 @@ import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.ResponseHelper;
 import org.cyk.utility.service.SpecificService;
-import org.cyk.utility.service.client.Controller;
 import org.cyk.utility.service.client.SpecificServiceGetter;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.BudgetCategory;
@@ -41,11 +39,6 @@ public class ReadOnlyEntityTest {
 	@Inject ExercisePersistence exercisePersistence;
 	@Inject BudgetCategoryPersistence budgetCategoryPersistence;
 	@Inject BudgetCategoryController budgetCategoryController;
-	
-	@BeforeAll
-	static void listenBeforeAll() {
-		Controller.GetArguments.PROCESSABLE_BY_USER.clear();
-	}
 	
 	/* Persistence */
 	

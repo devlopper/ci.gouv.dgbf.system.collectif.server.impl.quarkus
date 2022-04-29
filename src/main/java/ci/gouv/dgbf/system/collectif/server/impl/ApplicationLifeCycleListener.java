@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl;
 
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
 import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.mapping.MapperClassGetter;
@@ -76,6 +77,8 @@ import io.quarkus.runtime.StartupEvent;
 public class ApplicationLifeCycleListener {
 	public static final int ORDER = org.cyk.quarkus.extension.hibernate.orm.ApplicationLifeCycleListener.ORDER+1;
 
+	@Inject Configuration configuration;
+	
     void onStart(@Observes StartupEvent startupEvent) {
     	org.cyk.quarkus.extension.hibernate.orm.ApplicationLifeCycleListener.QUALIFIER = ci.gouv.dgbf.system.collectif.server.api.System.class;
     	DependencyInjection.setQualifierClassTo(ci.gouv.dgbf.system.collectif.server.api.System.class

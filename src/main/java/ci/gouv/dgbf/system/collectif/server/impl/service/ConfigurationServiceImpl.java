@@ -20,4 +20,9 @@ public class ConfigurationServiceImpl implements ConfigurationService,Serializab
 		return dto;
 	}
 
+	@Override
+	public Boolean isScopeTypeVisibilityCheckable(String scopeType) {
+		return Boolean.TRUE.equals(configuration.actor().visibilities().enabled()) && configuration.actor().visibilities().scopesTypes().contains(scopeType);
+	}
+
 }
