@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
+import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.RequestExecutor;
@@ -21,7 +22,11 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto.AdjustmentDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureService;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LessorImpl;
 
 @Path(ExpenditureService.PATH)
 public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<ExpenditureDto,ExpenditureDtoImpl,Expenditure,ExpenditureImpl> implements ExpenditureService,Serializable {
@@ -66,6 +71,26 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 				ExpenditureImpl expenditure = (ExpenditureImpl) persistence.readOne(new QueryExecutorArguments().setFilter(filter));
 				if(expenditure != null)
 					responseBuilderArguments.setEntity(mapper.mapSourceToDestination(expenditure));
+			}
+		});
+	}
+
+	@Override
+	public Response verifyLoadable(List<ExpenditureDto.LoadDto> loads) {
+		return buildResponseOk(business.verifyLoadable(CollectionHelper.isEmpty(loads) ? null : loads.stream().map(
+				dto -> new ExpenditureImpl().setActivityCode(dto.getActivity()).setEconomicNatureCode(dto.getEconomicNature()).setFundingSourceCode(dto.getFundingSource()).setLessorCode(dto.getLessor())
+				).collect(Collectors.toList())),new ResponseBuilderListener.AbstractImpl() {
+			@Override
+			protected String buildHeaderName(Object value) {
+				if(ActivityImpl.class.equals(value))
+					return HEADER_UNKNOWN_ACTIVITIES_CODES;
+				if(EconomicNatureImpl.class.equals(value))
+					return HEADER_UNKNOWN_ECONOMICS_NATURES_CODES;
+				if(FundingSourceImpl.class.equals(value))
+					return HEADER_UNKNOWN_FUNDINGS_SOURCES_CODES;
+				if(LessorImpl.class.equals(value))
+					return HEADER_UNKNOWN_LESSORS_CODES;
+				return super.buildHeaderName(value);
 			}
 		});
 	}

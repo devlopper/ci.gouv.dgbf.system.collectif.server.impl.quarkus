@@ -5,6 +5,8 @@ import static org.cyk.utility.persistence.query.Language.Where.and;
 import static org.cyk.utility.persistence.query.Language.Where.or;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,7 +28,7 @@ import lombok.experimental.Accessors;
 public interface ExpenditureQueryStringBuilder {
 	
 	String[] ENTRY_AUTHORIZATION_PAYMENT_CREDIT = {ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION,ExpenditureImpl.FIELD_PAYMENT_CREDIT};
-	String[] REGULATORY_ACT_LEGISLATIVE_ACT_VERSION_AND_AVAILABLE = {ExpenditureImpl.FIELDS_AMOUNTS};
+	Collection<String> REGULATORY_ACT_LEGISLATIVE_ACT_VERSION_AND_AVAILABLE = List.of(ExpenditureImpl.FIELDS_AMOUNTS);
 	
 	public static interface Projection {
 		

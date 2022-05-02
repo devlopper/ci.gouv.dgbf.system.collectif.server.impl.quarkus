@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +18,12 @@ import javax.json.bind.JsonbBuilder;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.time.TimeHelper;
+import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.Query;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -39,6 +43,8 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.service.EntryAuthorizationDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureService;
+import ci.gouv.dgbf.system.collectif.server.impl.business.ExpenditureBusinessImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAmountsReader;
@@ -60,6 +66,83 @@ public class ExpenditureTest {
 	@Inject Assertor assertor;
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
+	
+	@Test
+	public void verifyLoadable(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
+		Result result = expenditureBusiness.verifyLoadable(expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).isNull();
+		assertThat(result.getMap()).isNull();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void verifyLoadable_unknown_activity_code(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setActivityCode("unknown_activity_code").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
+		Result result = expenditureBusiness.verifyLoadable(expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageActivitiesCodesDoNotExist(List.of("unknown_activity_code")));
+		assertThat(result.getMap()).isNotEmpty();
+		assertThat(result.getMap().keySet()).containsExactly(ActivityImpl.class);
+		assertThat((Collection<String>)result.getMap().entrySet().iterator().next().getValue()).containsExactly("unknown_activity_code");
+	}
+	
+	@Test
+	public void verifyLoadable_unknown_economicNature_code(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("unknown_economicNature_code").setFundingSourceCode("1").setLessorCode("1"));
+		Result result = expenditureBusiness.verifyLoadable(expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageEconomicsNaturesCodesDoNotExist(List.of("unknown_economicNature_code")));
+	}
+	
+	@Test
+	public void verifyLoadable_unknown_fundingsSources_code(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("unknown_fundingSource_code").setLessorCode("1"));
+		Result result = expenditureBusiness.verifyLoadable(expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageFundingsSourcesCodesDoNotExist(List.of("unknown_fundingSource_code")));
+	}
+	
+	@Test
+	public void verifyLoadable_unknown_lessor_code(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("unknown_lessor_code"));
+		Result result = expenditureBusiness.verifyLoadable(expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageLessorsCodesDoNotExist(List.of("unknown_lessor_code")));
+	}
+	
+	@Test
+	public void verifyLoadable_unknown_all_code(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setActivityCode("uac").setEconomicNatureCode("uenc").setFundingSourceCode("ufsc").setLessorCode("ulc"));
+		Result result = expenditureBusiness.verifyLoadable(expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageActivitiesCodesDoNotExist(List.of("uac")),ExpenditureBusinessImpl.formatMessageEconomicsNaturesCodesDoNotExist(List.of("uenc"))
+				,ExpenditureBusinessImpl.formatMessageFundingsSourcesCodesDoNotExist(List.of("ufsc")),ExpenditureBusinessImpl.formatMessageLessorsCodesDoNotExist(List.of("ulc")));
+	}
+	
+	@Test
+	public void readFromFileExcel() throws IOException{
+		Collection<Expenditure> expenditures = expenditurePersistence.readFromFileExcel(IOUtils.toByteArray(getClass().getResourceAsStream("depenses_ajutements.xlsx")),0,1,2,3);
+		assertThat(expenditures).isNotNull();
+		ExpenditureImpl expenditure = (ExpenditureImpl) CollectionHelper.getElementAt(expenditures, 0);
+		assertThat(expenditure.getActivityCode()).isEqualTo("ACTIVITE");
+		assertThat(expenditure.getEconomicNatureCode()).isEqualTo("NATURE ECONOMIQUE");
+		assertThat(expenditure.getFundingSourceCode()).isEqualTo("SOURCE FINANCEMENT");
+		assertThat(expenditure.getLessorCode()).isEqualTo("BAILLEUR");
+		
+		expenditure = (ExpenditureImpl) CollectionHelper.getElementAt(expenditures, 1);
+		assertThat(expenditure.getActivityCode()).isEqualTo("78045200170");
+		assertThat(expenditure.getEconomicNatureCode()).isEqualTo("7B33E851AAA040C1B2D6429EB3D93F08");
+		assertThat(expenditure.getFundingSourceCode()).isEqualTo("1");
+		assertThat(expenditure.getLessorCode()).isEqualTo("ET");
+	}
 	
 	@Test
 	void queryStringBuilder_projections_amoutSum() {
@@ -168,6 +251,36 @@ public class ExpenditureTest {
 		assertThat(expenditures).isNotNull();
 		assertThat(FieldHelper.readSystemIdentifiersAsStrings(expenditures)).containsExactlyInAnyOrder("2021_1_2_1","2021_1_2_2","2021_1_2_3","2021_1_2_4","2021_1_2_5");
 	}
+	
+	@Test @Order(1)
+    public void service_verifyLoadable() {
+		io.restassured.response.Response response = given().when()
+				//.log().all()
+				.header("Content-Type", "application/json")
+				.body(JsonbBuilder.create().toJson(List.of(new ExpenditureDto.LoadDto().setActivity("1").setEconomicNature("1").setFundingSource("1").setLessor("1"))))
+				.post("/api/depenses/verification-chargeable");
+		response.then()
+			//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	//.header(ResponseHelper.HEADER_X_TOTAL_COUNT, "13")
+        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
+    }
+	
+	@Test @Order(1)
+    public void service_verifyLoadable_unknown_activity_code() {
+		io.restassured.response.Response response = given().when()
+				//.log().all()
+				.header("Content-Type", "application/json")
+				.body(JsonbBuilder.create().toJson(List.of(new ExpenditureDto.LoadDto().setActivity("uac").setEconomicNature("1").setFundingSource("1").setLessor("1"))))
+				.post("/api/depenses/verification-chargeable");
+		response.then()
+			//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	.header("codes_activites_inconnus", "uac")
+        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
+    }
 	
 	@Test @Order(1)
     public void service_get_many() {

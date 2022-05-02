@@ -2,6 +2,7 @@ package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -80,9 +81,13 @@ import lombok.experimental.Accessors;
 public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements Expenditure,ExpenditureAmountsEntryAuthorizationPaymentCredit,Serializable {
 
 	@NotNull @Column(name = COLUMN_ACTIVITY_IDENTIFIER,nullable = false) String activityIdentifier;
+	@Transient String economicNatureCode;
 	@NotNull @Column(name = COLUMN_ECONOMIC_NATURE_IDENTIFIER,nullable = false) String economicNatureIdentifier;
+	@Transient String activityCode;
 	@NotNull @Column(name = COLUMN_FUNDING_SOURCE_IDENTIFIER,nullable = false) String fundingSourceIdentifier;
+	@Transient String fundingSourceCode;
 	@NotNull @Column(name = COLUMN_LESSOR_IDENTIFIER,nullable = false) String lessorIdentifier;
+	@Transient String lessorCode;
 	
 	@Valid
 	@Embedded
@@ -178,9 +183,13 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	}
 	
 	public static final String FIELD_ACTIVITY_IDENTIFIER = "activityIdentifier";
+	public static final String FIELD_ACTIVITY_CODE = "activityCode";
 	public static final String FIELD_ECONOMIC_NATURE_IDENTIFIER = "economicNatureIdentifier";
+	public static final String FIELD_ECONOMIC_NATURE_CODE = "economicNatureCode";
 	public static final String FIELD_FUNDING_SOURCE_IDENTIFIER = "fundingSourceIdentifier";
+	public static final String FIELD_FUNDING_SOURCE_CODE = "fundingSourceCode";
 	public static final String FIELD_LESSOR_IDENTIFIER = "lessorIdentifier";
+	public static final String FIELD_LESSOR_CODE = "lessorCode";
 	
 	public static final String FIELD_ACT_VERSION = "actVersion";
 	public static final String FIELD_ENTRY_AUTHORIZATION = "entryAuthorization";
@@ -229,7 +238,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String QUERY_READ_BY_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readByActVersionIdentifier";
 	public static final String QUERY_READ_FOR_COPY_BY_ACT_VERSION_IDENTIFIER_BY_SOURCE_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readForCopyByActVersionIdentifierBySourceActVersionIdentifier";
 	
-	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
+	public static final List<String> VIEW_FIELDS_NAMES = List.of(FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT);
 	
 	/**/
 	

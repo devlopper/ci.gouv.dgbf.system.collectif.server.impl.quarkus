@@ -1,6 +1,8 @@
 package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -129,5 +131,5 @@ public class ResourceImpl extends AbstractIdentifiableSystemScalarStringAuditedI
 	
 	public static final String QUERY_READ_BY_IDENTIIFERS = ENTITY_NAME+".readByIdentifiers";
 	
-	public static final String[] VIEW_FIELDS_NAMES = {FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT};
+	public static final Collection<String> VIEW_FIELDS_NAMES = List.of(FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT);
 }

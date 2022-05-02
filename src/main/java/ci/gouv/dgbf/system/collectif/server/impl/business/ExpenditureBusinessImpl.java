@@ -12,30 +12,39 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.server.query.ReaderByCollection;
+import org.cyk.utility.persistence.server.query.executor.field.CodeExecutor;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAvailableMonitorableIsNotFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportableView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureView;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LessorImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
 
 @ApplicationScoped
 public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
 
+	@Inject CodeExecutor codeExecutor;
+	
 	@Override
 	void __listenPostConstruct__() {
 		entityClass = Expenditure.class;
@@ -148,5 +157,59 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 	Expenditure instantiateForImport(LegislativeActVersion legislativeActVersion, Object[] array) {
 		return new ExpenditureImpl().setIdentifier((String)array[0]).setActVersion(legislativeActVersion).setActivityIdentifier((String)array[1]).setEconomicNatureIdentifier((String)array[2])
 				.setFundingSourceIdentifier((String)array[3]).setLessorIdentifier((String)array[4]).setEntryAuthorization(new EntryAuthorizationImpl()).setPaymentCredit(new PaymentCreditImpl());
+	}
+	
+	/* Load */
+	
+	@Override
+	public Result verifyLoadable(Collection<Expenditure> expenditures) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		ValidatorImpl.Expenditure.validateVerifyLoadable(expenditures, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		
+		verifyUnexistingCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result);
+		verifyUnexistingCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result);
+		verifyUnexistingCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result);
+		verifyUnexistingCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result);
+		return result;
+	}
+	
+	private void verifyUnexistingCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result) {
+		Collection<String> unexistingCodes = codeExecutor.getUnexisting(klass, expenditures.stream().map(expenditure -> (String)FieldHelper.read(expenditure, codeFieldName)).collect(Collectors.toSet()));
+		if(CollectionHelper.isNotEmpty(unexistingCodes)) {
+			result.getMap(Boolean.TRUE).put(klass, unexistingCodes);
+			if(ActivityImpl.class.equals(klass))
+				result.addMessages(formatMessageActivitiesCodesDoNotExist(unexistingCodes));
+			else if(EconomicNatureImpl.class.equals(klass))
+				result.addMessages(formatMessageEconomicsNaturesCodesDoNotExist(unexistingCodes));
+			else if(FundingSourceImpl.class.equals(klass))
+				result.addMessages(formatMessageFundingsSourcesCodesDoNotExist(unexistingCodes));
+			else if(LessorImpl.class.equals(klass))
+				result.addMessages(formatMessageLessorsCodesDoNotExist(unexistingCodes));
+			else
+				result.addMessages(unexistingCodes.toString());
+		}
+	}
+	
+	public static String formatMessageActivitiesCodesDoNotExist(Collection<String> codes) {
+		return formatMessageCodesDoNotExist("d'activités", codes);
+	}
+	
+	public static String formatMessageEconomicsNaturesCodesDoNotExist(Collection<String> codes) {
+		return formatMessageCodesDoNotExist("de natures économiques", codes);
+	}
+	
+	public static String formatMessageFundingsSourcesCodesDoNotExist(Collection<String> codes) {
+		return formatMessageCodesDoNotExist("de sources de financement", codes);
+	}
+	
+	public static String formatMessageLessorsCodesDoNotExist(Collection<String> codes) {
+		return formatMessageCodesDoNotExist("de bailleurs", codes);
+	}
+	
+	public static String formatMessageCodesDoNotExist(String name,Collection<String> codes) {
+		return String.format("Les codes %s suivants n'existent pas : %s",name,StringHelper.concatenate(codes,","));
 	}
 }

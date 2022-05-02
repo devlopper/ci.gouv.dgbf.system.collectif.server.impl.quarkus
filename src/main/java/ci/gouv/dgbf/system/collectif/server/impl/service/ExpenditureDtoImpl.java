@@ -32,9 +32,13 @@ public class ExpenditureDtoImpl extends AbstractIdentifiableSystemScalarStringAu
 	@JsonbProperty(value = JSON_BUDGET_SPECIALIZATION_UNIT_AS_STRING) String budgetSpecializationUnitAsString;
 	@JsonbProperty(value = JSON_ACTION_AS_STRING) String actionAsString;
 	@JsonbProperty(value = JSON_ACTIVITY_AS_STRING) String activityAsString;
+	@JsonbProperty(value = JSON_ACTIVITY_CODE) String activityCode;
 	@JsonbProperty(value = JSON_ECONOMIC_NATURE_AS_STRING) String economicNatureAsString;
+	@JsonbProperty(value = JSON_ECONOMIC_NATURE_CODE) String economicNatureCode;
 	@JsonbProperty(value = JSON_FUNDING_SOURCE_AS_STRING) String fundingSourceAsString;
+	@JsonbProperty(value = JSON_FUNDING_SOURCE_CODE) String fundingSourceCode;
 	@JsonbProperty(value = JSON_LESSOR_AS_STRING) String lessorAsString;
+	@JsonbProperty(value = JSON_LESSOR_CODE) String lessorCode;
 	
 	@Override @JsonbProperty(ExpenditureDto.JSON_IDENTIFIER)
 	public ExpenditureDtoImpl setIdentifier(String identifier) {

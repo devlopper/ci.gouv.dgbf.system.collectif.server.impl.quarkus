@@ -38,8 +38,8 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	@Override
 	protected <T> void __validate__(Class<T> klass, T entity, Object actionIdentifier,ThrowablesMessages throwablesMessages) {
 		super.__validate__(klass, entity, actionIdentifier, throwablesMessages);
-		if(Boolean.TRUE.equals(ClassHelper.isInstanceOf(klass, Expenditure.class)))
-			Expenditure.validate(actionIdentifier, (Expenditure) entity, throwablesMessages);
+		if(Boolean.TRUE.equals(ClassHelper.isInstanceOf(klass, ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure.class)))
+			Expenditure.validate(actionIdentifier, (ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure) entity, throwablesMessages);
 	}
 
 	/**/
@@ -195,8 +195,13 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 
 	public static interface Expenditure {
 		
-		static void validate(Object actionIdentifier,Expenditure expenditure,ThrowablesMessages throwablesMessages) {
+		static void validate(Object actionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure expenditure,ThrowablesMessages throwablesMessages) {
 			
+		}
+		
+		static void validateVerifyLoadable(Collection<ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure> expenditures,ThrowablesMessages throwablesMessages) {
+			throwablesMessages.addIfTrue("Dépenses requises",CollectionHelper.isEmpty(expenditures));
+			//throwablesMessages.addIfTrue("Nom d'utilisateur requis",NumberHelper.isLessThanZero(activityCodeColumnIndex));		
 		}
 		
 		static void validateAdjustmentsAvailable(Map<String,Long[]> adjustments,Collection<Object[]> arrays,Integer entryAuthorizationAvailableIndex,Integer paymentCreditAvailableIndex,ThrowablesMessages throwablesMessages) {
