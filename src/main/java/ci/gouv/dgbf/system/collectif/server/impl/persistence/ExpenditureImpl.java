@@ -94,12 +94,14 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	@AttributeOverrides({@AttributeOverride(name = EntryAuthorizationImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_ENTRY_AUTHORIZATION_ADJUSTMENT,nullable = false))})
 	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_ENTRY_AUTHORIZATION_ADJUSTMENT+"_MOD")
 	EntryAuthorizationImpl entryAuthorization;
+	@Transient Long entryAuthorizationAdjustment;
 	
 	@Valid
 	@Embedded
 	@AttributeOverrides({@AttributeOverride(name = PaymentCreditImpl.FIELD_ADJUSTMENT,column = @Column(name=COLUMN_PAYMENT_CREDIT_ADJUSTMENT,nullable = false))})
 	@Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_PAYMENT_CREDIT_ADJUSTMENT+"_MOD")
 	PaymentCreditImpl paymentCredit;
+	@Transient Long paymentCreditAdjustment;
 	
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_ACT_VERSION)
 	LegislativeActVersionImpl actVersion;

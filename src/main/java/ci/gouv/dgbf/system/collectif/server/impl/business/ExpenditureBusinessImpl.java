@@ -169,47 +169,105 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		ValidatorImpl.Expenditure.validateVerifyLoadable(expenditures, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
-		verifyUnexistingCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result);
-		verifyUnexistingCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result);
-		verifyUnexistingCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result);
-		verifyUnexistingCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result);
+		verifyNullCodes(expenditures, result);
+		
+		verifyUnexistingCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result,RESULT_MAP_UNKNOWN_ACTIVITIES_CODES);
+		verifyUnexistingCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result,RESULT_MAP_UNKNOWN_ECONOMICS_NATURES_CODES);
+		verifyUnexistingCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result,RESULT_MAP_UNKNOWN_FUNDING_SOURCES_CODES);
+		verifyUnexistingCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result,RESULT_MAP_UNKNOWN_LESSORS_CODES);
+		
+		verifyDuplicates(expenditures, result);
+		
+		if(CollectionHelper.isEmpty(result.getMessages()))
+			result.setValue(String.format("Les %s dépenses sont chargeable",expenditures.size()));
 		return result;
 	}
 	
-	private void verifyUnexistingCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result) {
-		Collection<String> unexistingCodes = codeExecutor.getUnexisting(klass, expenditures.stream().map(expenditure -> (String)FieldHelper.read(expenditure, codeFieldName)).collect(Collectors.toSet()));
-		if(CollectionHelper.isNotEmpty(unexistingCodes)) {
-			result.getMap(Boolean.TRUE).put(klass, unexistingCodes);
-			if(ActivityImpl.class.equals(klass))
-				result.addMessages(formatMessageActivitiesCodesDoNotExist(unexistingCodes));
-			else if(EconomicNatureImpl.class.equals(klass))
-				result.addMessages(formatMessageEconomicsNaturesCodesDoNotExist(unexistingCodes));
-			else if(FundingSourceImpl.class.equals(klass))
-				result.addMessages(formatMessageFundingsSourcesCodesDoNotExist(unexistingCodes));
-			else if(LessorImpl.class.equals(klass))
-				result.addMessages(formatMessageLessorsCodesDoNotExist(unexistingCodes));
-			else
-				result.addMessages(unexistingCodes.toString());
+	private Collection<Expenditure> getNullCodes(Collection<Expenditure> expenditures,Boolean isNull) {
+		return expenditures.stream().filter(
+				expenditure -> {
+					Boolean condition = StringHelper.isBlank(expenditure.getActivityCode()) || StringHelper.isBlank(expenditure.getEconomicNatureCode())
+							|| StringHelper.isBlank(expenditure.getFundingSourceCode()) || StringHelper.isBlank(expenditure.getLessorCode());
+					if(!Boolean.TRUE.equals(isNull))
+						condition = !condition;
+					return condition;}
+				)
+				.collect(Collectors.toList());
+	}
+	
+	private void verifyNullCodes(Collection<Expenditure> expenditures,Result result) {
+		Collection<Expenditure> nullCodes = getNullCodes(expenditures, Boolean.TRUE);
+		if(CollectionHelper.isEmpty(nullCodes))
+			return;
+		Collection<String> identifiers = nullCodes.stream().map(expenditure -> expenditure.getIdentifier()).filter(identifier -> StringHelper.isNotBlank(identifier)).collect(Collectors.toList());
+		if(CollectionHelper.isNotEmpty(identifiers))
+			result.getMap(Boolean.TRUE).put(RESULT_MAP_UNDEFINED_CODES_IDENTIFIERS, identifiers);
+		result.addMessages(formatMessageCodesNull(nullCodes));
+	}
+	
+	private void verifyUnexistingCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result,String mapKey) {
+		Collection<String> unexistingCodes = codeExecutor.getUnexisting(klass, expenditures.stream().map(expenditure -> (String)FieldHelper.read(expenditure, codeFieldName)).filter(code -> StringHelper.isNotBlank(code)).collect(Collectors.toSet()));
+		if(CollectionHelper.isEmpty(unexistingCodes))
+			return;
+		result.getMap(Boolean.TRUE).put(mapKey, unexistingCodes);
+		if(ActivityImpl.class.equals(klass))
+			result.addMessages(formatMessageActivitiesCodesDoNotExist(unexistingCodes));
+		else if(EconomicNatureImpl.class.equals(klass))
+			result.addMessages(formatMessageEconomicsNaturesCodesDoNotExist(unexistingCodes));
+		else if(FundingSourceImpl.class.equals(klass))
+			result.addMessages(formatMessageFundingsSourcesCodesDoNotExist(unexistingCodes));
+		else if(LessorImpl.class.equals(klass))
+			result.addMessages(formatMessageLessorsCodesDoNotExist(unexistingCodes));
+		else
+			result.addMessages(formatMessageCodesDoNotExist("", unexistingCodes));
+	}
+	
+	private void verifyDuplicates(Collection<Expenditure> expenditures,Result result) {
+		Collection<Expenditure> duplicates = null;
+		Collection<String> codes = new ArrayList<>();
+		for(Expenditure expenditure : getNullCodes(expenditures, Boolean.FALSE)) {
+			String code = expenditure.getActivityCode()+expenditure.getEconomicNatureCode()+expenditure.getFundingSourceCode()+expenditure.getLessorCode();
+			if(codes.contains(code)) {
+				if(duplicates == null)
+					duplicates = new ArrayList<>();
+				duplicates.add(expenditure);
+			}else
+				codes.add(code);
 		}
+		if(CollectionHelper.isEmpty(duplicates))
+			return;
+		Collection<String> identifiers = duplicates.stream().map(expenditure -> expenditure.getIdentifier()).filter(identifier -> StringHelper.isNotBlank(identifier)).collect(Collectors.toList());
+		if(CollectionHelper.isNotEmpty(identifiers))
+			result.getMap(Boolean.TRUE).put(RESULT_MAP_DUPLICATES_IDENTIFIERS, identifiers);
+		result.addMessages(formatMessageDuplicates(duplicates));
 	}
 	
 	public static String formatMessageActivitiesCodesDoNotExist(Collection<String> codes) {
-		return formatMessageCodesDoNotExist("d'activités", codes);
+		return formatMessageCodesDoNotExist("activités ", codes);
 	}
 	
 	public static String formatMessageEconomicsNaturesCodesDoNotExist(Collection<String> codes) {
-		return formatMessageCodesDoNotExist("de natures économiques", codes);
+		return formatMessageCodesDoNotExist("natures économiques ", codes);
 	}
 	
 	public static String formatMessageFundingsSourcesCodesDoNotExist(Collection<String> codes) {
-		return formatMessageCodesDoNotExist("de sources de financement", codes);
+		return formatMessageCodesDoNotExist("sources de financement ", codes);
 	}
 	
 	public static String formatMessageLessorsCodesDoNotExist(Collection<String> codes) {
-		return formatMessageCodesDoNotExist("de bailleurs", codes);
+		return formatMessageCodesDoNotExist("bailleurs ", codes);
 	}
 	
 	public static String formatMessageCodesDoNotExist(String name,Collection<String> codes) {
-		return String.format("Les codes %s suivants n'existent pas : %s",name,StringHelper.concatenate(codes,","));
+		return String.format("codes %sinexistant : %s",name,StringHelper.concatenate(codes,","));
+	}
+	
+	public static String formatMessageCodesNull(Collection<Expenditure> expenditures) {
+		return String.format("%s dépense(s) ayant code activité ou code nature économique ou code source de financement ou code bailleur non défini : %s",expenditures.size()
+				,expenditures.stream().map(expenditure -> expenditure.getIdentifier()).filter(identifier -> StringHelper.isNotBlank(identifier)).collect(Collectors.joining(",")));
+	}
+	
+	public static String formatMessageDuplicates(Collection<Expenditure> expenditures) {
+		return String.format("%s dépense(s) en double : %s",expenditures.size(),expenditures.stream().map(expenditure -> expenditure.getIdentifier()).filter(identifier -> StringHelper.isNotBlank(identifier)).collect(Collectors.joining(",")));
 	}
 }

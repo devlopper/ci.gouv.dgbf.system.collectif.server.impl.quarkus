@@ -22,11 +22,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto.AdjustmentDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureService;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.LessorImpl;
 
 @Path(ExpenditureService.PATH)
 public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<ExpenditureDto,ExpenditureDtoImpl,Expenditure,ExpenditureImpl> implements ExpenditureService,Serializable {
@@ -78,18 +74,23 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 	@Override
 	public Response verifyLoadable(List<ExpenditureDto.LoadDto> loads) {
 		return buildResponseOk(business.verifyLoadable(CollectionHelper.isEmpty(loads) ? null : loads.stream().map(
-				dto -> new ExpenditureImpl().setActivityCode(dto.getActivity()).setEconomicNatureCode(dto.getEconomicNature()).setFundingSourceCode(dto.getFundingSource()).setLessorCode(dto.getLessor())
+				dto -> new ExpenditureImpl().setIdentifier(dto.getIdentifier()).setActivityCode(dto.getActivity()).setEconomicNatureCode(dto.getEconomicNature()).setFundingSourceCode(dto.getFundingSource())
+				.setLessorCode(dto.getLessor()).setEntryAuthorizationAdjustment(dto.getEntryAuthorization()).setPaymentCreditAdjustment(dto.getPaymentCredit())
 				).collect(Collectors.toList())),new ResponseBuilderListener.AbstractImpl() {
 			@Override
 			protected String buildHeaderName(Object value) {
-				if(ActivityImpl.class.equals(value))
+				if(ExpenditureBusiness.RESULT_MAP_DUPLICATES_IDENTIFIERS.equals(value))
+					return HEADER_DUPLICATES_IDENTIFIERS;
+				if(ExpenditureBusiness.RESULT_MAP_UNDEFINED_CODES_IDENTIFIERS.equals(value))
+					return HEADER_UNDEFINED_CODES_IDENTIFIERS;
+				if(ExpenditureBusiness.RESULT_MAP_UNKNOWN_ACTIVITIES_CODES.equals(value))
 					return HEADER_UNKNOWN_ACTIVITIES_CODES;
-				if(EconomicNatureImpl.class.equals(value))
+				if(ExpenditureBusiness.RESULT_MAP_UNKNOWN_ECONOMICS_NATURES_CODES.equals(value))
 					return HEADER_UNKNOWN_ECONOMICS_NATURES_CODES;
-				if(FundingSourceImpl.class.equals(value))
+				if(ExpenditureBusiness.RESULT_MAP_UNKNOWN_FUNDING_SOURCES_CODES.equals(value))
 					return HEADER_UNKNOWN_FUNDINGS_SOURCES_CODES;
-				if(LessorImpl.class.equals(value))
-					return HEADER_UNKNOWN_LESSORS_CODES;
+				if(ExpenditureBusiness.RESULT_MAP_UNKNOWN_LESSORS_CODES.equals(value))
+					return HEADER_UNKNOWN_LESSORS_CODES;	
 				return super.buildHeaderName(value);
 			}
 		});
