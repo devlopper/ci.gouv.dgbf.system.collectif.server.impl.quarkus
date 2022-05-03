@@ -169,7 +169,10 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		ValidatorImpl.Expenditure.validateVerifyLoadable(expenditures, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
-		verifyNullCodes(expenditures, result);
+		verifyUndefinedCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result,RESULT_MAP_UNDEFINED_ACTIVITIES_CODES_IDENTIFIERS);
+		verifyUndefinedCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result,RESULT_MAP_UNDEFINED_ECONOMICS_NATURES_CODES_IDENTIFIERS);
+		verifyUndefinedCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result,RESULT_MAP_UNDEFINED_FUNDING_SOURCES_CODES_IDENTIFIERS);
+		verifyUndefinedCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result,RESULT_MAP_UNDEFINED_LESSORS_CODES_IDENTIFIERS);
 		
 		verifyUnexistingCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result,RESULT_MAP_UNKNOWN_ACTIVITIES_CODES);
 		verifyUnexistingCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result,RESULT_MAP_UNKNOWN_ECONOMICS_NATURES_CODES);
@@ -183,7 +186,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		return result;
 	}
 	
-	private Collection<Expenditure> getNullCodes(Collection<Expenditure> expenditures,Boolean isNull) {
+	private Collection<Expenditure> getUndefinedCodes(Collection<Expenditure> expenditures,Boolean isNull) {
 		return expenditures.stream().filter(
 				expenditure -> {
 					Boolean condition = StringHelper.isBlank(expenditure.getActivityCode()) || StringHelper.isBlank(expenditure.getEconomicNatureCode())
@@ -195,14 +198,21 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 				.collect(Collectors.toList());
 	}
 	
-	private void verifyNullCodes(Collection<Expenditure> expenditures,Result result) {
-		Collection<Expenditure> nullCodes = getNullCodes(expenditures, Boolean.TRUE);
-		if(CollectionHelper.isEmpty(nullCodes))
+	private void verifyUndefinedCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result,String mapKey) {
+		Collection<String> undefinedIdentifiers = expenditures.stream().filter(expenditure -> StringHelper.isBlank((String)FieldHelper.read(expenditure, codeFieldName))).map(expenditure -> expenditure.getIdentifier()).collect(Collectors.toSet());
+		if(CollectionHelper.isEmpty(undefinedIdentifiers))
 			return;
-		Collection<String> identifiers = nullCodes.stream().map(expenditure -> expenditure.getIdentifier()).filter(identifier -> StringHelper.isNotBlank(identifier)).collect(Collectors.toList());
-		if(CollectionHelper.isNotEmpty(identifiers))
-			result.getMap(Boolean.TRUE).put(RESULT_MAP_UNDEFINED_CODES_IDENTIFIERS, identifiers);
-		result.addMessages(formatMessageCodesNull(nullCodes));
+		result.getMap(Boolean.TRUE).put(mapKey, undefinedIdentifiers);
+		if(ActivityImpl.class.equals(klass))
+			result.addMessages(formatMessageActivitiesCodesUndefined(undefinedIdentifiers));
+		else if(EconomicNatureImpl.class.equals(klass))
+			result.addMessages(formatMessageEconomicsNaturesCodesUndefined(undefinedIdentifiers));
+		else if(FundingSourceImpl.class.equals(klass))
+			result.addMessages(formatMessageFundingsSourcesCodesUndefined(undefinedIdentifiers));
+		else if(LessorImpl.class.equals(klass))
+			result.addMessages(formatMessageLessorsCodesUndefined(undefinedIdentifiers));
+		else
+			result.addMessages(formatMessageCodesUndefined("???", undefinedIdentifiers));
 	}
 	
 	private void verifyUnexistingCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result,String mapKey) {
@@ -225,7 +235,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 	private void verifyDuplicates(Collection<Expenditure> expenditures,Result result) {
 		Collection<Expenditure> duplicates = null;
 		Collection<String> codes = new ArrayList<>();
-		for(Expenditure expenditure : getNullCodes(expenditures, Boolean.FALSE)) {
+		for(Expenditure expenditure : getUndefinedCodes(expenditures, Boolean.FALSE)) {
 			String code = expenditure.getActivityCode()+expenditure.getEconomicNatureCode()+expenditure.getFundingSourceCode()+expenditure.getLessorCode();
 			if(codes.contains(code)) {
 				if(duplicates == null)
@@ -241,6 +251,30 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 			result.getMap(Boolean.TRUE).put(RESULT_MAP_DUPLICATES_IDENTIFIERS, identifiers);
 		result.addMessages(formatMessageDuplicates(duplicates));
 	}
+	
+	/**/
+	
+	public static String formatMessageCodesUndefined(String name,Collection<String> identifiers) {
+		return String.format("%s dépense(s) ayant code %s non défini : %s",identifiers.size(),name,StringHelper.concatenate(identifiers,","));
+	}
+	
+	public static String formatMessageActivitiesCodesUndefined(Collection<String> identifiers) {
+		return formatMessageCodesUndefined("activités", identifiers);
+	}
+	
+	public static String formatMessageEconomicsNaturesCodesUndefined(Collection<String> identifiers) {
+		return formatMessageCodesUndefined("natures économiques", identifiers);
+	}
+	
+	public static String formatMessageFundingsSourcesCodesUndefined(Collection<String> identifiers) {
+		return formatMessageCodesUndefined("sources de financement", identifiers);
+	}
+	
+	public static String formatMessageLessorsCodesUndefined(Collection<String> identifiers) {
+		return formatMessageCodesUndefined("bailleurs", identifiers);
+	}
+	
+	/**/
 	
 	public static String formatMessageActivitiesCodesDoNotExist(Collection<String> codes) {
 		return formatMessageCodesDoNotExist("activités ", codes);
@@ -259,7 +293,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 	}
 	
 	public static String formatMessageCodesDoNotExist(String name,Collection<String> codes) {
-		return String.format("codes %sinexistant : %s",name,StringHelper.concatenate(codes,","));
+		return String.format("%s code(s) %sinexistant : %s",codes.size(),name,StringHelper.concatenate(codes,","));
 	}
 	
 	public static String formatMessageCodesNull(Collection<Expenditure> expenditures) {

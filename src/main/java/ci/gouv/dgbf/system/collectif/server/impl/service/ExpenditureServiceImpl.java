@@ -81,8 +81,16 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 			protected String buildHeaderName(Object value) {
 				if(ExpenditureBusiness.RESULT_MAP_DUPLICATES_IDENTIFIERS.equals(value))
 					return HEADER_DUPLICATES_IDENTIFIERS;
-				if(ExpenditureBusiness.RESULT_MAP_UNDEFINED_CODES_IDENTIFIERS.equals(value))
-					return HEADER_UNDEFINED_CODES_IDENTIFIERS;
+				
+				if(ExpenditureBusiness.RESULT_MAP_UNDEFINED_ACTIVITIES_CODES_IDENTIFIERS.equals(value))
+					return HEADER_UNDEFINED_ACTIVITIES_CODES_IDENTIFIERS;
+				if(ExpenditureBusiness.RESULT_MAP_UNDEFINED_ECONOMICS_NATURES_CODES_IDENTIFIERS.equals(value))
+					return HEADER_UNDEFINED_ECONOMICS_NATURES_CODES_IDENTIFIERS;
+				if(ExpenditureBusiness.RESULT_MAP_UNDEFINED_FUNDING_SOURCES_CODES_IDENTIFIERS.equals(value))
+					return HEADER_UNDEFINED_FUNDINGS_SOURCES_CODES_IDENTIFIERS;
+				if(ExpenditureBusiness.RESULT_MAP_UNDEFINED_LESSORS_CODES_IDENTIFIERS.equals(value))
+					return HEADER_UNDEFINED_LESSORS_CODES_IDENTIFIERS;
+				
 				if(ExpenditureBusiness.RESULT_MAP_UNKNOWN_ACTIVITIES_CODES.equals(value))
 					return HEADER_UNKNOWN_ACTIVITIES_CODES;
 				if(ExpenditureBusiness.RESULT_MAP_UNKNOWN_ECONOMICS_NATURES_CODES.equals(value))
