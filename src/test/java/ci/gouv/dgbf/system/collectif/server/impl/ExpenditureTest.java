@@ -66,6 +66,8 @@ public class ExpenditureTest {
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
 	
+	Integer expectedCount = 14;
+	
 	@Test @Order(1)
 	public void verifyLoadable(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
@@ -358,7 +360,7 @@ public class ExpenditureTest {
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
-        	.header(ResponseHelper.HEADER_X_TOTAL_COUNT, "13")
+        	.header(ResponseHelper.HEADER_X_TOTAL_COUNT, expectedCount.toString())
         	.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
         	;
 		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
@@ -445,7 +447,7 @@ public class ExpenditureTest {
 		response.then()
 		//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
-        	.body(equalTo("13"))
+        	.body(equalTo(expectedCount.toString()))
         	;
 		assertThat(response.getHeaders().asList().stream().map(header -> header.getName()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
@@ -507,23 +509,23 @@ public class ExpenditureTest {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null,null, null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo(expectedCount.toString());
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure> expenditures = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
-		assertThat(expenditures).hasSize(13);
+		assertThat(expenditures).hasSize(expectedCount);
 		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
 		
 		response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null, null,null, null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo(expectedCount.toString());
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		expenditures = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
-		assertThat(expenditures).hasSize(13);
+		assertThat(expenditures).hasSize(expectedCount);
 		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
     }
 	
@@ -532,12 +534,12 @@ public class ExpenditureTest {
 		Response response = DependencyInjection.inject(SpecificServiceGetter.class).get(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class).get(null,null,null, List.of("astrings"), null, null, null, null);
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo("13");
+		assertThat(response.getHeaderString(ResponseHelper.HEADER_X_TOTAL_COUNT)).isEqualTo(expectedCount.toString());
 		assertThat(response.getHeaders().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()))
 		.contains(ResponseHelper.HEADER_PROCESSING_START_TIME,ResponseHelper.HEADER_PROCESSING_END_TIME,ResponseHelper.HEADER_PROCESSING_DURATION);
 		
 		List<ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure> expenditures = ResponseHelper.getEntityAsListFromJson(ci.gouv.dgbf.system.collectif.server.client.rest.Expenditure.class,response);
-		assertThat(expenditures).hasSize(13);
+		assertThat(expenditures).hasSize(expectedCount);
 		assertThat(expenditures.stream().map(e -> e.getIdentifier()).collect(Collectors.toList())).contains("2022_1_2_1");
     }
 	
@@ -572,7 +574,7 @@ public class ExpenditureTest {
 		assertThat(response).isNotNull();
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);
-		assertThat(count).isEqualTo(13l);
+		assertThat(count).isEqualTo(expectedCount.longValue());
     }
 	
 	/* Import */
@@ -861,13 +863,20 @@ public class ExpenditureTest {
     public void business_load() {
 		assertor.assertEntryAuthorization("2022_1_3_5", 7l);
 		assertor.assertPaymentCredit("2022_1_3_5", 5l);
+		assertor.assertEntryAuthorization("2022_1_3_6", 0l);
+		assertor.assertPaymentCredit("2022_1_3_6", 0l);
+		
 		expenditureBusiness.load("2022_1_3", List.of(new ExpenditureImpl().setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l)), "christian");
 		assertor.assertEntryAuthorization("2022_1_3_5", 0l);
 		assertor.assertPaymentCredit("2022_1_3_5", 0l);
-				
+		assertor.assertEntryAuthorization("2022_1_3_6", 0l);
+		assertor.assertPaymentCredit("2022_1_3_6", 0l);
+		
 		expenditureBusiness.load("2022_1_3", List.of(new ExpenditureImpl().setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(12l).setPaymentCreditAdjustment(25l)), "christian");
 		assertor.assertEntryAuthorization("2022_1_3_5", 12l);
 		assertor.assertPaymentCredit("2022_1_3_5", 25l);
+		assertor.assertEntryAuthorization("2022_1_3_6", 0l);
+		assertor.assertPaymentCredit("2022_1_3_6", 0l);
     }
 	
 	/**/

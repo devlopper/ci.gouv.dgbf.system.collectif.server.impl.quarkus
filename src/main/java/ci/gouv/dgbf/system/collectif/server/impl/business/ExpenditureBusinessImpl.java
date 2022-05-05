@@ -181,6 +181,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		throwablesMessages.throwIfNotEmpty();
 		
 		verifyLoadable(expenditures, result);
+		
 		Collection<Expenditure> loadables = expenditures.stream().filter(expenditure -> expenditure.isLoadable()).collect(Collectors.toList());
 		LogHelper.log(String.format("%s %s(s) chargeable(s)", loadables.size(),Expenditure.NAME),Result.getLogLevel(), getClass());
 		Map<String,Long[]> adjustments = null;
@@ -199,8 +200,8 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 						Object[] array = codesArrays.stream().filter(index -> identifier.equals(index[0])).findFirst().get();
 						if(array == null)
 							continue;
-						Expenditure loadable = loadables.stream().filter(index -> array[1].equals(index.getActivityCode()) && array[1].equals(index.getActivityCode()) && array[1].equals(index.getActivityCode()) && array[1].equals(index.getActivityCode()))
-							.findFirst().get();
+						Expenditure loadable = loadables.stream().filter(index -> array[1].equals(index.getActivityCode()) && array[2].equals(index.getEconomicNatureCode()) && array[3].equals(index.getFundingSourceCode()) 
+								&& array[4].equals(index.getLessorCode())).findFirst().get();
 						if(loadable == null)
 							continue;
 						if(adjustments == null)
@@ -209,7 +210,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 					}
 				}
 			}
-			
+
 			if(MapHelper.isNotEmpty(adjustments))
 				adjust(adjustments, generateAuditIdentifier(), auditWho, LOAD_ADJUSTMENTS_AUDIT_IDENTIFIER, result);
 		}
