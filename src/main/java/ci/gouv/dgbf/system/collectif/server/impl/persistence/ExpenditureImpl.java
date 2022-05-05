@@ -58,6 +58,8 @@ import lombok.experimental.Accessors;
 				+ " WHERE d.actVersion.identifier = :legislativeActVersionIdentifier AND s.actVersion.identifier = :legislativeActVersionSourceIdentifier"
 				+ " AND (s.entryAuthorization.adjustment <> d.entryAuthorization.adjustment OR s.paymentCredit.adjustment <> d.paymentCredit.adjustment)"
 				+ " ORDER BY d.identifier ASC")
+		,@NamedQuery(name = ExpenditureImpl.QUERY_READ_IDENTIFIERS_BY_ACT_VERSION_IDENTIFIER_BY_CODES
+		,query = "SELECT t.identifier FROM ExpenditureImpl t JOIN ExpenditureView v ON v.identifier = t.identifier WHERE t.actVersion.identifier = :actVersionIdentifier AND CONCAT(v.activityCode,v.economicNatureCode,v.fundingSourceCode,v.lessorCode) IN :codes")
 })
 @AttributeOverrides(value= {
 		@AttributeOverride(name = ExpenditureImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=ExpenditureImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = false))
@@ -116,6 +118,8 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	@Transient String economicNatureAsString;
 	@Transient String fundingSourceAsString;
 	@Transient String lessorAsString;
+	
+	@Transient Boolean isDuplicate,hasUndefinedCode,hasUnknownCode;
 	
 	@Override
 	public ExpenditureImpl setIdentifier(String identifier) {
@@ -239,6 +243,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String QUERY_READ_BY_IDENTIIFERS = "ExpenditureImpl.readByIdentifiers";
 	public static final String QUERY_READ_BY_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readByActVersionIdentifier";
 	public static final String QUERY_READ_FOR_COPY_BY_ACT_VERSION_IDENTIFIER_BY_SOURCE_ACT_VERSION_IDENTIFIER = "ExpenditureImpl.readForCopyByActVersionIdentifierBySourceActVersionIdentifier";
+	public static final String QUERY_READ_IDENTIFIERS_BY_ACT_VERSION_IDENTIFIER_BY_CODES = "ExpenditureImpl.readIdentifiersByActVersionIdentifierByCodes";
 	
 	public static final List<String> VIEW_FIELDS_NAMES = List.of(FIELDS_STRINGS,FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT);
 	

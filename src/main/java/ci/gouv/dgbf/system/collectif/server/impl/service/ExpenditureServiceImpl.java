@@ -21,6 +21,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersisten
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto.AdjustmentDto;
+import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureDto.LoadDto;
 import ci.gouv.dgbf.system.collectif.server.api.service.ExpenditureService;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 
@@ -70,10 +71,16 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 			}
 		});
 	}
+	
+	@Override
+	public Response load(String legislativeActVersionIdentifier, List<LoadDto> loads, String auditWho) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
-	public Response verifyLoadable(List<ExpenditureDto.LoadDto> loads) {
-		return buildResponseOk(business.verifyLoadable(CollectionHelper.isEmpty(loads) ? null : loads.stream().map(
+	public Response verifyLoadable(String legislativeActVersionIdentifier,List<ExpenditureDto.LoadDto> loads) {
+		return buildResponseOk(business.verifyLoadable(legislativeActVersionIdentifier,CollectionHelper.isEmpty(loads) ? null : loads.stream().map(
 				dto -> new ExpenditureImpl().setIdentifier(dto.getIdentifier()).setActivityCode(dto.getActivity()).setEconomicNatureCode(dto.getEconomicNature()).setFundingSourceCode(dto.getFundingSource())
 				.setLessorCode(dto.getLessor()).setEntryAuthorizationAdjustment(dto.getEntryAuthorization()).setPaymentCreditAdjustment(dto.getPaymentCredit())
 				).collect(Collectors.toList())),new ResponseBuilderListener.AbstractImpl() {

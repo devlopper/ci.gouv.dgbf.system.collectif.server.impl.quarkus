@@ -199,9 +199,15 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			
 		}
 		
-		static void validateVerifyLoadable(Collection<ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure> expenditures,ThrowablesMessages throwablesMessages) {
+		static void validateLoad(String legislativeActVersionIdentifier,Collection<ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure> expenditures,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
 			throwablesMessages.addIfTrue("Dépenses requises",CollectionHelper.isEmpty(expenditures));
-			//throwablesMessages.addIfTrue("Nom d'utilisateur requis",NumberHelper.isLessThanZero(activityCodeColumnIndex));		
+			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
+		}
+		
+		static void validateVerifyLoadable(String legislativeActVersionIdentifier,Collection<ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure> expenditures,ThrowablesMessages throwablesMessages) {
+			validateIdentifier(legislativeActVersionIdentifier,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion.NAME, throwablesMessages);
+			throwablesMessages.addIfTrue("Dépenses requises",CollectionHelper.isEmpty(expenditures));
 		}
 		
 		static void validateAdjustmentsAvailable(Map<String,Long[]> adjustments,Collection<Object[]> arrays,Integer entryAuthorizationAvailableIndex,Integer paymentCreditAvailableIndex,ThrowablesMessages throwablesMessages) {
@@ -236,6 +242,13 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		
 		static void validateAdjust(Map<String, Long[]> adjustments,String auditWho,ThrowablesMessages throwablesMessages) {
 			throwablesMessages.addIfTrue("Ajustements requis",MapHelper.isEmpty(adjustments));
+			if(adjustments != null)
+				adjustments.entrySet().forEach(entry -> {
+					for(Integer index = 0; index < entry.getValue().length; index = index +1)
+						throwablesMessages.addIfTrue(String.format("L'ajustement %s de %s doit être défini",index == 0 ? "de l'autorisation d'engagement" : "du crédit de paiement",entry.getKey()),entry.getValue()[index] == null);
+					//throwablesMessages.addIfTrue(String.format("L'ajustement de l'autorisation d'engagement de %s doit être défini",entry.getKey()),entry.getValue()[0] == null);
+					//throwablesMessages.addIfTrue(String.format("L'ajustement du crédit de paiement de %s doit être défini",entry.getKey()),entry.getValue()[1] == null);
+				});
 			throwablesMessages.addIfTrue("Nom d'utilisateur requis",StringHelper.isBlank(auditWho));		
 		}
 		

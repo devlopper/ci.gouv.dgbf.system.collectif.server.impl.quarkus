@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,8 +18,11 @@ import javax.transaction.Transactional;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.log.LogHelper;
+import org.cyk.utility.__kernel__.map.MapHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.__kernel__.value.ValueHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.server.query.ReaderByCollection;
@@ -27,6 +31,7 @@ import org.cyk.utility.persistence.server.query.executor.field.CodeExecutor;
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
@@ -44,6 +49,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
 public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
 
 	@Inject CodeExecutor codeExecutor;
+	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	
 	@Override
 	void __listenPostConstruct__() {
@@ -58,8 +64,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		return adjust(adjustments,generateAuditIdentifier(), auditWho, ADJUST_AUDIT_IDENTIFIER);
 	}
 	
-	private Result adjust(Map<String, Long[]> adjustments,String auditIdentifier,String auditWho,String auditFunctionality) {
-		Result result = new Result().open();
+	private Collection<ExpenditureImpl> adjust(Map<String, Long[]> adjustments,String auditIdentifier,String auditWho,String auditFunctionality,Result result) {
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
 		ValidatorImpl.Expenditure.validateAdjust(adjustments, auditWho, throwablesMessages);
@@ -93,7 +98,13 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 			audit(expenditure,auditIdentifier,auditFunctionality,auditWho,auditWhen);
 			entityManager.merge(expenditure);
 		});
-
+		
+		return expenditures;
+	}
+	
+	private Result adjust(Map<String, Long[]> adjustments,String auditIdentifier,String auditWho,String auditFunctionality) {
+		Result result = new Result().open();
+		Collection<ExpenditureImpl> expenditures = adjust(adjustments, auditIdentifier, auditWho, auditFunctionality, result);
 		// Return of message
 		result.close().setName(String.format("Ajustement de %s %s(s) par %s",expenditures.size(),Expenditure.NAME,auditWho)).log(getClass());
 		result.addMessages(String.format("Nombre de %s mise à jour : %s",Expenditure.NAME, expenditures.size()));
@@ -161,29 +172,82 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 	
 	/* Load */
 	
-	@Override
-	public Result verifyLoadable(Collection<Expenditure> expenditures) {
+	@Override @Transactional
+	public Result load(String legislativeActVersionIdentifier,Collection<Expenditure> expenditures,String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
-		ValidatorImpl.Expenditure.validateVerifyLoadable(expenditures, throwablesMessages);
+		ValidatorImpl.Expenditure.validateLoad(legislativeActVersionIdentifier,expenditures,auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
+		verifyLoadable(expenditures, result);
+		Collection<Expenditure> loadables = expenditures.stream().filter(expenditure -> expenditure.isLoadable()).collect(Collectors.toList());
+		LogHelper.log(String.format("%s %s(s) chargeable(s)", loadables.size(),Expenditure.NAME),Result.getLogLevel(), getClass());
+		Map<String,Long[]> adjustments = null;
+		if(CollectionHelper.isNotEmpty(loadables)) {
+			Collection<String> expendituresIdentifiers = entityManager.createNamedQuery(ExpenditureImpl.QUERY_READ_IDENTIFIERS_BY_ACT_VERSION_IDENTIFIER_BY_CODES,String.class)
+					.setParameter("actVersionIdentifier", legislativeActVersionIdentifier)
+					.setParameter("codes", loadables.stream().map(loadable -> loadable.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode()).collect(Collectors.toSet()))
+					.getResultList();
+			LogHelper.log(String.format("%s %s(s) collectées par codes", CollectionHelper.getSize(expendituresIdentifiers),Expenditure.NAME),Result.getLogLevel(),getClass());
+			Collection<Object[]> codesArrays = null;
+			if(CollectionHelper.isNotEmpty(expendituresIdentifiers)) {
+				codesArrays = entityManager.createNamedQuery(ExpenditureView.QUERY_READ_IDENTIFIER_ACTIVITY_CODE_ECONOMIC_NATURE_CODE_FUNDING_SOURCE_CODE_LESSOR_CODE_BY_IDENTIFIERS,Object[].class)
+						.setParameter("identifiers", expendituresIdentifiers).getResultList();
+				if(CollectionHelper.isNotEmpty(codesArrays)) {
+					for(String identifier : expendituresIdentifiers) {
+						Object[] array = codesArrays.stream().filter(index -> identifier.equals(index[0])).findFirst().get();
+						if(array == null)
+							continue;
+						Expenditure loadable = loadables.stream().filter(index -> array[1].equals(index.getActivityCode()) && array[1].equals(index.getActivityCode()) && array[1].equals(index.getActivityCode()) && array[1].equals(index.getActivityCode()))
+							.findFirst().get();
+						if(loadable == null)
+							continue;
+						if(adjustments == null)
+							adjustments = new LinkedHashMap<>();
+						adjustments.put(identifier, new Long[] {loadable.getEntryAuthorizationAdjustment(),ValueHelper.defaultToIfNull(loadable.getPaymentCreditAdjustment(),loadable.getEntryAuthorizationAdjustment())});
+					}
+				}
+			}
+			
+			if(MapHelper.isNotEmpty(adjustments))
+				adjust(adjustments, generateAuditIdentifier(), auditWho, LOAD_ADJUSTMENTS_AUDIT_IDENTIFIER, result);
+		}
+		
+		// Return of message
+		Integer count = adjustments == null ? 0 : adjustments.size();
+		result.close().setName(String.format("Chargement de %s %s(s) par %s", count,Expenditure.NAME,auditWho)).log(getClass());
+		result.addMessages(String.format("Nombre de %s chargée(s) : %s",Expenditure.NAME, count));
+		return result;
+	}
+	
+	@Override
+	public Result verifyLoadable(String legislativeActVersionIdentifier,Collection<Expenditure> expenditures) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		ValidatorImpl.Expenditure.validateVerifyLoadable(legislativeActVersionIdentifier,expenditures, throwablesMessages);
+		throwablesMessages.throwIfNotEmpty();
+		
+		verifyLoadable(expenditures, result);
+		
+		if(CollectionHelper.isEmpty(result.getMessages()))
+			result.setValue(String.format("Les %s dépenses sont chargeable",expenditures.size()));
+		return result;
+	}
+	
+	private void verifyLoadable(Collection<Expenditure> expenditures,Result result) {
 		verifyUndefinedCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result,RESULT_MAP_UNDEFINED_ACTIVITIES_CODES_IDENTIFIERS);
 		verifyUndefinedCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result,RESULT_MAP_UNDEFINED_ECONOMICS_NATURES_CODES_IDENTIFIERS);
 		verifyUndefinedCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result,RESULT_MAP_UNDEFINED_FUNDING_SOURCES_CODES_IDENTIFIERS);
 		verifyUndefinedCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result,RESULT_MAP_UNDEFINED_LESSORS_CODES_IDENTIFIERS);
 		
-		verifyUnexistingCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result,RESULT_MAP_UNKNOWN_ACTIVITIES_CODES);
-		verifyUnexistingCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result,RESULT_MAP_UNKNOWN_ECONOMICS_NATURES_CODES);
-		verifyUnexistingCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result,RESULT_MAP_UNKNOWN_FUNDING_SOURCES_CODES);
-		verifyUnexistingCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result,RESULT_MAP_UNKNOWN_LESSORS_CODES);
+		verifyUnknownCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result,RESULT_MAP_UNKNOWN_ACTIVITIES_CODES);
+		verifyUnknownCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result,RESULT_MAP_UNKNOWN_ECONOMICS_NATURES_CODES);
+		verifyUnknownCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result,RESULT_MAP_UNKNOWN_FUNDING_SOURCES_CODES);
+		verifyUnknownCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result,RESULT_MAP_UNKNOWN_LESSORS_CODES);
 		
 		verifyDuplicates(expenditures, result);
-		
-		if(CollectionHelper.isEmpty(result.getMessages()))
-			result.setValue(String.format("Les %s dépenses sont chargeable",expenditures.size()));
-		return result;
 	}
 	
 	private Collection<Expenditure> getUndefinedCodes(Collection<Expenditure> expenditures,Boolean isNull) {
@@ -197,9 +261,14 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 				)
 				.collect(Collectors.toList());
 	}
-	
+		
 	private void verifyUndefinedCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result,String mapKey) {
-		Collection<String> undefinedIdentifiers = expenditures.stream().filter(expenditure -> StringHelper.isBlank((String)FieldHelper.read(expenditure, codeFieldName))).map(expenditure -> expenditure.getIdentifier()).collect(Collectors.toSet());
+		Collection<String> undefinedIdentifiers = expenditures.stream().filter(expenditure -> {
+			Boolean value = StringHelper.isBlank((String)FieldHelper.read(expenditure, codeFieldName));
+			if(!Boolean.TRUE.equals(expenditure.getHasUndefinedCode()))
+				expenditure.setHasUndefinedCode(value);
+			return value;
+			}).map(expenditure -> expenditure.getIdentifier()).collect(Collectors.toSet());
 		if(CollectionHelper.isEmpty(undefinedIdentifiers))
 			return;
 		result.getMap(Boolean.TRUE).put(mapKey, undefinedIdentifiers);
@@ -215,10 +284,15 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 			result.addMessages(formatMessageCodesUndefined("???", undefinedIdentifiers));
 	}
 	
-	private void verifyUnexistingCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result,String mapKey) {
-		Collection<String> unexistingCodes = codeExecutor.getUnexisting(klass, expenditures.stream().map(expenditure -> (String)FieldHelper.read(expenditure, codeFieldName)).filter(code -> StringHelper.isNotBlank(code)).collect(Collectors.toSet()));
+	private void verifyUnknownCodes(Collection<Expenditure> expenditures,Class<?> klass,String codeFieldName,Result result,String mapKey) {
+		Collection<String> unexistingCodes = codeExecutor.getUnexisting(klass, expenditures.stream().map(expenditure -> (String)FieldHelper.read(expenditure, codeFieldName))
+				.filter(code -> StringHelper.isNotBlank(code)).collect(Collectors.toSet()));
 		if(CollectionHelper.isEmpty(unexistingCodes))
 			return;
+		expenditures.forEach(expenditure -> {
+			if(!Boolean.TRUE.equals(expenditure.getHasUnknownCode()))
+				expenditure.setHasUnknownCode(unexistingCodes.contains(FieldHelper.read(expenditure, codeFieldName)));
+		});
 		result.getMap(Boolean.TRUE).put(mapKey, unexistingCodes);
 		if(ActivityImpl.class.equals(klass))
 			result.addMessages(formatMessageActivitiesCodesDoNotExist(unexistingCodes));
@@ -240,6 +314,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 			if(codes.contains(code)) {
 				if(duplicates == null)
 					duplicates = new ArrayList<>();
+				expenditure.setIsDuplicate(Boolean.TRUE);
 				duplicates.add(expenditure);
 			}else
 				codes.add(code);
