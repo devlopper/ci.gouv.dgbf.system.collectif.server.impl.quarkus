@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,12 +17,10 @@ import javax.json.bind.JsonbBuilder;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
 import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.time.TimeHelper;
-import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.Query;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -37,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness.LoadableVerificationResult;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
@@ -71,98 +69,89 @@ public class ExpenditureTest {
 	@Test @Order(1)
 	public void verifyLoadable(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).isNull();
 		assertThat(result.getMap()).isNull();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test @Order(1)
 	public void verifyLoadable_undefined_activity_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode(null).setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode(null).setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageActivitiesCodesUndefined(List.of("id1")));
-		assertThat(result.getMap()).isNotEmpty();
-		assertThat(result.getMap().keySet()).containsExactly(ExpenditureBusiness.RESULT_MAP_UNDEFINED_ACTIVITIES_CODES_IDENTIFIERS);
-		assertThat((Collection<String>)result.getMap().entrySet().iterator().next().getValue()).containsExactly("id1");
+		assertThat(result.getUndefined().getActivities()).containsExactly("id1");
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test @Order(1)
 	public void verifyLoadable_undefined_economic_nature_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("").setFundingSourceCode("1").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageEconomicsNaturesCodesUndefined(List.of("id1")));
-		assertThat(result.getMap()).isNotEmpty();
-		assertThat(result.getMap().keySet()).containsExactly(ExpenditureBusiness.RESULT_MAP_UNDEFINED_ECONOMICS_NATURES_CODES_IDENTIFIERS);
-		assertThat((Collection<String>)result.getMap().entrySet().iterator().next().getValue()).containsExactly("id1");
+		assertThat(result.getUndefined().getEconomicsNatures()).containsExactly("id1");
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test @Order(1)
 	public void verifyLoadable_undefined_funding_source_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode(" ").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode(" ").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
-		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageFundingsSourcesCodesUndefined(List.of("id1")));
-		assertThat(result.getMap()).isNotEmpty();
-		assertThat(result.getMap().keySet()).containsExactly(ExpenditureBusiness.RESULT_MAP_UNDEFINED_FUNDING_SOURCES_CODES_IDENTIFIERS);
-		assertThat((Collection<String>)result.getMap().entrySet().iterator().next().getValue()).containsExactly("id1");
+		assertThat(result.getUndefined().getFundingsSources()).containsExactly("id1");
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test @Order(1)
 	public void verifyLoadable_undefined_lessor_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("     "));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("     ").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageLessorsCodesUndefined(List.of("id1")));
-		assertThat(result.getMap()).isNotEmpty();
-		assertThat(result.getMap().keySet()).containsExactly(ExpenditureBusiness.RESULT_MAP_UNDEFINED_LESSORS_CODES_IDENTIFIERS);
-		assertThat((Collection<String>)result.getMap().entrySet().iterator().next().getValue()).containsExactly("id1");
+		assertThat(result.getUndefined().getLessors()).containsExactly("id1");
 	}
 	
-	@SuppressWarnings("unchecked")
+	@Test @Order(1)
+	public void verifyLoadable_undefined_entry_authorization_adjustment(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(null));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageEntryAuthorizationAdjustmentUndefined(List.of("id1")));
+		assertThat(result.getUndefinedEntriesAuthorizationsAdjustments()).containsExactly("id1");
+	}
+	
 	@Test @Order(1)
 	public void verifyLoadable_duplicates(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
-		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("2").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
-		expenditures.add(new ExpenditureImpl().setIdentifier("3").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("2").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		expenditures.add(new ExpenditureImpl().setIdentifier("3").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageDuplicates(List.of(new ExpenditureImpl().setIdentifier("3"))));
-		assertThat(result.getMap()).isNotEmpty();
-		assertThat(result.getMap().keySet()).containsExactly(ExpenditureBusiness.RESULT_MAP_DUPLICATES_IDENTIFIERS);
-		assertThat((Collection<String>)result.getMap().entrySet().iterator().next().getValue()).containsExactly("3");
+		assertThat(result.getDuplicates()).containsExactly("3");
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test @Order(1)
 	public void verifyLoadable_unknown_activity_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setActivityCode("unknown_activity_code").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setActivityCode("unknown_activity_code").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageActivitiesCodesDoNotExist(List.of("unknown_activity_code")));
-		assertThat(result.getMap()).isNotEmpty();
-		assertThat(result.getMap().keySet()).containsExactly(ExpenditureBusiness.RESULT_MAP_UNKNOWN_ACTIVITIES_CODES);
-		assertThat((Collection<String>)result.getMap().entrySet().iterator().next().getValue()).containsExactly("unknown_activity_code");
+		assertThat(result.getUnknown().getActivities()).containsExactly("unknown_activity_code");
 	}
 	
 	@Test @Order(1)
 	public void verifyLoadable_unknown_economicNature_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("unknown_economicNature_code").setFundingSourceCode("1").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("unknown_economicNature_code").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageEconomicsNaturesCodesDoNotExist(List.of("unknown_economicNature_code")));
 	}
@@ -170,8 +159,8 @@ public class ExpenditureTest {
 	@Test @Order(1)
 	public void verifyLoadable_unknown_fundingsSources_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("unknown_fundingSource_code").setLessorCode("1"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("unknown_fundingSource_code").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageFundingsSourcesCodesDoNotExist(List.of("unknown_fundingSource_code")));
 	}
@@ -179,8 +168,8 @@ public class ExpenditureTest {
 	@Test @Order(1)
 	public void verifyLoadable_unknown_lessor_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("unknown_lessor_code"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("unknown_lessor_code").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageLessorsCodesDoNotExist(List.of("unknown_lessor_code")));
 	}
@@ -188,28 +177,11 @@ public class ExpenditureTest {
 	@Test @Order(1)
 	public void verifyLoadable_unknown_all_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setActivityCode("uac").setEconomicNatureCode("uenc").setFundingSourceCode("ufsc").setLessorCode("ulc"));
-		Result result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		expenditures.add(new ExpenditureImpl().setActivityCode("uac").setEconomicNatureCode("uenc").setFundingSourceCode("ufsc").setLessorCode("ulc").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageActivitiesCodesDoNotExist(List.of("uac")),ExpenditureBusinessImpl.formatMessageEconomicsNaturesCodesDoNotExist(List.of("uenc"))
 				,ExpenditureBusinessImpl.formatMessageFundingsSourcesCodesDoNotExist(List.of("ufsc")),ExpenditureBusinessImpl.formatMessageLessorsCodesDoNotExist(List.of("ulc")));
-	}
-	
-	@Test @Order(1)
-	public void readFromFileExcel() throws IOException{
-		Collection<Expenditure> expenditures = expenditurePersistence.readFromFileExcel(IOUtils.toByteArray(getClass().getResourceAsStream("depenses_ajutements.xlsx")),0,1,2,3);
-		assertThat(expenditures).isNotNull();
-		ExpenditureImpl expenditure = (ExpenditureImpl) CollectionHelper.getElementAt(expenditures, 0);
-		assertThat(expenditure.getActivityCode()).isEqualTo("ACTIVITE");
-		assertThat(expenditure.getEconomicNatureCode()).isEqualTo("NATURE ECONOMIQUE");
-		assertThat(expenditure.getFundingSourceCode()).isEqualTo("SOURCE FINANCEMENT");
-		assertThat(expenditure.getLessorCode()).isEqualTo("BAILLEUR");
-		
-		expenditure = (ExpenditureImpl) CollectionHelper.getElementAt(expenditures, 1);
-		assertThat(expenditure.getActivityCode()).isEqualTo("78045200170");
-		assertThat(expenditure.getEconomicNatureCode()).isEqualTo("7B33E851AAA040C1B2D6429EB3D93F08");
-		assertThat(expenditure.getFundingSourceCode()).isEqualTo("1");
-		assertThat(expenditure.getLessorCode()).isEqualTo("ET");
 	}
 	
 	@Test @Order(1)
@@ -347,8 +319,8 @@ public class ExpenditureTest {
 		response.then()
 			//.log().all()
         	.statusCode(Response.Status.OK.getStatusCode())
-        	.header("codes_activites_inconnus", "uac")
-        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	//.header("codes_activites_inconnus", "uac")
+        	.body(ExpenditureService.LoadableVerificationResultDto.JSON_UNKNOWN+".activites", hasItems("uac"))
         	;
     }
 	
@@ -761,6 +733,17 @@ public class ExpenditureTest {
 		assertor.assertPaymentCredit("2022_1_3_5", 1l);
 		assertor.assertExpenditureAudits("2022_1_3_5", "meliane", ExpenditureBusiness.ADJUST_AUDIT_IDENTIFIER, "MODIFICATION");
 		assertor.assertExpenditureAudit("2022_1_3_5", ExpenditureBusiness.ADJUST_AUDIT_IDENTIFIER+" par meliane le");
+		
+		String auditIdentifier = entityManager.createQuery("SELECT t.__auditIdentifier__ FROM ExpenditureImpl t WHERE t.identifier = :identifier",String.class).setParameter("identifier", "2022_1_3_5").getSingleResult();
+		
+		//Again with same values
+		expenditureBusiness.adjust(Map.of("2022_1_3_5",new Long[] {3l,1l}),"meliane");
+		assertor.assertEntryAuthorization("2022_1_3_5", 3l);
+		assertor.assertPaymentCredit("2022_1_3_5", 1l);
+		assertor.assertExpenditureAudits("2022_1_3_5", "meliane", ExpenditureBusiness.ADJUST_AUDIT_IDENTIFIER, "MODIFICATION");
+		assertor.assertExpenditureAudit("2022_1_3_5", ExpenditureBusiness.ADJUST_AUDIT_IDENTIFIER+" par meliane le");
+		
+		assertThat(entityManager.createQuery("SELECT t.__auditIdentifier__ FROM ExpenditureImpl t WHERE t.identifier = :identifier",String.class).setParameter("identifier", "2022_1_3_5").getSingleResult()).as("audit identifier").isEqualTo(auditIdentifier);
 	}
 	
 	@Test @Order(4)
@@ -795,6 +778,14 @@ public class ExpenditureTest {
 		Assertions.assertThrows(RuntimeException.class, () -> {
 			expenditureBusiness.adjustByEntryAuthorizations(Map.of("identifier_not_exist",0l),"anonymous");
 	    });
+	}
+	
+	@Test @Order(6)
+	void business_adjust_entry_authorization_adjustment_null_payment_credit_adjustment_notNull() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			expenditureBusiness.adjust(Map.of("2022_1_3_5",new Long[] {null,2l}), "christian");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("L'ajustement de l'autorisation d'engagement de 2022_1_3_5 doit être défini");
 	}
 	
 	@Test @Order(4)
@@ -849,14 +840,6 @@ public class ExpenditureTest {
 			expenditureBusiness.load("2022_1_3", null, "christian");
 	    });
 		assertThat(exception.getMessage()).isEqualTo("Dépenses requises");
-	}
-	
-	@Test @Order(6)
-	void business_load_entry_authorization_adjustment_null_payment_credit_adjustment_notNull() {
-		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
-			expenditureBusiness.load("2022_1_3", List.of(new ExpenditureImpl().setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setPaymentCreditAdjustment(10l)), "christian");
-	    });
-		assertThat(exception.getMessage()).isEqualTo("L'ajustement de l'autorisation d'engagement de 2022_1_3_5 doit être défini");
 	}
 	
 	@Test @Order(6)

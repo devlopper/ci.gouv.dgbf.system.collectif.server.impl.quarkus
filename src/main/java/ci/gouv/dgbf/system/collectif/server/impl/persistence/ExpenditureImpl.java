@@ -119,7 +119,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	@Transient String fundingSourceAsString;
 	@Transient String lessorAsString;
 	
-	@Transient Boolean isDuplicate,hasUndefinedCode,hasUnknownCode;
+	@Transient Boolean isDuplicate,hasUndefined,hasUnknown;
 	
 	@Override
 	public ExpenditureImpl setIdentifier(String identifier) {
@@ -203,6 +203,9 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String FIELD_NATURE_AS_STRING = "natureAsString";
 	public static final String FIELD_SECTION_AS_STRING = "sectionAsString";
 	public static final String FIELD_BUDGET_SPECIALIZATION_UNIT_AS_STRING = "budgetSpecializationUnitAsString";
+	
+	public static final String FIELD_ENTRY_AUTHORIZATION_ADJUSTMENT = "entryAuthorizationAdjustment";
+	public static final String FIELD_PAYMENT_CREDIT_ADJUSTMENT = "paymentCreditAdjustment";
 	
 	public static final String FIELDS_STRINGS = "strings";
 	public static final String FIELDS_IDENTIFIERS = "identifiers";

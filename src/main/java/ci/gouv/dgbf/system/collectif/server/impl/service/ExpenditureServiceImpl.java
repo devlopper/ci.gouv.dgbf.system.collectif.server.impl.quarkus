@@ -9,14 +9,17 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
+import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.RequestExecutor;
 import org.cyk.utility.service.server.AbstractSpecificServiceImpl;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness.LoadableVerificationResult;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
@@ -114,6 +117,11 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 			if(ExpenditureBusiness.RESULT_MAP_UNKNOWN_LESSORS_CODES.equals(value))
 				return HEADER_UNKNOWN_LESSORS_CODES;	
 			return super.buildHeaderName(value);
+		}
+		
+		@Override
+		public Object buildEntity(ResponseBuilder builder, Result result, Object value) {
+			return new LoadableVerificationResultDto((LoadableVerificationResult) result);
 		}
 	}
 }
