@@ -119,7 +119,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	@Transient String fundingSourceAsString;
 	@Transient String lessorAsString;
 	
-	@Transient Boolean isDuplicate,hasUndefined,hasUnknown;
+	@Transient Boolean isDuplicate,hasUndefined,hasUnknown,hasNoEntryAuthorizationAvailableAmount,hasNoPaymentCreditAvailableAmount;
 	
 	@Override
 	public ExpenditureImpl setIdentifier(String identifier) {
@@ -206,6 +206,9 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	
 	public static final String FIELD_ENTRY_AUTHORIZATION_ADJUSTMENT = "entryAuthorizationAdjustment";
 	public static final String FIELD_PAYMENT_CREDIT_ADJUSTMENT = "paymentCreditAdjustment";
+	
+	public static final String FIELD_HAS_NO_ENTRY_AUTHORIZATION_AVAILABLE_AMOUNT = "hasNoEntryAuthorizationAvailableAmount";
+	public static final String FIELD_HAS_NO_PAYMENT_CREDIT_AVAILABLE_AMOUNT = "hasNoPaymentCreditAvailableAmount";
 	
 	public static final String FIELDS_STRINGS = "strings";
 	public static final String FIELDS_IDENTIFIERS = "identifiers";

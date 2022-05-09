@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import javax.transaction.Transactional;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.computation.ComparisonOperator;
 import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.klass.ClassHelper;
 import org.cyk.utility.__kernel__.log.LogHelper;
 import org.cyk.utility.__kernel__.map.MapHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
@@ -32,6 +34,7 @@ import org.cyk.utility.persistence.server.query.executor.field.CodeExecutor;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
@@ -40,6 +43,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationI
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAvailableMonitorableIsNotFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWithCodesReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportableView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
@@ -66,6 +70,16 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		return adjust(adjustments,generateAuditIdentifier(), auditWho, ADJUST_AUDIT_IDENTIFIER);
 	}
 	
+	private Collection<Object[]> readEntryAuthorizationPaymentCreditAdjustmentAvailable(Collection<String> identifiers,Class<? extends ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader> readerClass) {
+		Collection<Object[]> availablesMonitorables = new ExpenditureImplAvailableMonitorableIsNotFalseReader().readByIdentifiers(new ArrayList<String>(identifiers), null);
+		Collection<String> availablesMonitorablesIdentifiers = CollectionHelper.isEmpty(availablesMonitorables) ? null : availablesMonitorables.stream().map(array -> (String)array[0]).collect(Collectors.toList());
+		return CollectionHelper.isEmpty(availablesMonitorablesIdentifiers) ? null :  ClassHelper.instanciate(readerClass).readByIdentifiers(availablesMonitorablesIdentifiers, null);
+	}
+	
+	private Collection<Object[]> readEntryAuthorizationPaymentCreditAdjustmentAvailable(Collection<String> identifiers) {
+		return readEntryAuthorizationPaymentCreditAdjustmentAvailable(identifiers, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.class);
+	}
+	
 	private Collection<ExpenditureImpl> adjust(Map<String, Long[]> adjustments,String auditIdentifier,String auditWho,String auditFunctionality,Result result) {
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
@@ -74,13 +88,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		
 		// Validation of adjustments
 		Collection<String> providedIdentifiers = adjustments.entrySet().stream().map(x -> x.getKey()).collect(Collectors.toList());
-		
-		Collection<Object[]> availablesMonitorables = new ExpenditureImplAvailableMonitorableIsNotFalseReader().readByIdentifiers(new ArrayList<String>(adjustments.keySet()), null);
-		Collection<String> availablesMonitorablesIdentifiers = CollectionHelper.isEmpty(availablesMonitorables) ? null : availablesMonitorables.stream().map(array -> (String)array[0]).collect(Collectors.toList());
-		Collection<Object[]> arrays = CollectionHelper.isEmpty(availablesMonitorablesIdentifiers) ? null : new ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader().readByIdentifiers(providedIdentifiers, null);
-		
-		//Collection<String> identifiers = CollectionHelper.isEmpty(arrays) ? null : arrays.stream().map(array -> (String)array[0]).collect(Collectors.toList());	
-		//ValidatorImpl.validateIdentifiers(providedIdentifiers, identifiers, throwablesMessages);
+		Collection<Object[]> arrays = readEntryAuthorizationPaymentCreditAdjustmentAvailable(providedIdentifiers);
 		ValidatorImpl.Expenditure.validateAdjustmentsAvailable(adjustments, arrays, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.ENTRY_AUTHORIZATION_AVAILABLE_INDEX
 				, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.PAYMENT_CREDIT_AVAILABLE_INDEX, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
@@ -187,17 +195,15 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		ValidatorImpl.Expenditure.validateLoad(legislativeActVersionIdentifier,expenditures,auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
-		verifyLoadable(expenditures, result);
+		verifyLoadable(legislativeActVersionIdentifier,expenditures, result);
 		
 		Collection<Expenditure> loadables = expenditures.stream().filter(expenditure -> expenditure.isLoadable()).collect(Collectors.toList());
 		LogHelper.log(String.format("%s %s(s) chargeable(s)", loadables.size(),Expenditure.NAME),Result.getLogLevel(), getClass());
 		Map<String,Long[]> adjustments = null;
 		Collection<ExpenditureImpl> loaded = null;
 		if(CollectionHelper.isNotEmpty(loadables)) {
-			Collection<String> expendituresIdentifiers = entityManager.createNamedQuery(ExpenditureImpl.QUERY_READ_IDENTIFIERS_BY_ACT_VERSION_IDENTIFIER_BY_CODES,String.class)
-					.setParameter("actVersionIdentifier", legislativeActVersionIdentifier)
-					.setParameter("codes", loadables.stream().map(loadable -> loadable.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode()).collect(Collectors.toSet()))
-					.getResultList();
+			Collection<String> expendituresIdentifiers = ((ExpenditurePersistence)persistence).readIdentifiersByActVersionIdentifierByCodes(legislativeActVersionIdentifier
+					, loadables.stream().map(loadable -> loadable.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode()).collect(Collectors.toSet()));
 			LogHelper.log(String.format("%s %s(s) collectées par codes", CollectionHelper.getSize(expendituresIdentifiers),Expenditure.NAME),Result.getLogLevel(),getClass());
 			Collection<Object[]> codesArrays = null;
 			if(CollectionHelper.isNotEmpty(expendituresIdentifiers)) {
@@ -226,7 +232,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		// Return of message
 		Integer count = loaded == null ? 0 : loaded.size();
 		result.close().setName(String.format("Chargement de %s %s(s) par %s", count,Expenditure.NAME,auditWho)).log(getClass());
-		result.addMessages(String.format("Nombre de %s chargée(s) : %s",Expenditure.NAME, count));
+		result.addMessages(String.format("%s dépense(s) chargée(s)",count));
 		return result;
 	}
 	
@@ -238,27 +244,40 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		ValidatorImpl.Expenditure.validateVerifyLoadable(legislativeActVersionIdentifier,expenditures, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
-		verifyLoadable(expenditures, result);
+		verifyLoadable(legislativeActVersionIdentifier,expenditures, result);
 		
 		if(CollectionHelper.isEmpty(result.getMessages()))
 			result.setValue(String.format("Les %s dépenses sont chargeable",expenditures.size()));
 		return result;
 	}
 	
-	private void verifyLoadable(Collection<Expenditure> expenditures,LoadableVerificationResult result) {
+	private void verifyLoadable(String legislativeActVersionIdentifier,Collection<Expenditure> expenditures,LoadableVerificationResult result) {
+		verifyUndefined(expenditures, result);
+		verifyUnknown(expenditures, result);
+		verifyDuplicates(expenditures, result);
+		
+		expenditures = expenditures.stream().filter(expenditure -> Boolean.TRUE.equals(expenditure.isLoadable())).collect(Collectors.toList());
+		if(CollectionHelper.isEmpty(expenditures))
+			return;
+		
+		verifyAvailablesAmounts(legislativeActVersionIdentifier,expenditures, result);
+		
+	}
+	
+	private void verifyUndefined(Collection<Expenditure> expenditures,LoadableVerificationResult result) {
 		verifyUndefinedCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result);
 		verifyUndefinedCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result);
 		verifyUndefinedCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result);
 		verifyUndefinedCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result);
 		verifyUndefinedAmount(expenditures, ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION_ADJUSTMENT, result);
 		//verifyUndefinedAmount(expenditures, ExpenditureImpl.FIELD_PAYMENT_CREDIT_ADJUSTMENT, result);
-		
+	}
+	
+	private void verifyUnknown(Collection<Expenditure> expenditures,LoadableVerificationResult result) {
 		verifyUnknownCodes(expenditures, ActivityImpl.class,ExpenditureImpl.FIELD_ACTIVITY_CODE, result);
 		verifyUnknownCodes(expenditures, EconomicNatureImpl.class, ExpenditureImpl.FIELD_ECONOMIC_NATURE_CODE, result);
 		verifyUnknownCodes(expenditures, FundingSourceImpl.class, ExpenditureImpl.FIELD_FUNDING_SOURCE_CODE, result);
 		verifyUnknownCodes(expenditures, LessorImpl.class, ExpenditureImpl.FIELD_LESSOR_CODE, result);
-		
-		verifyDuplicates(expenditures, result);
 	}
 	
 	private Collection<Expenditure> getUndefinedCodes(Collection<Expenditure> expenditures,Boolean isNull) {
@@ -362,7 +381,58 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		if(CollectionHelper.isEmpty(identifiers))
 			return;
 		result.setDuplicates(identifiers);
-		result.addMessages(formatMessageDuplicates(duplicates));
+		result.addMessages(formatMessageDuplicates(identifiers));
+	}
+	
+	private void verifyAvailablesAmounts(String legislativeActVersionIdentifier,Collection<Expenditure> expenditures,LoadableVerificationResult result) {
+		Collection<String> identifiers = ((ExpenditurePersistence)persistence).readIdentifiersByActVersionIdentifierByCodes(legislativeActVersionIdentifier
+				, expenditures.stream().map(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode()).collect(Collectors.toSet()));
+		Collection<Object[]> arrays = readEntryAuthorizationPaymentCreditAdjustmentAvailable(identifiers,ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWithCodesReader.class);
+		if(CollectionHelper.isEmpty(arrays))
+			return;
+		arrays.forEach(array -> {
+			Expenditure expenditure = CollectionHelper.getFirst(expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode().equals(array[5])).collect(Collectors.toList()));
+			if(expenditure == null)
+				return;
+			if(StringHelper.isNotBlank(expenditure.getIdentifier())) {
+				if(result.getEntryAuthorizationAdjustment() == null)
+					result.setEntryAuthorizationAdjustment(new HashMap<String, Long>());
+				if(result.getPaymentCreditAdjustment() == null)
+					result.setPaymentCreditAdjustment(new HashMap<String, Long>());
+				if(result.getEntryAuthorizationAvailable() == null)
+					result.setEntryAuthorizationAvailable(new HashMap<String, Long>());
+				if(result.getPaymentCreditAvailable() == null)
+					result.setPaymentCreditAvailable(new HashMap<String, Long>());
+				result.getEntryAuthorizationAdjustment().put(expenditure.getIdentifier(), (Long)array[1]);
+				result.getPaymentCreditAdjustment().put(expenditure.getIdentifier(), (Long)array[2]);
+				result.getEntryAuthorizationAvailable().put(expenditure.getIdentifier(), (Long)array[3]);
+				result.getPaymentCreditAvailable().put(expenditure.getIdentifier(), (Long)array[4]);
+			}
+			expenditure.setHasNoEntryAuthorizationAvailableAmount(NumberHelper.getLong(expenditure.getEntryAuthorizationAdjustment(),0l)+NumberHelper.getLong(array[2], 0l) < 0 );
+			expenditure.setHasNoPaymentCreditAvailableAmount(NumberHelper.getLong(expenditure.getPaymentCreditAdjustment(),0l)+NumberHelper.getLong(array[4], 0l) < 0 );
+		});
+		
+		for(String fieldName : new String[] {ExpenditureImpl.FIELD_HAS_NO_ENTRY_AUTHORIZATION_AVAILABLE_AMOUNT,ExpenditureImpl.FIELD_HAS_NO_PAYMENT_CREDIT_AVAILABLE_AMOUNT}) {
+			identifiers = arrays.stream().filter(array -> {
+				Expenditure expenditure = CollectionHelper.getFirst(expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode().equals(array[5])).collect(Collectors.toList()));
+				if(expenditure == null)
+					return Boolean.FALSE;
+				if(fieldName.equals(ExpenditureImpl.FIELD_HAS_NO_ENTRY_AUTHORIZATION_AVAILABLE_AMOUNT))
+					return expenditure.getHasNoEntryAuthorizationAvailableAmount();
+				else if(fieldName.equals(ExpenditureImpl.FIELD_HAS_NO_PAYMENT_CREDIT_AVAILABLE_AMOUNT))
+					return expenditure.getHasNoPaymentCreditAvailableAmount();
+				return Boolean.FALSE;
+			}).map(array -> expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode().equals(array[5])).findFirst().get().getIdentifier()).collect(Collectors.toList());
+			if(CollectionHelper.isEmpty(identifiers))
+				continue;
+			if(fieldName.equals(ExpenditureImpl.FIELD_HAS_NO_ENTRY_AUTHORIZATION_AVAILABLE_AMOUNT)) {
+				result.addMessages(formatMessageEntryAuthorizationAvailableIsNotEnough(identifiers));
+				result.setEntryAuthorizationAvailableIsNotEnough(identifiers);
+			}else if(fieldName.equals(ExpenditureImpl.FIELD_HAS_NO_PAYMENT_CREDIT_AVAILABLE_AMOUNT)) {
+				result.addMessages(formatMessagePaymentCreditAvailableIsNotEnough(identifiers));
+				result.setPaymentCreditAvailableIsNotEnough(identifiers);	
+			}
+		}
 	}
 	
 	/**/
@@ -417,12 +487,19 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		return String.format("%s code(s) %sinexistant : %s",codes.size(),name,StringHelper.concatenate(codes,","));
 	}
 	
-	public static String formatMessageCodesNull(Collection<Expenditure> expenditures) {
-		return String.format("%s dépense(s) ayant code activité ou code nature économique ou code source de financement ou code bailleur non défini : %s",expenditures.size()
-				,expenditures.stream().map(expenditure -> expenditure.getIdentifier()).filter(identifier -> StringHelper.isNotBlank(identifier)).collect(Collectors.joining(",")));
+	public static String formatMessageDuplicates(Collection<String> identifiers) {
+		return String.format("%s dépense(s) en double : %s",identifiers.size(),StringHelper.concatenate(identifiers, ","));
 	}
 	
-	public static String formatMessageDuplicates(Collection<Expenditure> expenditures) {
-		return String.format("%s dépense(s) en double : %s",expenditures.size(),expenditures.stream().map(expenditure -> expenditure.getIdentifier()).filter(identifier -> StringHelper.isNotBlank(identifier)).collect(Collectors.joining(",")));
+	public static String formatMessageEntryAuthorizationAvailableIsNotEnough(Collection<String> identifiers) {
+		return formatMessageAvailableIsNotEnough("autorisation d'engagement", identifiers);
+	}
+	
+	public static String formatMessagePaymentCreditAvailableIsNotEnough(Collection<String> identifiers) {
+		return formatMessageAvailableIsNotEnough("crédit de paiement", identifiers);
+	}
+	
+	public static String formatMessageAvailableIsNotEnough(String name,Collection<String> identifiers) {
+		return String.format("%s dépense(s) avec disponible %s insuffisant : %s",identifiers.size(),name,StringHelper.concatenate(identifiers, ","));
 	}
 }

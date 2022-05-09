@@ -126,18 +126,6 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_duplicates(){
-		Collection<Expenditure> expenditures = new ArrayList<>();
-		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
-		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("2").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
-		expenditures.add(new ExpenditureImpl().setIdentifier("3").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
-		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
-		assertThat(result).isNotNull();
-		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageDuplicates(List.of(new ExpenditureImpl().setIdentifier("3"))));
-		assertThat(result.getDuplicates()).containsExactly("3");
-	}
-	
-	@Test @Order(1)
 	public void verifyLoadable_unknown_activity_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setActivityCode("unknown_activity_code").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
@@ -182,6 +170,40 @@ public class ExpenditureTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageActivitiesCodesDoNotExist(List.of("uac")),ExpenditureBusinessImpl.formatMessageEconomicsNaturesCodesDoNotExist(List.of("uenc"))
 				,ExpenditureBusinessImpl.formatMessageFundingsSourcesCodesDoNotExist(List.of("ufsc")),ExpenditureBusinessImpl.formatMessageLessorsCodesDoNotExist(List.of("ulc")));
+	}
+	
+	@Test @Order(1)
+	public void verifyLoadable_duplicates(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("2").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		expenditures.add(new ExpenditureImpl().setIdentifier("3").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageDuplicates(List.of("3")));
+		assertThat(result.getDuplicates()).containsExactly("3");
+	}
+	
+	@Test @Order(1)
+	public void verifyLoadable_entry_authorization_available_not_enough(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(-10000000l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_3",expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessageEntryAuthorizationAvailableIsNotEnough(List.of("2")));
+		assertThat(result.getEntryAuthorizationAvailableIsNotEnough()).containsExactly("2");
+	}
+	
+	@Test @Order(1)
+	public void verifyLoadable_credit_payment_available_not_enough(){
+		Collection<Expenditure> expenditures = new ArrayList<>();
+		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
+		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l).setPaymentCreditAdjustment(-10000000l));
+		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_3",expenditures);
+		assertThat(result).isNotNull();
+		assertThat(result.getMessages()).containsExactly(ExpenditureBusinessImpl.formatMessagePaymentCreditAvailableIsNotEnough(List.of("2")));
+		assertThat(result.getPaymentCreditAvailableIsNotEnough()).containsExactly("2");
 	}
 	
 	@Test @Order(1)
@@ -856,6 +878,18 @@ public class ExpenditureTest {
 		assertor.assertPaymentCredit("2022_1_3_6", 0l);
 		
 		expenditureBusiness.load("2022_1_3", List.of(new ExpenditureImpl().setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(12l).setPaymentCreditAdjustment(25l)), "christian");
+		assertor.assertEntryAuthorization("2022_1_3_5", 12l);
+		assertor.assertPaymentCredit("2022_1_3_5", 25l);
+		assertor.assertEntryAuthorization("2022_1_3_6", 0l);
+		assertor.assertPaymentCredit("2022_1_3_6", 0l);
+		
+		expenditureBusiness.load("2022_1_3", List.of(new ExpenditureImpl().setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(null).setPaymentCreditAdjustment(25l)), "christian");
+		assertor.assertEntryAuthorization("2022_1_3_5", 12l);
+		assertor.assertPaymentCredit("2022_1_3_5", 25l);
+		assertor.assertEntryAuthorization("2022_1_3_6", 0l);
+		assertor.assertPaymentCredit("2022_1_3_6", 0l);
+		
+		expenditureBusiness.load("2022_1_3", List.of(new ExpenditureImpl().setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(-10000l).setPaymentCreditAdjustment(25l)), "christian");
 		assertor.assertEntryAuthorization("2022_1_3_5", 12l);
 		assertor.assertPaymentCredit("2022_1_3_5", 25l);
 		assertor.assertEntryAuthorization("2022_1_3_6", 0l);
