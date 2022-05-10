@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.cyk.quarkus.extension.core_.configuration.processing.Copy;
 import org.cyk.quarkus.extension.core_.configuration.processing.Importation;
+import org.cyk.quarkus.extension.core_.configuration.processing.MaterializedViewActualization;
 
 import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
@@ -18,6 +19,8 @@ public interface Configuration extends org.cyk.quarkus.extension.core_.configura
 	@WithName("server.client.rest.uri")
 	@WithConverter(StringConverter.class)
 	String serverClientRestUri();
+	
+	MaterializedViewActualization materializedViewActualization();
 	
 	Importation importation();
 	

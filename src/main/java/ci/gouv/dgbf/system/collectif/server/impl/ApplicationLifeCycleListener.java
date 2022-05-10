@@ -1,5 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl;
 
+import java.util.List;
+
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -13,8 +15,10 @@ import org.cyk.utility.persistence.query.EntityCounter;
 import org.cyk.utility.persistence.query.EntityReader;
 import org.cyk.utility.persistence.query.QueryResultMapper;
 import org.cyk.utility.persistence.server.TransientFieldsProcessor;
+import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
 import org.cyk.utility.persistence.server.query.RuntimeQueryBuilder;
 import org.cyk.utility.persistence.server.query.string.RuntimeQueryStringBuilder;
+import org.cyk.utility.persistence.server.view.MaterializedViewManager;
 import org.cyk.utility.service.server.PersistenceEntityClassGetterImpl;
 
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActionImpl;
@@ -25,14 +29,17 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureNatureImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.GeneratedActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LessorImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceActivityImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.SectionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ActionDtoImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.service.ActionDtoImplMapper;
@@ -71,6 +78,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.service.SectionDtoImplMapper;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
+import io.quarkus.scheduler.Scheduled;
 
 @Startup(value = ApplicationLifeCycleListener.ORDER)
 @javax.enterprise.context.ApplicationScoped
@@ -78,6 +86,7 @@ public class ApplicationLifeCycleListener {
 	public static final int ORDER = org.cyk.quarkus.extension.hibernate.orm.ApplicationLifeCycleListener.ORDER+1;
 
 	@Inject Configuration configuration;
+	@Inject @Hibernate MaterializedViewManager materializedViewManager;
 	
     void onStart(@Observes StartupEvent startupEvent) {
     	org.cyk.quarkus.extension.hibernate.orm.ApplicationLifeCycleListener.QUALIFIER = ci.gouv.dgbf.system.collectif.server.api.System.class;
@@ -143,9 +152,16 @@ public class ApplicationLifeCycleListener {
     	/**/
 
     	//ContainerRequestFilter.LEVEL = Level.INFO;
+    	materializedViewManager.setViewsClasses(List.of(BudgetCategoryImpl.class,SectionImpl.class,BudgetSpecializationUnitImpl.class,ActionImpl.class,ActivityImpl.class,ExpenditureNatureImpl.class,ResourceActivityImpl.class
+    			,EconomicNatureImpl.class,FundingSourceImpl.class,LessorImpl.class,RegulatoryActImpl.class,RegulatoryActExpenditureImpl.class,ExpenditureView.class,ResourceView.class));
     }
 
     void onStop(@Observes ShutdownEvent shutdownEvent) {               
         
+    }
+
+    @Scheduled(cron = "{collectif.materialized-view-actualization.processing.cron}")
+	void actualizeMaterializedView() {
+    	materializedViewManager.actualizeAll();
     }
 }
