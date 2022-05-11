@@ -1,7 +1,8 @@
+--------------------------------------------------------- LOG ----------------------------------------------------------------------------------------
 CREATE OR REPLACE PROCEDURE AP_LOG_TABLE(p_identifier IN VARCHAR2,p_table_name IN VARCHAR2,p_actor IN VARCHAR2,p_action IN VARCHAR2) AUTHID CURRENT_USER AS
 ocount NUMBER;
 BEGIN
-	SELECT COUNT(*) INTO ocount FROM all_tables WHERE table_name = 'AT_TABLE_LOG';
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'INSERT INTO AT_TABLE_LOG (identifier,table_name,actor,action,start_date) VALUES (:1,:2,:3,:4,SYSDATE)' USING p_identifier,p_table_name,p_actor,p_action;
     END IF;
@@ -9,7 +10,7 @@ END;
 
 CREATE OR REPLACE PROCEDURE AP_LOG_TABLE_END_DATE(p_identifier IN VARCHAR2) AUTHID CURRENT_USER AS ocount NUMBER;
 BEGIN
-	SELECT COUNT(*) INTO ocount FROM all_tables WHERE table_name = 'AT_TABLE_LOG';
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET end_date = SYSDATE WHERE identifier = :1' USING p_identifier;
     END IF;
@@ -17,31 +18,60 @@ END;
 
 CREATE OR REPLACE PROCEDURE AP_LOG_TABLE_INPUTS(p_identifier IN VARCHAR2,p_inputs IN VARCHAR2) AUTHID CURRENT_USER AS ocount NUMBER;
 BEGIN
-	SELECT COUNT(*) INTO ocount FROM all_tables WHERE table_name = 'AT_TABLE_LOG';
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET inputs = '''||p_inputs||''' WHERE identifier = :1' USING p_identifier;
     END IF;
 END;
 
+CREATE OR REPLACE PROCEDURE AP_LOG_TABLE_OUTPUTS(p_identifier IN VARCHAR2,p_outputs IN VARCHAR2) AUTHID CURRENT_USER AS ocount NUMBER;
+BEGIN
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
+    IF ocount = 1 THEN
+    	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET outputs = '''||p_outputs||''' WHERE identifier = :1' USING p_identifier;
+    END IF;
+END;
+
 CREATE OR REPLACE PROCEDURE AP_LOG_TABLE_EXCEPTION(p_identifier IN VARCHAR2,p_exception IN VARCHAR2) AUTHID CURRENT_USER AS ocount NUMBER;
 BEGIN
-	SELECT COUNT(*) INTO ocount FROM all_tables WHERE table_name = 'AT_TABLE_LOG';
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET end_date = SYSDATE , exception = '''||p_exception||''' WHERE identifier = :1' USING p_identifier;
     END IF;
 END;
+
+------------------------------------------------ DROP -------------------------------------------------------------------------
 
 CREATE OR REPLACE PROCEDURE AP_DROP_TABLE(p_table_name IN VARCHAR2) AUTHID CURRENT_USER AS 
 ocount NUMBER;
 uuid VARCHAR2(32) := SYS_GUID();
 BEGIN
     AP_LOG_TABLE(uuid,p_table_name,'SYSTEME','DROP');
-	SELECT COUNT(*) INTO ocount FROM all_tables WHERE table_name = p_table_name;
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = p_table_name;
     IF ocount = 1 THEN
         EXECUTE IMMEDIATE  'DROP TABLE '||p_table_name||' CASCADE CONSTRAINTS PURGE';
-        UPDATE AT_TABLE_LOG SET outputs = 'Dropped' WHERE identifier = uuid;
+        AP_LOG_TABLE_OUTPUTS(uuid,'Dropped');
     ELSE
-        UPDATE AT_TABLE_LOG SET outputs = 'Does not exist' WHERE identifier = uuid;
+    	AP_LOG_TABLE_OUTPUTS(uuid,'Does not exist');
+    END IF;
+    AP_LOG_TABLE_END_DATE(uuid);
+END;
+
+CREATE OR REPLACE PROCEDURE AP_DROP_ALL_MV AUTHID CURRENT_USER AS 
+v_table_name VARCHAR2(30) := 'AT_MV';
+ocount NUMBER;
+uuid VARCHAR2(32) := SYS_GUID();
+BEGIN
+    AP_LOG_TABLE(uuid,v_table_name,'SYSTEME','DROPALL');
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = v_table_name;
+    IF ocount = 1 THEN
+        FOR t IN (SELECT name FROM AT_MV)
+    	LOOP
+    	    AP_DROP_TABLE(t.name);
+    	END LOOP;
+    	AP_LOG_TABLE_OUTPUTS(uuid,'All dropped');
+    ELSE
+        AP_LOG_TABLE_OUTPUTS(uuid,'Does not exist');
     END IF;
     AP_LOG_TABLE_END_DATE(uuid);
 END;
@@ -53,19 +83,19 @@ ocount NUMBER;
 uuid VARCHAR2(32) := SYS_GUID();
 BEGIN
 	AP_LOG_TABLE(uuid,p_table_name,'SYSTEME','CREATE');
-	SELECT COUNT(*) INTO ocount FROM all_tables WHERE table_name = p_table_name;
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = p_table_name;
     IF ocount = 0 THEN
         EXECUTE IMMEDIATE 'CREATE TABLE '||p_table_name||' AS '||query_string;
-        UPDATE AT_TABLE_LOG SET outputs = 'Created' WHERE identifier = uuid;
+        AP_LOG_TABLE_OUTPUTS(uuid,'Created');
     ELSE
-        UPDATE AT_TABLE_LOG SET outputs = 'Already exist' WHERE identifier = uuid;
+        AP_LOG_TABLE_OUTPUTS(uuid,'Already exist');
     END IF;
 	AP_LOG_TABLE_END_DATE(uuid); 
 END;
 
 CREATE OR REPLACE PROCEDURE AP_GET_CREATE_TABLE_QUERY(p_table_name IN VARCHAR2,p_query OUT VARCHAR2) AUTHID CURRENT_USER AS
 BEGIN
-	SELECT query_select INTO p_query FROM AT_MV WHERE name = p_table_name;
+	SELECT query INTO p_query FROM AT_MV WHERE name = p_table_name;
 END;
 
 CREATE OR REPLACE PROCEDURE AP_CREATE_TABLE(p_table_name IN VARCHAR2) AUTHID CURRENT_USER AS
@@ -81,6 +111,7 @@ BEGIN
 	AP_LOG_TABLE(uuid,p_table_name_original,'SYSTEME','RENAME');
     AP_LOG_TABLE_INPUTS(uuid,p_table_name_final);
 	EXECUTE IMMEDIATE 'RENAME '||p_table_name_original||' TO '||p_table_name_final;
+	AP_LOG_TABLE_OUTPUTS(uuid,'Renamed');
 	AP_LOG_TABLE_END_DATE(uuid);
 END;
 
@@ -92,6 +123,7 @@ BEGIN
     LOOP
         EXECUTE IMMEDIATE t.script;
     END LOOP;
+    AP_LOG_TABLE_OUTPUTS(uuid,'Scripted');
     AP_LOG_TABLE_END_DATE(uuid);
     EXCEPTION WHEN others THEN AP_LOG_TABLE_EXCEPTION(uuid,SUBSTR( DBMS_UTILITY.format_error_stack || DBMS_UTILITY.format_error_backtrace, 1, 4000)); 
     COMMIT;
@@ -102,7 +134,7 @@ v_temp_table_name VARCHAR2(2048);
 query_string VARCHAR2(3500);
 BEGIN
     -- We will use a temporary table to avoid application to fail in case there is something going wrong
-    v_temp_table_name := p_table_name||'_TEMP';
+    v_temp_table_name := p_table_name||'_T';
     AP_DROP_TABLE(v_temp_table_name);
     AP_GET_CREATE_TABLE_QUERY(p_table_name,query_string);
     AP_CREATE_TABLE_FROM_QUERY(v_temp_table_name,query_string);
@@ -114,52 +146,93 @@ BEGIN
 END;
 
 CREATE OR REPLACE PROCEDURE AP_CREATE_ALL_MV AUTHID CURRENT_USER AS
+v_table_name VARCHAR2(30) := 'AT_MV';
+ocount NUMBER;
+uuid VARCHAR2(32) := SYS_GUID();
 BEGIN
-    FOR t IN (SELECT * FROM AT_MV WHERE enabled = 1 ORDER BY order_number)
-    LOOP
-        AP_CREATE_MV(t.name);
-    END LOOP;
+    AP_LOG_TABLE(uuid,v_table_name,'SYSTEME','CREATEALL');
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = v_table_name;
+    IF ocount = 1 THEN
+        FOR t IN (SELECT name FROM AT_MV WHERE enabled = 1 ORDER BY order_number)
+    	LOOP
+    	    AP_CREATE_MV(t.name);
+    	END LOOP;
+    	AP_LOG_TABLE_OUTPUTS(uuid,'All created');
+    ELSE
+        AP_LOG_TABLE_OUTPUTS(uuid,'Does not exist');
+    END IF;
+    AP_LOG_TABLE_END_DATE(uuid);
 END;
 
 --------------------------------------- MERGE ---------------------------------------------
 
-CREATE OR REPLACE PROCEDURE AP_MERGE_TABLE_FROM_QUERY(p_table_name IN VARCHAR2,query_string IN VARCHAR2) AUTHID CURRENT_USER AS
+CREATE OR REPLACE PROCEDURE AP_MERGE_TABLE_FROM_QUERY(p_table_name IN VARCHAR2,query_string IN CLOB) AUTHID CURRENT_USER AS
 ocount NUMBER;
 uuid VARCHAR2(32) := SYS_GUID();
 BEGIN
 	AP_LOG_TABLE(uuid,p_table_name,'SYSTEME','MERGE');
-	SELECT COUNT(*) INTO ocount FROM all_tables WHERE table_name = p_table_name;
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = p_table_name;
 	IF query_string IS NOT NULL THEN
 		IF ocount = 1 THEN
 	        EXECUTE IMMEDIATE query_string;
-	        UPDATE AT_TABLE_LOG SET outputs = 'Merged' WHERE identifier = uuid;
+	        AP_LOG_TABLE_OUTPUTS(uuid,'Merged');
 	    ELSE
-	        UPDATE AT_TABLE_LOG SET outputs = 'Does not exist.' WHERE identifier = uuid;
+	        AP_LOG_TABLE_OUTPUTS(uuid,'Does not exist');
 	    END IF;
 	ELSE
-		UPDATE AT_TABLE_LOG SET outputs = 'No query has been defined' WHERE identifier = uuid;
+		AP_LOG_TABLE_OUTPUTS(uuid,'No query has been defined');
 	END IF;
 	AP_LOG_TABLE_END_DATE(uuid); 
 END;
 
-CREATE OR REPLACE PROCEDURE AP_GET_MERGE_TABLE_QUERY(p_table_name IN VARCHAR2,p_query OUT VARCHAR2) AUTHID CURRENT_USER AS
+CREATE OR REPLACE PROCEDURE AP_GET_MERGE_TABLE_QUERY(p_table_name IN VARCHAR2,p_query OUT CLOB) AUTHID CURRENT_USER AS
 BEGIN
-	SELECT query_merge INTO p_query FROM AT_MV WHERE name = p_table_name;
+	SELECT query INTO p_query FROM AV_MV_QUERY_MERGE t WHERE name = p_table_name;
 END;
 
-CREATE OR REPLACE PROCEDURE AP_MERGE_TABLE(p_table_name IN VARCHAR2) AUTHID CURRENT_USER AS
-query_string VARCHAR2(3500);
+CREATE OR REPLACE PROCEDURE AP_GET_MERGE_MV_QUERY(p_table_name IN VARCHAR2,p_query OUT CLOB) AUTHID CURRENT_USER AS
 BEGIN
-	AP_GET_MERGE_TABLE_QUERY(p_table_name,query_string);
+	SELECT query INTO p_query FROM AV_MV_QUERY_MERGE t WHERE name = p_table_name;
+END;
+
+CREATE OR REPLACE PROCEDURE AP_MERGE_MV(p_table_name IN VARCHAR2) AUTHID CURRENT_USER AS
+query_string CLOB;
+BEGIN
+	AP_GET_MERGE_MV_QUERY(p_table_name,query_string);
 	AP_MERGE_TABLE_FROM_QUERY(p_table_name,query_string);
 END;
 
 CREATE OR REPLACE PROCEDURE AP_MERGE_ALL_MV AUTHID CURRENT_USER AS
+ocount NUMBER;
+v_table_name VARCHAR2(30) := 'AT_MV';
+uuid VARCHAR2(32) := SYS_GUID();
 BEGIN
-    FOR t IN (SELECT * FROM AT_MV WHERE enabled = 1 ORDER BY order_number)
-    LOOP
-        AP_MERGE_TABLE(t.name);
-    END LOOP;
+	AP_LOG_TABLE(uuid,v_table_name,'SYSTEME','MERGEALL');
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = v_table_name;
+    IF ocount = 1 THEN
+        FOR t IN (SELECT name FROM AT_MV WHERE enabled = 1 ORDER BY order_number)
+    	LOOP
+    	    AP_MERGE_MV(t.name);
+    	END LOOP;
+    	AP_LOG_TABLE_OUTPUTS(uuid,'All merged');
+    ELSE
+        AP_LOG_TABLE_OUTPUTS(uuid,'Does not exist');
+    END IF;
+    AP_LOG_TABLE_END_DATE(uuid);
+END;
+
+CREATE OR REPLACE PROCEDURE AP_ACTUALIZE_MV(p_table_name IN VARCHAR2) AUTHID CURRENT_USER AS
+ocount NUMBER;
+uuid VARCHAR2(32) := SYS_GUID();
+BEGIN
+    --AP_LOG_TABLE(uuid,p_table_name,'SYSTEME','ACTUALIZE');
+	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = p_table_name;
+    IF ocount = 1 THEN
+        AP_MERGE_MV(p_table_name);
+    ELSE
+        AP_CREATE_MV(p_table_name);
+    END IF;
+    --AP_LOG_TABLE_END_DATE(uuid);
 END;
    
 CREATE OR REPLACE PROCEDURE PA_ACTUALISER_VM(nom_table IN VARCHAR2) AUTHID CURRENT_USER AS uuid VARCHAR2(32);
