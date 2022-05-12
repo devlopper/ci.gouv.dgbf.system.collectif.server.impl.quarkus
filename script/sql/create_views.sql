@@ -1,22 +1,3 @@
-CREATE OR REPLACE VIEW AV_MV_QUERY_MERGE_TOKENS AS
-SELECT mv.name AS "NAME"
-,'SELECT '||(LISTAGG('s.'||atc.column_name, ',') WITHIN GROUP (ORDER BY atc.column_name))||',s.'||mv.deletable_column||',s.identifiant FROM ('||query||') s UNION ALL SELECT '
-||(LISTAGG('d.'||atc.column_name, ',') WITHIN GROUP (ORDER BY atc.column_name))||','''||mv.deletable_marker||''' AS '||mv.deletable_column||',d.identifiant FROM '||mv.name||' d ' AS "SELECT_"
-,'LEFT JOIN ('||mv.query||') s ON s.identifiant = d.identifiant WHERE s.identifiant IS NULL' AS "JOIN_"
-,'INSERT('||(LISTAGG(atc.column_name, ',') WITHIN GROUP (ORDER BY atc.column_name))||','||mv.deletable_column||',identifiant) VALUES ('
-||(LISTAGG('s.'||atc.column_name, ',') WITHIN GROUP (ORDER BY atc.column_name))||',s.'||mv.deletable_column||',s.identifiant)'AS "INSERT_"
-,'UPDATE SET '||((LISTAGG('d.'||atc.column_name||'=s.'||atc.column_name, ',') WITHIN GROUP (ORDER BY atc.column_name)))||',d.'||mv.deletable_column||'=s.'||mv.deletable_column AS "UPDATE_"
-,'DELETE WHERE d.'||mv.deletable_column||' = '''||mv.deletable_marker||'''' AS "DELETE_"
-FROM at_mv mv
-JOIN all_tab_columns atc ON atc.table_name = mv.name
-WHERE owner = USER AND LOWER(atc.column_name) <> LOWER(mv.deletable_column) AND LOWER(atc.column_name) <> 'identifiant'
-GROUP BY atc.owner,mv.name,mv.query,mv.deletable_column,mv.deletable_marker;
-
-CREATE OR REPLACE VIEW AV_MV_QUERY_MERGE AS
-SELECT name,CONCAT(CONCAT('MERGE INTO '||name||' d USING (',TO_CLOB(select_)),CONCAT(join_,CONCAT(') s ON (s.identifiant = d.identifiant) WHEN NOT MATCHED THEN '
-,CONCAT(TO_CLOB(insert_),CONCAT(' WHEN MATCHED THEN ',CONCAT(TO_CLOB(update_),CONCAT(' ',TO_CLOB(delete_)))))))) AS "QUERY"
-FROM AV_MV_QUERY_MERGE_TOKENS t;
-
 -- Liste des dépenses
 CREATE OR REPLACE VIEW VA_DEPENSE AS
 SELECT version_collectif.identifiant||d.activite_code||d.nature_economique_code||d.source_financement_code||d.bailleur_code AS "IDENTIFIANT",version_collectif.identifiant AS "VERSION_COLLECTIF",d.*
