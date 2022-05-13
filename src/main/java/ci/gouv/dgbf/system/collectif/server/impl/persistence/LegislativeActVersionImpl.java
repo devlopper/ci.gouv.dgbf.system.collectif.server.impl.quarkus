@@ -145,6 +145,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELDS_EXPENDITURES_AMOUNTS_WITHOUT_AVAILABLE = "expendituresAmountsWithoutAvailable";
 	public static final String FIELDS_EXPENDITURES_AMOUNTS_WITH_AVAILABLE_ONLY = "expendituresAmountsWithAvailableOnly";
 	public static final String FIELDS_EXPENDITURES_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY = "expendituresAmountsWithIncludedMovementOnly";
+	public static final String FIELDS_EXPENDITURES_AMOUNTS_WITH_ADJUSTMENT_LOWER_THAN_ZERO_GREATER_THAN_ZERO_ONLY = "expendituresAmountsWithAdjustmentLowerThanZeroGreaterThanZeroOnly";
 	public static final String FIELDS_EXPENDITURES_ENTRY_AUTHORIZATION_AMOUNTS = "expendituresEntryAuthorizationAmounts";
 	public static final String FIELDS_EXPENDITURES_PAYMENT_CREDIT_AMOUNTS = "expendituresPaymentCreditAmounts";
 	public static final String FIELDS_RESOURCES_AMOUNTS = "resourcesAmounts";

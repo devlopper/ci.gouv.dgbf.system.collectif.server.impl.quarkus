@@ -105,6 +105,8 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 				new LegislativeActVersionImplExpendituresAmountsWithAvailableOnlyReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY.equals(fieldName))
 				new LegislativeActVersionImplExpendituresAmountsWithIncludedMovementOnlyReader().readThenSet(legislativeActVersions, null);
+			else if(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITH_ADJUSTMENT_LOWER_THAN_ZERO_GREATER_THAN_ZERO_ONLY.equals(fieldName))
+				new LegislativeActVersionImplExpendituresAmountsWithIncludedMovementOnlyReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_RESOURCES_AMOUNTS.equals(fieldName))
 				new LegislativeActVersionImplResourcesAmountsReader().readThenSet(legislativeActVersions, null);
 			else if(LegislativeActVersionImpl.FIELDS_AMOUNTS_AVAILABLE.equals(fieldName))

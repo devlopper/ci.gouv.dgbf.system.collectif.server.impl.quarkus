@@ -24,6 +24,14 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 		return Boolean.TRUE;
 	}
 	
+	protected Boolean hasAdjustmentLowerThanZero() {
+		return null;
+	}
+	
+	protected Boolean hasAdjustmentGreaterThanZero() {
+		return null;
+	}
+	
 	protected Boolean hasExpectedAdjustment() {
 		return Boolean.TRUE;
 	}

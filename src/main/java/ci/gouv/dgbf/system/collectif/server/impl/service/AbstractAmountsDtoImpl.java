@@ -15,6 +15,8 @@ import lombok.experimental.Accessors;
 public abstract class AbstractAmountsDtoImpl extends AbstractObject implements AmountsDto,Serializable  {
 
 	@JsonbProperty(value = JSON_ADJUSTMENT) Long adjustment;
+	@JsonbProperty(value = JSON_ADJUSTMENT_LOWER_THAN_ZERO) Long adjustmentLowerThanZero;
+	@JsonbProperty(value = JSON_ADJUSTMENT_GREATER_THAN_ZERO) Long adjustmentGreaterThanZero;
 	@JsonbProperty(value = JSON_EXPECTED_ADJUSTMENT) Long expectedAdjustment;
 	@JsonbProperty(value = JSON_EXPECTED_ADJUSTMENT_MINUS_ADJUSTMENT) Long expectedAdjustmentMinusAdjustment;
 	@JsonbProperty(value = JSON_INITIAL) Long initial;

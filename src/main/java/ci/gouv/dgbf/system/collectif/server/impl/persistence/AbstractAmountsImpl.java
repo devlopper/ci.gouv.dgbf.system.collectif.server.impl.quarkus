@@ -19,6 +19,8 @@ import lombok.experimental.Accessors;
 public abstract class AbstractAmountsImpl extends AbstractObject implements Amounts,Serializable  {
 
 	@NotNull @Column(name = COLUMN_ADJUSTMENT,nullable = false) Long adjustment = 0l;
+	@Transient Long adjustmentLowerThanZero = 0l;
+	@Transient Long adjustmentGreaterThanZero = 0l;
 	
 	@Transient Long expectedAdjustment = 0l;
 	@Transient Long expectedAdjustmentMinusAdjustment = 0l;
