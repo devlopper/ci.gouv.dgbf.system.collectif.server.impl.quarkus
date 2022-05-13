@@ -218,6 +218,7 @@ public class ExpenditureImpl extends AbstractIdentifiableSystemScalarStringAudit
 	public static final String FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY = "amounts_with_included_movement_only";
 	public static final String FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY = "amounts_with_available_only";
 	public static final String FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY = "amounts_with_included_movement_and_available_only";
+	public static final String FIELDS_AMOUNTS_WITH_ADJUSTMENT_LESS_THAN_ZERO_GREATER_THAN_ZERO_ONLY = "amountsWithAdjustmentLowerThanZeroGreaterThanZeroOnly";
 	
 	public static final String FIELDS_AMOUNTS_INITIAL_ACTUAL_MOVEMENT_ADJUSTMENT_ACTUAL_PLUS_ADJUSTMENT = "amountsInitialActualMovementAdjustmentActualPlusAdjustment";
 	public static final String FIELDS_AMOUNTS_INITIAL = "amountsInitial";

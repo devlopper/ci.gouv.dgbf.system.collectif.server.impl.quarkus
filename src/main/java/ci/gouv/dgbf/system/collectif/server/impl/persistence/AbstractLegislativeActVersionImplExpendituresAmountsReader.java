@@ -4,12 +4,15 @@ import java.io.Serializable;
 
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureQueryStringBuilder.Projection.Amounts.SetArguments;
+
 public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends AbstractLegislativeActVersionImplReader implements Serializable {
 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().setAdjustment(hasAdjustment()).setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().setAdjustment(hasAdjustment()).setAdjustmentLessThanZero(hasAdjustmentLessThanZero()).setAdjustmentGreaterThanZero(hasAdjustmentGreaterThanZero())
+		.setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		new LegislativeActVersionQueryStringBuilder.Tuple.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
 		arguments.getGroup(Boolean.TRUE).add("t.identifier");
 		return arguments;
@@ -17,19 +20,20 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 	
 	@Override
 	protected void __set__(LegislativeActVersionImpl legislativeActVersion, Object[] array) {
-		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion, array,hasAdjustment(),hasExpectedAdjustment(),hasView(),hasIncludedMovement(),hasAvailable());
+		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion,new SetArguments().setArray(array).setAdjustment(hasAdjustment()).setAdjustmentLessThanZero(hasAdjustmentLessThanZero())
+				.setAdjustmentGreaterThanZero(hasAdjustmentGreaterThanZero()).setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()));
 	}
 	
 	protected Boolean hasAdjustment() {
 		return Boolean.TRUE;
 	}
 	
-	protected Boolean hasAdjustmentLowerThanZero() {
-		return null;
+	protected Boolean hasAdjustmentLessThanZero() {
+		return Boolean.TRUE;
 	}
 	
 	protected Boolean hasAdjustmentGreaterThanZero() {
-		return null;
+		return Boolean.TRUE;
 	}
 	
 	protected Boolean hasExpectedAdjustment() {

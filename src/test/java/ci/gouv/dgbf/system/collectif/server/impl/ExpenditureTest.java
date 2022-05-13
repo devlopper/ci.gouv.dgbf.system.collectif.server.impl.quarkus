@@ -64,7 +64,7 @@ public class ExpenditureTest {
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
 	
-	Integer expectedCount = 14;
+	Integer expectedCount = 15;
 	
 	@Test @Order(1)
 	public void verifyLoadable(){
@@ -207,9 +207,21 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	void queryStringBuilder_projections_amoutSum() {
+	void queryStringBuilder_projections_amount() {
+		assertThat(ExpenditureQueryStringBuilder.Projection.Amounts.get("t", "entryAuthorization.initial",null))
+			.isEqualTo("COALESCE(t.entryAuthorization.initial,0l)");
+	}
+	
+	@Test @Order(1)
+	void queryStringBuilder_projections_amount_lowerThanZero() {
+		assertThat(ExpenditureQueryStringBuilder.Projection.Amounts.get("t", "entryAuthorization.initial",null,Boolean.TRUE))
+			.isEqualTo("CASE WHEN COALESCE(t.entryAuthorization.initial,0l) < 0l THEN COALESCE(t.entryAuthorization.initial,0l) ELSE 0l END");
+	}
+	
+	@Test @Order(1)
+	void queryStringBuilder_projections_amountSum() {
 		assertThat(ExpenditureQueryStringBuilder.Projection.Amounts.get("t", "entryAuthorization.initial",Boolean.TRUE))
-			.isEqualTo("SUM(CASE WHEN t.entryAuthorization.initial IS NULL THEN 0l ELSE t.entryAuthorization.initial END)");
+			.isEqualTo("SUM(COALESCE(t.entryAuthorization.initial,0l))");
 	}
 	
 	@Test @Order(1)
@@ -287,6 +299,20 @@ public class ExpenditureTest {
 				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
 		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(null).setMovement(null).setActual(null).setAdjustment(null).setAvailable(5l).setMovementIncluded(0l)
 				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+	}
+	
+	@Test @Order(1)
+	void persistence_amountsWithAdjustmentLessThanZeroGreaterThanZeroOnly() {
+		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELDS_AMOUNTS_WITH_ADJUSTMENT_LESS_THAN_ZERO_GREATER_THAN_ZERO_ONLY)
+				.addFilterFieldsValues(Parameters.EXPENDITURES_IDENTIFIERS,List.of("2022_2_2_2")));
+		assertThat(expenditure).isNotNull();
+		assertThat(expenditure.getEntryAuthorization()).as("AE").isNotNull();
+		assertThat(expenditure.getEntryAuthorization().getAdjustmentLessThanZero()).isEqualTo(-10l);
+		assertThat(expenditure.getEntryAuthorization().getAdjustmentGreaterThanZero()).isEqualTo(0l);
+		
+		assertThat(expenditure.getPaymentCredit()).as("CP").isNotNull();
+		assertThat(expenditure.getPaymentCredit().getAdjustmentLessThanZero()).isEqualTo(0l);
+		assertThat(expenditure.getPaymentCredit().getAdjustmentGreaterThanZero()).isEqualTo(15l);
 	}
 	
 	@Test @Order(1)

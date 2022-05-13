@@ -108,6 +108,17 @@ public class LegislativeActVersionTest {
 				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
 	}
 	
+	@Test @Order(1)
+	void persistence_sumsExpendituresAmountAdjustmentLessThanZeroGreaterThanZeroOnly() {
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITH_ADJUSTMENT_LESS_THAN_ZERO_GREATER_THAN_ZERO_ONLY)
+				.addFilterFieldsValues(persistence.getParameterNameIdentifier(),"2021_1_1"));
+		assertThat(legislativeActVersion).isNotNull();
+		assertThat(legislativeActVersion.getEntryAuthorization().getAdjustmentLessThanZero()).isEqualTo(0l);
+		assertThat(legislativeActVersion.getEntryAuthorization().getAdjustmentGreaterThanZero()).isEqualTo(0l);
+		assertThat(legislativeActVersion.getPaymentCredit().getAdjustmentLessThanZero()).isEqualTo(-3l);
+		assertThat(legislativeActVersion.getPaymentCredit().getAdjustmentGreaterThanZero()).isEqualTo(9l);
+	}
+	
 	//@Test @Order(1)
 	void persistence_sumsResourcesAmounts() {
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) persistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(LegislativeActVersionImpl.FIELDS_RESOURCES_AMOUNTS)

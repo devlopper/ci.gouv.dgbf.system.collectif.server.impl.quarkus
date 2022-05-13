@@ -56,11 +56,17 @@ public interface LegislativeActVersionQueryStringBuilder {
 				return Boolean.TRUE;
 			}
 			
+			public static void set(LegislativeActVersionImpl legislativeActVersion,ExpenditureQueryStringBuilder.Projection.Amounts.SetArguments arguments) {
+				if(legislativeActVersion == null)
+					return;
+				arguments.index = ExpenditureQueryStringBuilder.Projection.Amounts.set(arguments.setAmounts(legislativeActVersion.getEntryAuthorization(Boolean.TRUE)));
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(arguments.setAmounts(legislativeActVersion.getPaymentCredit(Boolean.TRUE)));
+			}
+			
 			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
 				if(legislativeActVersion == null)
 					return;
-				Integer index = ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getEntryAuthorization(Boolean.TRUE),array,1,adjustment,expected,view,includedMovement,available);
-				ExpenditureQueryStringBuilder.Projection.Amounts.set(legislativeActVersion.getPaymentCredit(Boolean.TRUE),array,index,adjustment,expected,view,includedMovement,available);
+				set(legislativeActVersion,new ExpenditureQueryStringBuilder.Projection.Amounts.SetArguments().setArray(array).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available));
 			}
 		}
 	}

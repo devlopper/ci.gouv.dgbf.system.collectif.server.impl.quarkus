@@ -18,6 +18,7 @@ import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.Language;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.query.string.CaseStringBuilder;
+import org.cyk.utility.persistence.server.query.string.CaseStringBuilder.Case;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
 import org.cyk.utility.persistence.server.query.string.WhereStringBuilder;
 
@@ -52,7 +53,7 @@ public interface ExpenditureQueryStringBuilder {
 		
 		@Setter @Accessors(chain = true)
 		public static class Amounts {
-			protected Boolean adjustment=Boolean.TRUE,expected,view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE;
+			protected Boolean adjustment=Boolean.TRUE,adjustmentLessThanZero,adjustmentGreaterThanZero,expected,view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE;
 			protected String variableName = "t",expectedVariableName;
 			protected Boolean sumable = Boolean.FALSE;
 
@@ -62,6 +63,12 @@ public interface ExpenditureQueryStringBuilder {
 				for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
 					if(Boolean.TRUE.equals(adjustment))
 						arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
+					
+					if(Boolean.TRUE.equals(adjustmentLessThanZero))
+						arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT),sumable,Boolean.TRUE));
+					if(Boolean.TRUE.equals(adjustmentGreaterThanZero))
+						arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT),sumable,Boolean.FALSE));
+					
 					if(Boolean.TRUE.equals(expected) && StringHelper.isNotBlank(expectedVariableName))
 						arguments.getProjection(Boolean.TRUE).add(get(expectedVariableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
 					if(Boolean.TRUE.equals(view)) {
@@ -76,6 +83,17 @@ public interface ExpenditureQueryStringBuilder {
 				}
 			}
 			
+			public Amounts nullify() {
+				adjustment = null;
+				adjustmentLessThanZero = null;
+				adjustmentGreaterThanZero = null;
+				expected = null;
+				view = null;
+				includedMovement = null;
+				available = null;
+				return this;
+			}
+			
 			protected Boolean isIdentifiable() {
 				return !Boolean.TRUE.equals(sumable);
 			}
@@ -85,13 +103,75 @@ public interface ExpenditureQueryStringBuilder {
 			}
 			
 			public static String get(String tupleName,String fieldName,Boolean sumable) {
-				String string = CaseStringBuilder.Case.instantiateWhenFieldIsNullThenZeroElseFieldAndBuild(FieldHelper.join(tupleName,fieldName),"0l");
+				return get(tupleName, fieldName, sumable,null);
+			}
+			
+			public static String get(String tupleName,String fieldName,Boolean sumable,Boolean isLessThanZero) {
+				String string = org.cyk.utility.persistence.server.hibernate.Language.coalesceZeroLong(FieldHelper.join(tupleName,fieldName));
+				if(isLessThanZero != null) {
+					if(isLessThanZero)
+						string = Case.instantiateWhenIsNotGreaterThanOrEqualZeroThenZeroAndBuild(string,"0l");
+					else
+						string = Case.instantiateWhenIsNotLessThanOrEqualZeroThenZeroAndBuild(string,"0l");
+				}
 				if(Boolean.TRUE.equals(sumable))
 					string = Language.formatSum(string);
 				return string;
 			}
 			
+			@Setter @Accessors(chain=true)
+			public static class SetArguments{
+				AbstractAmountsImpl amounts;
+				Object[] array;
+				Integer index=1;
+				Boolean adjustment;
+				Boolean adjustmentLessThanZero;
+				Boolean adjustmentGreaterThanZero;
+				Boolean expected;
+				Boolean view;
+				Boolean includedMovement;
+				Boolean available;
+			}
+			
+			public static Integer set(SetArguments arguments) {
+				if(arguments == null || arguments.amounts == null || arguments.index == null || arguments.index < 0)
+					return arguments.index;
+				arguments.amounts.nullify();
+				if(Boolean.TRUE.equals(arguments.adjustment) && arguments.index < arguments.array.length)
+					arguments.amounts.setAdjustment(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+				if(Boolean.TRUE.equals(arguments.adjustmentLessThanZero) && arguments.index < arguments.array.length)
+					arguments.amounts.setAdjustmentLessThanZero(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+				if(Boolean.TRUE.equals(arguments.adjustmentGreaterThanZero) && arguments.index < arguments.array.length)
+					arguments.amounts.setAdjustmentGreaterThanZero(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+				if(Boolean.TRUE.equals(arguments.expected)) {
+					arguments.amounts.setExpectedAdjustment(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+					arguments.amounts.computeExpectedAdjustmentMinusAdjustment();
+				}
+				if(Boolean.TRUE.equals(arguments.view)) {
+					if(arguments.index < arguments.array.length)
+						arguments.amounts.setInitial(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+					if(arguments.index < arguments.array.length)
+						arguments.amounts.setMovement(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+					if(arguments.index < arguments.array.length)
+						arguments.amounts.setActual(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+				}
+				
+				if(Boolean.TRUE.equals(arguments.includedMovement) && arguments.index < arguments.array.length)
+					arguments.amounts.setMovementIncluded(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+				if(Boolean.TRUE.equals(arguments.available) && arguments.index < arguments.array.length)
+					arguments.amounts.setAvailable(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+				
+				arguments.amounts.computeActualPlusAdjustment();
+				if(Boolean.TRUE.equals(arguments.view) && Boolean.TRUE.equals(arguments.includedMovement) && Boolean.TRUE.equals(arguments.adjustment))
+					arguments.amounts.computeActualMinusMovementIncludedPlusAdjustment();
+				if(Boolean.TRUE.equals(arguments.includedMovement) && Boolean.TRUE.equals(arguments.available)  && Boolean.TRUE.equals(arguments.adjustment))
+					arguments.amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
+				return arguments.index;
+			}
+			
 			public static Integer set(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
+				return set(new SetArguments().setAmounts(amounts).setArray(array).setIndex(index).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available));
+				/*
 				if(amounts == null || index == null || index < 0)
 					return index;
 				amounts.nullify();
@@ -121,13 +201,26 @@ public interface ExpenditureQueryStringBuilder {
 				if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available)  && Boolean.TRUE.equals(adjustment))
 					amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
 				return index;
+				*/
+			}
+			
+			static void set(ExpenditureImpl expenditure,SetArguments arguments) {
+				if(expenditure == null || arguments == null)
+					return;
+				arguments.setAmounts(expenditure.getEntryAuthorization(Boolean.TRUE));
+				arguments.index = set(arguments);
+				arguments.setAmounts(expenditure.getPaymentCredit(Boolean.TRUE));
+				arguments.index = set(arguments);
 			}
 			
 			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available,Integer index) {
+				set(expenditure,new SetArguments().setArray(array).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available).setIndex(index));
+				/*
 				if(expenditure == null)
 					return;
 				index = set(expenditure.getEntryAuthorization(Boolean.TRUE),array,index,adjustment,expected,view,includedMovement,available);
 				set(expenditure.getPaymentCredit(Boolean.TRUE),array,index,adjustment,expected,view,includedMovement,available);
+				*/
 			}
 			
 			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
@@ -335,6 +428,7 @@ public interface ExpenditureQueryStringBuilder {
 		}
 	}
 	
+	
 	public static interface Predicate {
 		public static void populate(QueryExecutorArguments queryExecutorArguments, Arguments arguments, WhereStringBuilder.Predicate predicate,Filter filter) {
 			Boolean availableMinusIncludedMovementPlusAdjustmentLessThanZero = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO);
@@ -381,34 +475,5 @@ public interface ExpenditureQueryStringBuilder {
 				return parenthesis(or(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_PAYMENT_CREDIT)));
 			return and(getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_ENTRY_AUTHORIZATION),getAvailableMinusIncludedMovementPlusAdjustmentLessThanZero(lessThan,ExpenditureImpl.FIELD_PAYMENT_CREDIT));
 		}
-		/*
-		private static final String PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(rae.%4$s) FROM %1$s ralav,%2$s rae,%3$s ra"
-				+ " WHERE rae.%5$s = ralav.%6$s.identifier AND rae.%7$s = t.%7$s AND rae.%8$s = t.%8$s AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s AND ra.identifier = rae.%5$s AND ra.%11$s = exercise.%11$s AND ralav.%12$s IS TRUE"),"%13$s","0"));
-		private static String buildPredicateExpenditureMovementIncludedEqualZeroPredicate(Boolean isEqualToZero) {
-			Collection<String> strings = new ArrayList<>();
-			for(String field : RegulatoryActExpenditureImpl.ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT) {
-				strings.add(String.format(PREDICATE_EXPENDITURE_INCLUDED_MOVEMENT_EQUAL_ZERO_FORMAT,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActImpl.ENTITY_NAME,field
-						,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
-						,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActImpl.FIELD_YEAR,RegulatoryActLegislativeActVersionImpl.FIELD_INCLUDED,Language.formatOperatorEqual(isEqualToZero)));
-			}
-			return StringHelper.concatenate(strings, " AND ");
-		}
-		
-		private static final String PREDICATE_EXPENDITURE_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT = parenthesis(jpql(parenthesis("SELECT SUM(available.%4$s-rae.%5$s+t.%6$s.adjustment) FROM %1$s ralav,%2$s rae,%3$s ra"
-				+ " WHERE rae.%7$s = ralav.%8$s.identifier AND rae.%9$s = t.%9$s AND rae.%10$s = t.%10$s AND rae.%11$s = t.%11$s AND rae.%12$s = t.%12$s AND ra.identifier = rae.%7$s AND ra.%13$s = exercise.%13$s"),"%14$s","0"));
-		private static String buildPredicateExpenditureAvailableMinusIncludedMovementPlusAdjustmentLessThanZeroPredicate(Boolean isLessThanZero) {
-			Collection<String> strings = new ArrayList<>();
-			for(String field : RegulatoryActExpenditureImpl.ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT) {
-				strings.add(String.format(PREDICATE_EXPENDITURE_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO_FORMAT
-						,RegulatoryActLegislativeActVersionImpl.ENTITY_NAME,RegulatoryActExpenditureImpl.ENTITY_NAME,RegulatoryActImpl.ENTITY_NAME
-						,StringUtils.substringBefore(field, "Amount"),field,StringUtils.substringBefore(field, "Amount")
-						,RegulatoryActExpenditureImpl.FIELD_ACT_IDENTIFIER,RegulatoryActLegislativeActVersionImpl.FIELD_REGULATORY_ACT,RegulatoryActExpenditureImpl.FIELD_ACTIVITY_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_ECONOMIC_NATURE_IDENTIFIER
-						,RegulatoryActExpenditureImpl.FIELD_FUNDING_SOURCE_IDENTIFIER,RegulatoryActExpenditureImpl.FIELD_LESSOR_IDENTIFIER,RegulatoryActImpl.FIELD_YEAR
-						,Language.formatOperatorLessThan(isLessThanZero)));
-			}
-			return StringHelper.concatenate(strings, " AND ");
-		}*/
-	}
-	
-	
+	}	
 }
