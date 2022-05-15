@@ -38,7 +38,7 @@ public interface ExpenditureQueryStringBuilder {
 			if(Boolean.TRUE.equals(amountSumable)) {
 				Amounts amounts = new Amounts().setSumable(Boolean.TRUE);
 				if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE)))
-					amounts.setIncludedMovement(null).setAvailable(null);
+					amounts.setAdjustmentLessThanZero(Boolean.TRUE).setAdjustmentGreaterThanZero(Boolean.TRUE).setIncludedMovement(null).setAvailable(null);
 				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY)))
 					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(Boolean.TRUE).setAvailable(null);
 				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY)))

@@ -255,6 +255,12 @@ public class ExpenditureTest {
 				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
 		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(5l).setMovement(12l).setActual(17l).setAdjustment(7l).setAvailable(null).setMovementIncluded(null)
 				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
+		
+		assertThat(expenditure.getEntryAuthorization().getAdjustmentLessThanZero()).isEqualTo(0l);
+		assertThat(expenditure.getEntryAuthorization().getAdjustmentGreaterThanZero()).isEqualTo(33l);
+		
+		assertThat(expenditure.getPaymentCredit().getAdjustmentLessThanZero()).isEqualTo(0l);
+		assertThat(expenditure.getPaymentCredit().getAdjustmentGreaterThanZero()).isEqualTo(7l);
 	}
 	
 	@Test @Order(1)
