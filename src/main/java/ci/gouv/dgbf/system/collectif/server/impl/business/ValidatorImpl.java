@@ -18,6 +18,7 @@ import org.cyk.utility.__kernel__.map.MapHelper;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.business.Validator;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
@@ -316,16 +317,30 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
 		}
 		
-		static void validateIncludeOrExclude(Collection<Object[]> arrays,Boolean include,Boolean existingIgnorable,ThrowablesMessages throwablesMessages) {
-			if(Boolean.TRUE.equals(existingIgnorable))
+		static void validateIncludeOrExclude(Collection<Object[]> arrays,Boolean include,Boolean existingIgnorable,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages) {
+			if(CollectionHelper.isEmpty(arrays) || Boolean.TRUE.equals(existingIgnorable))
 				return;
-			if(CollectionHelper.isEmpty(arrays))
-				return;
+			if(Boolean.TRUE.equals(include)) {
+				if(legislativeActVersion.getActDate() == null)
+					throwablesMessages.add(String.format("La date du %s est requise", ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct.NAME));
+				arrays.forEach(array -> {
+					if(array[4] == null)
+						throwablesMessages.add(String.format("La date de %s est requise", array[3]));
+				});
+				
+				if(legislativeActVersion.getActDate() != null) {
+					Collection<Object[]> dateGreaterThanActDate = arrays.stream().filter(array -> array[4] != null && ((LocalDate)array[4]).isAfter(legislativeActVersion.getActDate())).collect(Collectors.toList());
+					if(CollectionHelper.isNotEmpty(dateGreaterThanActDate))
+						throwablesMessages.add(String.format("Les %s suivant ont une date supérieure à %s : %s",ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct.NAME_PLURAL
+							, TimeHelper.formatLocalDate(legislativeActVersion.getActDate())
+							, dateGreaterThanActDate.stream().map(array -> (String)array[3]).collect(Collectors.joining(","))));
+				}
+			}
 			Collection<Object[]> includedOrExcluded = arrays.stream().filter(array -> Boolean.TRUE.equals(include) ? Boolean.TRUE.equals(array[1]) : (array[1] == null || Boolean.FALSE.equals(array[1]))).collect(Collectors.toList());
 			if(CollectionHelper.isEmpty(includedOrExcluded))
 				return;
 			throwablesMessages.add(String.format("Les %s suivant sont déja %s : %s",ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct.NAME_PLURAL,Boolean.TRUE.equals(include) ? "inclus" : "exclus"
-				, includedOrExcluded.stream().map(array -> (String)array[3]+" "+array[4]).collect(Collectors.joining(","))));
+				, includedOrExcluded.stream().map(array -> (String)array[3]).collect(Collectors.joining(","))));
 		}
 		
 		static Object[] validateIncludeByLegislativeActVersionIdentifierInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {

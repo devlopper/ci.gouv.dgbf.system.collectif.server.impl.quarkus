@@ -22,6 +22,7 @@ import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.EntityManagerGetter;
+import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
@@ -31,13 +32,14 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActLegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureIncludedMovementView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplExerciseYearReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImplFromDateAsTimestampReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedLegislativeActJoinIdentifierNameDateReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActLegislativeActVersionImpl;
 import io.quarkus.vertx.ConsumeEvent;
 import lombok.AllArgsConstructor;
@@ -49,6 +51,7 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	@Inject RegulatoryActPersistence persistence;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject RegulatoryActLegislativeActVersionPersistence regulatoryActLegislativeActVersionPersistence;
+	@Inject MaterializedViewActualizer materializedViewActualizer;
 	@Inject EntityManager entityManager;
 	
 	@Override
@@ -103,9 +106,16 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		return regulatoryActs.size();
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Override @Transactional
+	@Override
 	public Result include(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
+		Result result = includeInTransaction(identifiers, legislativeActVersionIdentifier, existingIgnorable, auditWho);
+		materializedViewActualizer.executeAsynchronously(ExpenditureIncludedMovementView.class);
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Transactional
+	Result includeInTransaction(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
 		//1 - Validate preconditions
 		Object[] data = validate(identifiers, legislativeActVersionIdentifier, existingIgnorable,Boolean.TRUE,auditWho);
 		Collection<Object[]> arrays = (Collection<Object[]>) data[0];
@@ -185,10 +195,11 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		ValidatorImpl.RegulatoryAct.validateIncludeOrExcludeInputs(identifiers, legislativeActVersionIdentifier, auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
-		Collection<Object[]> arrays = new RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader().readByIdentifiers(identifiers, Map.of(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier));
-		ValidatorImpl.RegulatoryAct.validateIncludeOrExclude(arrays,include,existingIgnorable, throwablesMessages);
+		Collection<Object[]> arrays = new RegulatoryActImplIncludedLegislativeActJoinIdentifierNameDateReader().readByIdentifiers(identifiers, Map.of(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier));
+		LegislativeActVersion legislativeActVersion = legislativeActVersionPersistence.readOne(legislativeActVersionIdentifier,List.of(LegislativeActVersionImpl.FIELD_IDENTIFIER,LegislativeActVersionImpl.FIELD_ACT_DATE));
+		ValidatorImpl.RegulatoryAct.validateIncludeOrExclude(arrays,include,existingIgnorable,legislativeActVersion, throwablesMessages);
 		Collection<RegulatoryAct> regulatoryActs = persistence.readManyByIdentifiers(identifiers,List.of(RegulatoryActImpl.FIELD_IDENTIFIER));
-		LegislativeActVersion legislativeActVersion = legislativeActVersionPersistence.readOne(legislativeActVersionIdentifier,List.of(LegislativeActImpl.FIELD_IDENTIFIER));
+		
 		ValidatorImpl.validateIdentifiers(identifiers, FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs), throwablesMessages);
 		ValidatorImpl.validateIdentifiers(List.of(legislativeActVersionIdentifier),legislativeActVersion == null ? null : List.of(legislativeActVersion.getIdentifier()), throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();

@@ -37,13 +37,13 @@ public class RegulatoryActTest {
 	@Test @Order(1)
 	void persistence_readRegulatoryActMany_REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL() {
 		Collection<RegulatoryAct> regulatoryActs = persistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL,LocalDate.of(2019, 1, 1)));
-		assertThat(regulatoryActs).hasSize(8);
+		assertThat(regulatoryActs).hasSize(9);
 	}
 	
 	@Test @Order(1)
 	void persistence_readRegulatoryActMany() {
 		Collection<RegulatoryAct> regulatoryActs = persistence.readMany(null, null, null);
-		assertThat(regulatoryActs).hasSize(19);
+		assertThat(regulatoryActs).hasSize(20);
 	}
 	
 	@Test @Order(1)
@@ -124,7 +124,15 @@ public class RegulatoryActTest {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			business.include("2021_1_1",null,"meliane", "include_included_true");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant sont déja inclus : include_included_true include_included_true");
+		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant sont déja inclus : include_included_true");
+	}
+	
+	@Test @Order(2)
+	void business_include_date() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			business.include("2021_1_1",null,"meliane", "not_marked2");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant ont une date supérieure à 01/05/2021 : 4_2");
 	}
 	
 	@Test @Order(2)
@@ -164,7 +172,7 @@ public class RegulatoryActTest {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			business.exclude("2021_1_1",null,"meliane", "exclude_included_false");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant sont déja exclus : exclude_included_false exclude_included_false");
+		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant sont déja exclus : exclude_included_false");
 	}
 	
 	@Test @Order(2)
@@ -173,7 +181,7 @@ public class RegulatoryActTest {
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
 			business.exclude("2021_1_1",null,"meliane", "exclude_included_null");
 	    });
-		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant sont déja exclus : exclude_included_null exclude_included_null");
+		assertThat(exception.getMessage()).isEqualTo("Les Actes de gestion suivant sont déja exclus : exclude_included_null");
 	}
 	
 	@Test @Order(2)

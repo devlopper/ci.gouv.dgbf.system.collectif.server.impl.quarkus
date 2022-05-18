@@ -101,6 +101,12 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 		return this;
 	}
 	
+	@Override
+	public LegislativeActVersionImpl setActDate(LocalDate actDate) {
+		this.actDate = actDate;
+		return this;
+	}
+	
 	public RevenueImpl getRevenue(Boolean instantiateIfNull) {
 		if(revenue == null && Boolean.TRUE.equals(instantiateIfNull))
 			revenue = new RevenueImpl();
