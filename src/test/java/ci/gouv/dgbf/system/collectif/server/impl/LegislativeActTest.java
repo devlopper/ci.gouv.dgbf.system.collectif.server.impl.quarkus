@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.hasItems;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -189,8 +190,11 @@ public class LegislativeActTest {
 	void business_create() {
 		assertThat(persistence.readOne("2023_1")).isNull();
 		business.create(null, null,"2023",LocalDate.of(2023, 2, 4), "meliane");
+		assertThat(persistence.readOne("2023_1")).isNotNull();
 		assertor.assertLegislativeAct("2023_1", "2023_1","Collectif budgétaire 2023 du 04/02/2023","2023");
 		assertor.assertLegislativeActAudit("2023_1", LegislativeActBusiness.CREATE_AUDIT_IDENTIFIER);
+		
+		assertor.assertExpenditureByLegislativeActVersion("2023_1_1", List.of("2023_1_1_1"));
 	}
 	
 	@Test @Order(2)

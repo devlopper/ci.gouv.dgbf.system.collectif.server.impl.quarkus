@@ -30,8 +30,7 @@ import org.cyk.utility.persistence.SpecificPersistence;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.SpecificPersistenceGetter;
-import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
-import org.cyk.utility.persistence.server.view.MaterializedViewManager;
+import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureResourceBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
@@ -49,7 +48,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	@Inject SpecificPersistenceGetter specificPersistenceGetter;
 	SpecificPersistence<ENTITY> persistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
-	@Inject @Hibernate MaterializedViewManager materializedViewManager;
+	@Inject MaterializedViewActualizer materializedViewActualizer;
 	
 	@Inject Configuration configuration;
 	
@@ -79,9 +78,9 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 			persistence = specificPersistenceGetter.get(entityClass);
 	}
 	
-	@Override @Transactional
+	@Override
 	public Result import_(String legislativeActVersionIdentifier,Boolean throwIfRunning, String auditWho) {
-		Result result = new Result().open();
+		/*Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
 		Object[] instances = validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
@@ -94,9 +93,37 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		String auditIdentifier = generateAuditIdentifier();
 		LocalDateTime auditWhen = LocalDateTime.now();
 		
-		import_(legislativeActVersion,auditIdentifier, auditWho, getImportAuditIdentifier(), auditWhen,throwIfRunning,entityManager);
+		import_(legislativeActVersion,auditIdentifier, auditWho, getImportAuditIdentifier(), auditWhen,throwIfRunning,entityManager,Boolean.TRUE);
 		throwablesMessages.throwIfNotEmpty();
 		Long count = persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.__AUDIT_IDENTIFIER__,auditIdentifier));
+		
+		// Return of message
+		result.close().setName(String.format("Importation de %s %s(s) dans %s par %s",count,entityName,legislativeActVersion.getName(),auditWho)).log(getClass());
+		result.addMessages(String.format("Nombre de %s importée : %s",entityName, count));
+		return result;
+		*/
+		return import_(legislativeActVersionIdentifier, throwIfRunning, auditWho, entityManager, Boolean.FALSE);
+	}
+	
+	public Result import_(String legislativeActVersionIdentifier,Boolean throwIfRunning, String auditWho,EntityManager entityManager,Boolean isUserTransaction) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		Object[] instances = validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
+		throwablesMessages.throwIfNotEmpty();
+		
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
+		validateImport(legislativeActVersion, auditWho, throwablesMessages, entityManager);
+		throwablesMessages.throwIfNotEmpty();
+		
+		String auditIdentifier = generateAuditIdentifier();
+		LocalDateTime auditWhen = LocalDateTime.now();
+		if(Boolean.TRUE.equals(isUserTransaction))
+			entityManager.getTransaction().begin();
+		import_(legislativeActVersion,auditIdentifier, auditWho, getImportAuditIdentifier(), auditWhen,throwIfRunning,entityManager,Boolean.TRUE);
+		if(Boolean.TRUE.equals(isUserTransaction))
+			entityManager.getTransaction().commit();
+		Long count = persistence.count(new QueryExecutorArguments().setEntityManager(entityManager).addFilterFieldsValues(Parameters.__AUDIT_IDENTIFIER__,auditIdentifier));
 		
 		// Return of message
 		result.close().setName(String.format("Importation de %s %s(s) dans %s par %s",count,entityName,legislativeActVersion.getName(),auditWho)).log(getClass());
@@ -116,7 +143,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void import_(LegislativeActVersionImpl legislativeActVersion,String auditIdentifier, String auditWho, String auditFunctionality,LocalDateTime auditWhen,Boolean throwIfRunning, EntityManager entityManager) {
+	public void import_(LegislativeActVersionImpl legislativeActVersion,String auditIdentifier, String auditWho, String auditFunctionality,LocalDateTime auditWhen,Boolean throwIfRunning, EntityManager entityManager,Boolean threadable) {
 		String finalAuditFunctionality = StringHelper.isBlank(auditFunctionality) ? getImportAuditIdentifier() : auditFunctionality;
 		LocalDateTime finalAuditWhen = auditWhen == null ? LocalDateTime.now() : auditWhen;
 		synchronized(AbstractExpenditureResourceBusinessImpl.class) {
@@ -124,20 +151,20 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 				String message = formatMessageImportIsRunning(legislativeActVersion);
 				if(Boolean.TRUE.equals(throwIfRunning))
 					throw new RuntimeException(message);
-				else
-					LogHelper.logWarning(message, getClass());
+				LogHelper.logWarning(message, getClass());
 				return;
 			}
 			importRunning.add(legislativeActVersion.getIdentifier());
 		}
 		try {
 			updateMaterializedView();
-			Long count = countImportable(legislativeActVersion);
-			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(),configuration.importation().processing().batch().size());		
+			Long count = countImportable(legislativeActVersion,entityManager);
+			LogHelper.log(String.format("%s %s à importer",count,entityName),Result.getLogLevel(), getClass());
+			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(),configuration.importation().processing().batch().size());
 			if(CollectionHelper.isNotEmpty(batchSizes)) {
 				LogHelper.log(String.format("Importation de %s. Traitement par lot de %s. Nombre de lot = %s", count,configuration.importation().processing().batch().size(),batchSizes.size()),Result.getLogLevel(), getClass());
 				
-				List<Object[]> arrays = readImportable(legislativeActVersion);
+				List<Object[]> arrays = readImportable(legislativeActVersion,entityManager);
 
 				List<ENTITY> instances = instantiateForImport(legislativeActVersion, arrays,auditIdentifier, auditWho, finalAuditFunctionality, finalAuditWhen);
 							
@@ -146,14 +173,23 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 					lists.add(new Object[] {new ArrayList<>(instances.subList(index*configuration.importation().processing().batch().size(), index*configuration.importation().processing().batch().size()+batchSizes.get(index))),index+1,batchSizes.size()});
 				instances.clear();
 				instances = null;
-				ExecutorService executorService = Executors.newFixedThreadPool(configuration.importation().processing().executor().thread().count());
-				lists.forEach(array -> {
-					executorService.execute(() -> {
-						EntityManager __entityManager__ = EntityManagerGetter.getInstance().get();
-						createBatch(new ArrayList<>((List<ENTITY>)array[0]),__entityManager__,Boolean.TRUE,null);
+				if(Boolean.TRUE.equals(threadable)) {
+					ExecutorService executorService = Executors.newFixedThreadPool(configuration.importation().processing().executor().thread().count());
+					lists.forEach(array -> {
+						executorService.execute(() -> {
+							EntityManager __entityManager__ = EntityManagerGetter.getInstance().get();
+							createBatch(new ArrayList<>((List<ENTITY>)array[0]),__entityManager__,Boolean.TRUE,null);
+						});
 					});
-				});
-				shutdownExecutorService(executorService,configuration.importation().processing().executor().timeout().duration(), configuration.importation().processing().executor().timeout().unit());
+					shutdownExecutorService(executorService,configuration.importation().processing().executor().timeout().duration(), configuration.importation().processing().executor().timeout().unit());
+				}else {
+					lists.forEach(array -> {
+						List<ENTITY> list = (List<ENTITY>) array[0];
+						list.forEach(entity -> {
+							entityManager.persist(entity);
+						});
+					});
+				}				
 			}
 		} catch (Exception exception) {
 			throw new RuntimeException(exception);
@@ -196,7 +232,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	}
 	
 	void updateMaterializedView() {
-		materializedViewManager.actualize(entityViewClass);
+		materializedViewActualizer.execute(null,entityViewClass);
 	}
 	
 	abstract ENTITY instantiateForImport(LegislativeActVersion legislativeActVersion,Object[] array);
@@ -215,12 +251,12 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		return list;
 	}
 	
-	Long countImportable(LegislativeActVersion legislativeActVersion) {
+	Long countImportable(LegislativeActVersion legislativeActVersion,EntityManager entityManager) {
 		return entityManager.createNamedQuery(countImportableByLegislativeActIdentifierQueryIdentifier, Long.class).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getSingleResult();
 	}
 
 	@SuppressWarnings("unchecked")
-	List<Object[]> readImportable(LegislativeActVersion legislativeActVersion) {
+	List<Object[]> readImportable(LegislativeActVersion legislativeActVersion,EntityManager entityManager) {
 		return entityManager.createNamedQuery(readImportableByLegislativeActIdentifierQueryIdentifier).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getResultList();
 	}
 }

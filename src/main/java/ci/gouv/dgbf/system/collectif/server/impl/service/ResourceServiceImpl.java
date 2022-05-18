@@ -44,6 +44,11 @@ public class ResourceServiceImpl extends AbstractSpecificServiceImpl<ResourceDto
 	}
 	
 	@Override
+	public Response import_(String legislativeActVersionIdentifier,String auditWho) {
+		return buildResponseOk(business.import_(legislativeActVersionIdentifier,auditWho));
+	}
+	
+	@Override
 	public Response getAmountsSums(String filterAsJson) {
 		return execute(new RequestExecutor.Request.AbstractImpl() {
 			@Override

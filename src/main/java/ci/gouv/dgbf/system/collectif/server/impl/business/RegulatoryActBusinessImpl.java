@@ -16,12 +16,15 @@ import javax.transaction.Transactional;
 import org.cyk.utility.__kernel__.array.ArrayHelper;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
+import org.cyk.utility.__kernel__.log.LogHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
+import org.cyk.utility.persistence.EntityManagerGetter;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
@@ -36,6 +39,9 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersi
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActLegislativeActVersionImpl;
+import io.quarkus.vertx.ConsumeEvent;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @ApplicationScoped
 public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<RegulatoryAct> implements RegulatoryActBusiness,Serializable {
@@ -44,9 +50,19 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
 	@Inject RegulatoryActLegislativeActVersionPersistence regulatoryActLegislativeActVersionPersistence;
 	@Inject EntityManager entityManager;
-
-	@Override @Transactional
+	
+	@Override
 	public Result includeByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
+		Result result = includeByLegislativeActVersionIdentifierInTransaction(legislativeActVersionIdentifier, auditWho);
+		return result;
+	}
+	
+	@Transactional
+	Result includeByLegislativeActVersionIdentifierInTransaction(String legislativeActVersionIdentifier, String auditWho) {
+		return includeByLegislativeActVersionIdentifierInTransaction(legislativeActVersionIdentifier, auditWho,entityManager, Boolean.FALSE);
+	}
+	
+	Result includeByLegislativeActVersionIdentifierInTransaction(String legislativeActVersionIdentifier, String auditWho,EntityManager entityManager,Boolean isUserTransaction) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
@@ -54,7 +70,11 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		throwablesMessages.throwIfNotEmpty();
 		
 		LegislativeActVersion legislativeActVersion = (LegislativeActVersion) instances[0];
+		if(Boolean.TRUE.equals(isUserTransaction))
+			entityManager.getTransaction().begin();
 		Integer count = includeByLegislativeActVersionIdentifier(legislativeActVersion,generateAuditIdentifier(), auditWho, INCLUDE_BY_LEGISLATIVE_ACT_IDENTIFIER_AUDIT_IDENTIFIER, LocalDateTime.now(), entityManager);
+		if(Boolean.TRUE.equals(isUserTransaction))
+			entityManager.getTransaction().commit();
 		// Return of message
 		result.close().setName(String.format("Inclusion de %s %s de %s par %s",count,RegulatoryAct.NAME_PLURAL,legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Inclusion de %s : %s",RegulatoryAct.NAME_PLURAL, count));
@@ -64,14 +84,20 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	public Integer includeByLegislativeActVersionIdentifier(LegislativeActVersion legislativeActVersion,String auditIdentifier, String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {
 		Short year = ((LegislativeActVersionImpl)legislativeActVersion).getActDateYear();
 		if(year == null)
-			year = (Short) ArrayHelper.getElementAt(CollectionHelper.getFirst(new LegislativeActImplExerciseYearReader().readByIdentifiers(List.of(legislativeActVersion.getActIdentifier()), null)),1);
-		Object[] dates = CollectionHelper.getFirst(new LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader().readByIdentifiers(List.of(legislativeActVersion.getIdentifier()), null));
+			year = (Short) ArrayHelper.getElementAt(CollectionHelper.getFirst(new LegislativeActImplExerciseYearReader().setEntityManager(entityManager).readByIdentifiers(List.of(legislativeActVersion.getActIdentifier()), null)),1);
+		if(year == null)
+			LogHelper.logWarning(String.format("Impossible de déduire l'exercice du %s(%s)", LegislativeAct.NAME,legislativeActVersion.getActIdentifier()), getClass());
+		Object[] dates = CollectionHelper.getFirst(new LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader().setEntityManager(entityManager).readByIdentifiers(List.of(legislativeActVersion.getIdentifier()), null));
+		if(dates == null) {
+			LogHelper.logWarning(String.format("Impossible de déduire la période de %s(%s)", LegislativeActVersion.NAME,legislativeActVersion.getIdentifier()), getClass());
+			return null;
+		}
 		Collection<RegulatoryAct> regulatoryActs = CollectionHelper.cast(RegulatoryAct.class, entityManager.createNamedQuery(RegulatoryActImpl.QUERY_READ_WHERE_NOT_INCLUDED_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_FROM_DATE_BY_TO_DATE,RegulatoryActImpl.class)
 				.setParameter("fromDate", LegislativeActImplFromDateAsTimestampReader.buildDate((LocalDate) dates[2], year)).setParameter("toDate", dates[3])
 				.setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getResultList());
 		if(CollectionHelper.isEmpty(regulatoryActs))
 			return null;
-		Collection<Object[]> arrays = new RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader().readByIdentifiers(FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs)
+		Collection<Object[]> arrays = new RegulatoryActImplIncludedLegislativeActJoinIdentifierCodeNameReader().setEntityManager(entityManager).readByIdentifiers(FieldHelper.readSystemIdentifiersAsStrings(regulatoryActs)
 				, Map.of(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersion.getIdentifier()));
 		include(regulatoryActs, legislativeActVersion, arrays, Boolean.TRUE,auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
 		return regulatoryActs.size();
@@ -168,5 +194,19 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		throwablesMessages.throwIfNotEmpty();
 		Result result = new Result().setName(String.format("%sclusion des actes de gestion à une version du collectif",Boolean.TRUE.equals(include) ? "In" : "Ex")).open();
 		return new Object[] {arrays,regulatoryActs,legislativeActVersion,result};
+	}
+
+	/* Event */
+	
+	public static final String EVENT_CHANNEL_INCLUDE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "includeByLegislativeActVersionIdentifier";
+	@ConsumeEvent(EVENT_CHANNEL_INCLUDE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER)
+    void listenIncludeByLegislativeActVersionIdentifier(EventMessage message) {
+		includeByLegislativeActVersionIdentifierInTransaction(message.identifier,message.auditWho,EntityManagerGetter.getInstance().get(),Boolean.TRUE);
+    }
+	
+	@AllArgsConstructor @NoArgsConstructor
+	public static class EventMessage {
+		String identifier;
+		String auditWho;
 	}
 }

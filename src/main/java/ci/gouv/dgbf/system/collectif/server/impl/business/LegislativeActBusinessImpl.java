@@ -19,6 +19,7 @@ import org.cyk.utility.persistence.query.QueryExecutorArguments;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
+import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
@@ -33,9 +34,16 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 	@Inject EntityManager entityManager;
 	@Inject LegislativeActPersistence persistence;
 	@Inject LegislativeActVersionBusiness legislativeActVersionBusiness;
+	@Inject RegulatoryActBusiness regulatoryActBusiness;
 	
-	@Override @Transactional
+	@Override
 	public Result create(String code, String name, String exerciseIdentifier,LocalDate date, String auditWho) {
+		Result result = createInTransaction(code, name, exerciseIdentifier, date, auditWho);
+		return result;
+	}
+	
+	@Transactional
+	Result createInTransaction(String code, String name, String exerciseIdentifier,LocalDate date, String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
@@ -64,6 +72,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		
 		// Create version
 		LegislativeActVersionImpl legislativeActVersion = ((LegislativeActVersionBusinessImpl)legislativeActVersionBusiness).create(null, null, null, legislativeAct,auditIdentifier, auditWho,auditFunctionality, auditWhen,entityManager);;
+		result.map(LegislativeActVersion.class, legislativeActVersion);
 		// Set it as default version
 		legislativeAct.setDefaultVersion(legislativeActVersion);
 		// Set in progress
@@ -75,6 +84,7 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeAct.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Création de %s",legislativeAct.getName()));
+		//((RegulatoryActBusinessImpl)regulatoryActBusiness).actualizeExpenditureIncludedMovementView();
 		return result;
 	}
 	

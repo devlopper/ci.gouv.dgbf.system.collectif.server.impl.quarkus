@@ -16,9 +16,11 @@ import org.cyk.utility.persistence.query.EntityReader;
 import org.cyk.utility.persistence.query.QueryResultMapper;
 import org.cyk.utility.persistence.server.TransientFieldsProcessor;
 import org.cyk.utility.persistence.server.hibernate.annotation.Hibernate;
+import org.cyk.utility.persistence.server.procedure.ProcedureExecutor;
+import org.cyk.utility.persistence.server.procedure.ProcedureExecutorGetter;
 import org.cyk.utility.persistence.server.query.RuntimeQueryBuilder;
 import org.cyk.utility.persistence.server.query.string.RuntimeQueryStringBuilder;
-import org.cyk.utility.persistence.server.view.MaterializedViewManager;
+import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
 import org.cyk.utility.service.server.PersistenceEntityClassGetterImpl;
 
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActionImpl;
@@ -86,10 +88,16 @@ public class ApplicationLifeCycleListener {
 	public static final int ORDER = org.cyk.quarkus.extension.hibernate.orm.ApplicationLifeCycleListener.ORDER+1;
 
 	@Inject Configuration configuration;
-	@Inject @Hibernate MaterializedViewManager materializedViewManager;
+	@Inject ProcedureExecutorGetter procedureExecutorGetter;
+	@Inject @Hibernate ProcedureExecutor procedureExecutor;
+	
+	@Inject MaterializedViewActualizer materializedViewActualizer;
 	
     void onStart(@Observes StartupEvent startupEvent) {
     	org.cyk.quarkus.extension.hibernate.orm.ApplicationLifeCycleListener.QUALIFIER = ci.gouv.dgbf.system.collectif.server.api.System.class;
+    	
+    	procedureExecutorGetter.setProcedureExecutor(procedureExecutor);
+    	
     	DependencyInjection.setQualifierClassTo(ci.gouv.dgbf.system.collectif.server.api.System.class
     			, EntityReader.class,EntityCounter.class, RuntimeQueryBuilder.class, RuntimeQueryStringBuilder.class,QueryResultMapper.class,TransientFieldsProcessor.class/*, Initializer.class*/,Validator.class
     			);
@@ -152,8 +160,6 @@ public class ApplicationLifeCycleListener {
     	/**/
 
     	//ContainerRequestFilter.LEVEL = Level.INFO;
-    	materializedViewManager.setViewsClasses(List.of(BudgetCategoryImpl.class,SectionImpl.class,BudgetSpecializationUnitImpl.class,ActionImpl.class,ActivityImpl.class,ExpenditureNatureImpl.class,ResourceActivityImpl.class
-    			,EconomicNatureImpl.class,FundingSourceImpl.class,LessorImpl.class,RegulatoryActImpl.class,RegulatoryActExpenditureImpl.class,ExpenditureView.class,ResourceView.class));
     }
 
     void onStop(@Observes ShutdownEvent shutdownEvent) {               
@@ -162,6 +168,7 @@ public class ApplicationLifeCycleListener {
 
     @Scheduled(cron = "{collectif.materialized-view-actualization.processing.cron}")
 	void actualizeMaterializedView() {
-    	materializedViewManager.actualizeAll();
+    	materializedViewActualizer.execute(List.of(BudgetCategoryImpl.class,SectionImpl.class,BudgetSpecializationUnitImpl.class,ActionImpl.class,ActivityImpl.class,ExpenditureNatureImpl.class,ResourceActivityImpl.class
+    			,EconomicNatureImpl.class,FundingSourceImpl.class,LessorImpl.class,RegulatoryActImpl.class,RegulatoryActExpenditureImpl.class,ExpenditureView.class,ResourceView.class), null);
     }
 }

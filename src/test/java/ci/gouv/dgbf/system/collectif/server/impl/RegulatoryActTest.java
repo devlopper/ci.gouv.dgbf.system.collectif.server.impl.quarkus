@@ -220,4 +220,10 @@ public class RegulatoryActTest {
 		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_03","2021_2_1",Boolean.TRUE);
 		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_04","2021_2_1",Boolean.TRUE);
 	}
+	
+	/**/
+
+	public static String PA_ACTUALISER_VM(String tableName) {
+		return null;
+	}
 }

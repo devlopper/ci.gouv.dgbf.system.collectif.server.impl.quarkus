@@ -7,19 +7,25 @@ DELETE FROM AT_MV;
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_EXERCICE',1,1,'SELECT DISTINCT TO_CHAR(ld.exo_num) AS "IDENTIFIANT", TO_CHAR(ld.exo_num) AS "CODE",''Exercice budgétaire ''||ld.exo_num AS "LIBELLE",ld.exo_num AS "ANNEE"
 FROM ligne_de_depenses@dblink_elabo_bidf ld
 ORDER BY ld.exo_num DESC','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_BAILLEUR',2,1,'SELECT t.bai_id AS "IDENTIFIANT",t.bai_code AS "CODE",t.bai_designation AS "LIBELLE"
 FROM bailleur@dblink_elabo_bidf t','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_NATURE_DEPENSE',5,1,'SELECT t.ndep_id AS "IDENTIFIANT",t.ndep_code AS "CODE",t.ndep_liblg AS "LIBELLE"
 FROM nature_depenses@dblink_elabo_bidf t','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_TYPE_USB',8,1,'SELECT t.uuid AS "IDENTIFIANT",t.tusb_code AS "CODE",t.tusb_liblg AS "LIBELLE"
 FROM UT_BIDF_TAMP.type_usb@dblink_elabo_bidf t','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_CATEGORIE_BUDGET',12,1,'SELECT uuid AS "IDENTIFIANT",cbud_code AS "CODE",cbud_liblg AS "LIBELLE"
 FROM categorie_budget@dblink_elabo_bidf
 WHERE LENGTH(cbud_code) > 1
 ORDER BY cbud_code ASC','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_CATEGORIE_ACTIVITE',13,1,'SELECT catv_id AS "IDENTIFIANT",catv_code AS "CODE",catv_libelle AS "LIBELLE"
 FROM categorie_activite@dblink_elabo_bidf
 ORDER BY catv_code ASC','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_ACTIVITE_RESSOURCE',15,1,'SELECT a.ads_code AS "IDENTIFIANT",a.ads_code AS "CODE",a.ads_liblg AS "LIBELLE"
 ,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_liblg AS "USB_LIBELLE",u.usb_code||'' ''||u.usb_liblg AS "USB_CODE_LIBELLE"
 ,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_liblg AS "SECTION_LIBELLE",s.secb_num||'' ''||s.secb_liblg AS "SECTION_CODE_LIBELLE"
@@ -27,27 +33,35 @@ FROM activite_de_recette@dblink_elabo_bidf a
 LEFT JOIN categorie_activite@dblink_elabo_bidf ca ON ca.catv_code = a.catv_code
 LEFT JOIN unite_spec_bud@dblink_elabo_bidf u ON u.usb_code = a.usb_code
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = u.secb_id','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_DEPENSE',16,1,'SELECT version_collectif.identifiant||d.activite_code||d.nature_economique_code||d.source_financement_code||d.bailleur_code AS "IDENTIFIANT",version_collectif.identifiant AS "VERSION_COLLECTIF",d.*
  FROM UT_BIDF_TAMP.va_depense@dblink_elabo_bidf d
  JOIN VMA_EXERCICE exercice ON exercice.annee = d.exercice
  JOIN TA_COLLECTIF collectif ON collectif.exercice = exercice.identifiant
  JOIN TA_VERSION_COLLECTIF version_collectif ON version_collectif.collectif = collectif.identifiant','LDEP_ID','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VA_DEPENSE_DISPONIBLE',18,1,'SELECT d.exercice||d.activite||d.nature_economique||d.source_financement||d.bailleur AS "IDENTIFIANT",d.*
 FROM UT_BIDF_TAMP.va_depense_disponible@dblink_elabo_bidf d','ACTIVITE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_SOURCE_FINANCEMENT',3,1,'SELECT t.sfin_id AS "IDENTIFIANT",t.sfin_code AS "CODE",t.sfin_liblg AS "LIBELLE"
 FROM source_financement@dblink_elabo_bidf t','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_NATURE_ECONOMIQUE',4,1,'SELECT t.nat_id AS "IDENTIFIANT",t.nat_code AS "CODE",t.nat_liblg AS "LIBELLE"
 FROM nature_economique@dblink_elabo_bidf t','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_SECTION',6,1,'SELECT t.secb_id AS "IDENTIFIANT",t.secb_num AS "CODE",t.secb_liblg AS "LIBELLE"
 FROM section_budgetaire@dblink_elabo_bidf t','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_UNITE_ADMINISTRATIVE',7,1,'SELECT t.ua_id AS "IDENTIFIANT",t.ua_code AS "CODE",t.ua_liblg AS "LIBELLE"
 ,t.secb_id AS "SECTION_IDENTIFIANT",s.secb_num||'' ''||s.secb_liblg AS "SECTION_CODE_LIBELLE"
 FROM unite_administrative@dblink_elabo_bidf t
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = t.secb_id','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_CATEGORIE_USB',9,1,'SELECT t.uuid AS "IDENTIFIANT",t.cusb_code AS "CODE",t.cusb_lib AS "LIBELLE"
 ,tu.uuid AS "TYPE_IDENTIFIANT",tu.tusb_code||'' ''||tu.tusb_liblg AS "TYPE_CODE_LIBELLE"
 FROM UT_BIDF_TAMP.categorie_usb@dblink_elabo_bidf t
 LEFT JOIN UT_BIDF_TAMP.type_usb@dblink_elabo_bidf tu ON tu.uuid = t.tusb_id','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_USB',10,1,'SELECT usb.usb_id AS "IDENTIFIANT",usb.usb_code AS "CODE",usb.usb_liblg AS "LIBELLE"
 ,c.uuid AS "CATEGORIE_IDENTIFIANT",c.cusb_code||'' ''||c.cusb_lib AS "CATEGORIE_CODE_LIBELLE"
 ,tu.uuid AS "TYPE_IDENTIFIANT",tu.tusb_code||'' ''||tu.tusb_liblg AS "TYPE_CODE_LIBELLE"
@@ -58,6 +72,7 @@ LEFT JOIN categorie_budget@dblink_elabo_bidf cb ON cb.uuid = usb.cbud_id
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = usb.secb_id
 LEFT JOIN UT_BIDF_TAMP.categorie_usb@dblink_elabo_bidf c ON c.uuid = usb.cusb_code
 LEFT JOIN UT_BIDF_TAMP.type_usb@dblink_elabo_bidf tu ON tu.uuid = c.tusb_id','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_ACTION',11,1,'SELECT t.adp_id AS "IDENTIFIANT",t.adp_code AS "CODE",t.adp_liblg AS "LIBELLE"
 ,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_liblg AS "SECTION_LIBELLE",s.secb_num||'' ''||s.secb_liblg AS "SECTION_CODE_LIBELLE"
 ,usb.usb_id AS "USB_IDENTIFIANT",usb.usb_code AS "USB_CODE",usb.usb_liblg AS "USB_LIBELLE",usb.usb_code||'' ''||usb.usb_liblg AS "USB_CODE_LIBELLE"
@@ -66,6 +81,7 @@ FROM action@dblink_elabo_bidf t
 LEFT JOIN unite_spec_bud@dblink_elabo_bidf usb ON usb.usb_id = t.usb_id
 LEFT JOIN categorie_budget@dblink_elabo_bidf cb ON cb.uuid = usb.cbud_id
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = usb.secb_id','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_ACTIVITE',14,1,'SELECT t.ads_id AS "IDENTIFIANT",t.ads_code AS "CODE",t.ads_liblg AS "LIBELLE"
 ,t.ndep_id AS "NATURE_DEPENSE_IDENTIFIANT",n.ndep_code AS "NATURE_DEPENSE_CODE",n.ndep_liblg AS "NATURE_DEPENSE_LIBELLE",n.ndep_code||'' ''||n.ndep_liblg AS "NATURE_DEPENSE_CODE_LIBELLE"
 ,t.catv_id AS "CA_IDENTIFIANT",ca.catv_code AS "CA_CODE",ca.catv_libelle AS "CA_LIBELLE",ca.catv_code||'' ''||ca.catv_libelle AS "CA_CODE_LIBELLE"
@@ -82,11 +98,13 @@ LEFT JOIN action@dblink_elabo_bidf a ON a.adp_id = t.adp_id
 LEFT JOIN unite_spec_bud@dblink_elabo_bidf u ON u.usb_id = a.usb_id
 LEFT JOIN categorie_budget@dblink_elabo_bidf cb ON cb.uuid = u.cbud_id
 LEFT JOIN section_budgetaire@dblink_elabo_bidf s ON s.secb_id = u.secb_id','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_RESSOURCE',17,1,'SELECT version_collectif.identifiant||r.activite_code||r.nature_economique_code AS "IDENTIFIANT",version_collectif.identifiant AS "VERSION_COLLECTIF",r.*
 FROM UT_BIDF_TAMP.va_ressource@dblink_elabo_bidf r
 JOIN VMA_EXERCICE exercice ON exercice.annee = r.exercice
 JOIN TA_COLLECTIF collectif ON collectif.exercice = exercice.identifiant
 JOIN TA_VERSION_COLLECTIF version_collectif ON version_collectif.collectif = collectif.identifiant','REC_ID','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_ACTE_GESTION',19,1,'SELECT 
     ab.acte_id AS "IDENTIFIANT"
     ,CASE 
@@ -106,20 +124,22 @@ JOIN MEATEST.financement_depenses fd ON fd.acte_id = ab.acte_id
 JOIN MEATEST.categorie_acte_budgetaire cab ON cab.cab_id = ab.acte_cab_id AND cab.cab_tact_code IN (''REGLEMENTAIRE'')
 WHERE ab.acte_statut = ''APPLIQUE''
 GROUP BY ab.acte_id,ab.acte_numero,ab.acte_ref_externe_acte,ab.exo_num,ab.acte_date_signature','CODE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_ACTE_GESTION_DEPENSE',20,1,'SELECT
-    o.acte_id||o.ldep_id||o.find_id AS "IDENTIFIANT"
-    ,o.acte_id AS "ACTE"
-    ,ag.exercice AS "EXERCICE"
+    ld.acte_id||ld.ldep_id||fd.find_id AS "IDENTIFIANT"
+    ,ld.acte_id AS "ACTE"
+    ,ld.exo_num AS "EXERCICE"
     ,ld.ads_id AS "ACTIVITE"
     ,ld.nat_id AS "NATURE_ECONOMIQUE"
     ,fd.sfin_id AS "SOURCE_FINANCEMENT"
     ,fd.bai_id AS "BAILLEUR"
-    ,o.montant_ae AS "MONTANT_AE"
-    ,o.montant_cp AS "MONTANT_CP"
-FROM MEATEST.operation_acte o
-JOIN VMA_ACTE_GESTION ag ON ag.identifiant = o.acte_id
-LEFT JOIN MEATEST.ligne_de_depenses ld ON ld.ldep_id = o.ldep_id AND ld.acte_id = o.acte_id
-LEFT JOIN MEATEST.financement_depenses fd ON fd.find_id = o.find_id AND fd.acte_id = o.acte_id','ACTE','DELETED');
+    ,fd.find_montant_ae AS "MONTANT_AE"
+    ,fd.find_montant_cp AS "MONTANT_CP"
+FROM MEATEST.financement_depenses fd
+JOIN VMA_ACTE_GESTION ag ON ag.identifiant = fd.acte_id
+JOIN MEATEST.ligne_de_depenses ld ON ld.acte_id = fd.acte_id and ld.ldep_id = fd.ldep_id and ld.exo_num = fd.exo_num
+ORDER BY ld.exo_num DESC,ld.ads_id ASC,ld.nat_id ASC,fd.sfin_id ASC,fd.bai_id ASC','ACTE','DELETED');
+
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_ACTE_GESTION_RESSOURCE',21,1,'SELECT
     TRIM(''IDENTIFIANT2'') AS "IDENTIFIANT"
     ,TRIM(''ACTE2'') AS "ACTE"
@@ -128,6 +148,24 @@ Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MA
     ,TRIM(''NATURE_ECONOMIQUE1'') AS "NATURE_ECONOMIQUE"
     ,0 AS "MONTANT"
 FROM DUAL o','ACTE','DELETED');
+
+Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VA_DEPENSE_MOUVEMENT_INCLUS',22,1,'SELECT 
+	depense.identifiant,exercice.annee AS "EXERCICE",vdepense.activite_identifiant AS "ACTIVITE",vdepense.nature_economique_identifiant AS "NATURE_ECONOMIQUE"
+    ,vdepense.source_financement_identifiant AS "SOURCE_FINANCEMENT",vdepense.bailleur_identifiant AS "BAILLEUR"
+    ,SUM(NVL(acte_gestion_depense.montant_ae,0)) AS "AE",SUM(NVL(acte_gestion_depense.montant_cp,0)) AS "CP"
+	FROM ta_depense depense
+	JOIN ta_version_collectif version_collectif ON version_collectif.identifiant = depense.version_collectif
+	JOIN ta_collectif collectif ON collectif.identifiant = version_collectif.collectif
+	LEFT JOIN vma_exercice exercice ON exercice.identifiant = collectif.exercice
+	LEFT JOIN vma_depense vdepense ON vdepense.version_collectif = version_collectif.identifiant AND vdepense.activite_identifiant = depense.activite 
+        AND vdepense.nature_economique_identifiant = depense.nature_economique AND vdepense.source_financement_identifiant = depense.source_financement 
+        AND vdepense.bailleur_identifiant = depense.bailleur
+	LEFT JOIN vma_acte_gestion_depense acte_gestion_depense ON acte_gestion_depense.exercice = exercice.annee AND acte_gestion_depense.activite = depense.activite 
+        AND acte_gestion_depense.nature_economique = depense.nature_economique AND acte_gestion_depense.source_financement = depense.source_financement AND acte_gestion_depense.bailleur = depense.bailleur
+	LEFT JOIN vma_acte_gestion acte_gestion ON acte_gestion.identifiant = acte_gestion_depense.acte AND acte_gestion.exercice = exercice.annee
+	JOIN ta_acte_gestion_v_collectif acte_gestion_v_collectif ON acte_gestion_v_collectif.acte_gestion = acte_gestion.identifiant AND acte_gestion_v_collectif.version_collectif = version_collectif.identifiant
+        AND acte_gestion_v_collectif.inclus = 1
+	GROUP BY depense.identifiant,exercice.annee,vdepense.activite_identifiant,vdepense.nature_economique_identifiant,vdepense.source_financement_identifiant,vdepense.bailleur_identifiant','ACTIVITE','DELETED');
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
 -- AT_MV_SCRIPT
@@ -174,13 +212,6 @@ Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTIVITE_
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTIVITE_RESSOURCE','CREATE INDEX VMA_ACTIVITE_RESSOURCE_K_S_ID ON VMA_ACTIVITE_RESSOURCE (SECTION_IDENTIFIANT ASC)',null,1);
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTIVITE_RESSOURCE','CREATE INDEX VMA_ACTIVITE_RESSOURCE_K_U_ID ON VMA_ACTIVITE_RESSOURCE (USB_IDENTIFIANT ASC)',null,1);
 
-Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_DISPONIBLE','ALTER TABLE VA_DEPENSE_DISPONIBLE ADD CONSTRAINT VA_DEPENSE_DISPONIBLE_PK PRIMARY KEY (IDENTIFIANT)',null,1);
-Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_DISPONIBLE','CREATE INDEX VA_DEPENSE_DISPONIBLE_K_E ON VA_DEPENSE_DISPONIBLE (EXERCICE ASC)',null,1);
-Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_DISPONIBLE','CREATE INDEX VA_DEPENSE_DISPONIBLE_K_A ON VA_DEPENSE_DISPONIBLE (ACTIVITE ASC)',null,1);
-Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_DISPONIBLE','CREATE INDEX VA_DEPENSE_DISPONIBLE_K_NE ON VA_DEPENSE_DISPONIBLE (NATURE_ECONOMIQUE ASC)',null,1);
-Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_DISPONIBLE','CREATE INDEX VA_DEPENSE_DISPONIBLE_K_SF ON VA_DEPENSE_DISPONIBLE (SOURCE_FINANCEMENT ASC)',null,1);
-Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_DISPONIBLE','CREATE INDEX VA_DEPENSE_DISPONIBLE_K_B ON VA_DEPENSE_DISPONIBLE (BAILLEUR ASC)',null,1);
-
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_DEPENSE','CREATE INDEX VMA_DEPENSE_K_V_COLLECTIF ON VMA_DEPENSE (VERSION_COLLECTIF ASC)',null,1);
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_DEPENSE','CREATE INDEX VMA_DEPENSE_K_ACTIVITE ON VMA_DEPENSE (ACTIVITE_IDENTIFIANT ASC)',null,1);
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_DEPENSE','CREATE INDEX VMA_DEPENSE_K_ACTIVITE_CODE ON VMA_DEPENSE (ACTIVITE_CODE ASC)',null,1);
@@ -223,6 +254,25 @@ Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_RESSOURCE
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_EXERCICE','ALTER VIEW VA_DEPENSE COMPILE',null,1);
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_EXERCICE','ALTER VIEW VA_RESSOURCE COMPILE',null,1);
 Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_EXERCICE','ALTER VIEW VA_DEPENSE_MOUVEMENT_INCLUS COMPILE',null,1);
+
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_MOUVEMENT_INCLUS','ALTER TABLE VA_DEPENSE_MOUVEMENT_INCLUS ADD CONSTRAINT VA_DEPENSE_MI_PK PRIMARY KEY (IDENTIFIANT)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_MOUVEMENT_INCLUS','CREATE INDEX VA_DEPENSE_MI_K_E ON VA_DEPENSE_MOUVEMENT_INCLUS (EXERCICE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_MOUVEMENT_INCLUS','CREATE INDEX VA_DEPENSE_MI_K_A ON VA_DEPENSE_MOUVEMENT_INCLUS (ACTIVITE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_MOUVEMENT_INCLUS','CREATE INDEX VA_DEPENSE_MI_K_NE ON VA_DEPENSE_MOUVEMENT_INCLUS (NATURE_ECONOMIQUE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_MOUVEMENT_INCLUS','CREATE INDEX VA_DEPENSE_MI_K_SF ON VA_DEPENSE_MOUVEMENT_INCLUS (SOURCE_FINANCEMENT ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VA_DEPENSE_MOUVEMENT_INCLUS','CREATE INDEX VA_DEPENSE_MI_K_B ON VA_DEPENSE_MOUVEMENT_INCLUS (BAILLEUR ASC)',null,1);
+
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION','ALTER TABLE VMA_ACTE_GESTION ADD CONSTRAINT VMA_ACTE_GESTION_PK PRIMARY KEY (IDENTIFIANT)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION','CREATE INDEX VMA_ACTE_GESTION_K_CODE ON VMA_ACTE_GESTION (CODE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION','CREATE INDEX VMA_ACTE_GESTION_K_EXERCICE ON VMA_ACTE_GESTION (EXERCICE ASC)',null,1);
+
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION_DEPENSE','ALTER TABLE VMA_ACTE_GESTION_DEPENSE ADD CONSTRAINT VMA_ACTE_GESTION_DEPENSE_PK PRIMARY KEY (IDENTIFIANT)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION_DEPENSE','CREATE INDEX VMA_ACTE_GESTION_D_K_A ON VMA_ACTE_GESTION_DEPENSE (ACTE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION_DEPENSE','CREATE INDEX VMA_ACTE_GESTION_D_K_E ON VMA_ACTE_GESTION_DEPENSE (EXERCICE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION_DEPENSE','CREATE INDEX VMA_ACTE_GESTION_D_K_A1 ON VMA_ACTE_GESTION_DEPENSE (ACTIVITE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION_DEPENSE','CREATE INDEX VMA_ACTE_GESTION_D_K_NE ON VMA_ACTE_GESTION_DEPENSE (NATURE_ECONOMIQUE ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION_DEPENSE','CREATE INDEX VMA_ACTE_GESTION_D_K_SF ON VMA_ACTE_GESTION_DEPENSE (SOURCE_FINANCEMENT ASC)',null,1);
+Insert into AT_MV_SCRIPT (MV,SCRIPT,ORDER_NUMBER,ENABLED) values ('VMA_ACTE_GESTION_DEPENSE','CREATE INDEX VMA_ACTE_GESTION_D_K_B ON VMA_ACTE_GESTION_DEPENSE (BAILLEUR ASC)',null,1);
 
 COMMIT;
 

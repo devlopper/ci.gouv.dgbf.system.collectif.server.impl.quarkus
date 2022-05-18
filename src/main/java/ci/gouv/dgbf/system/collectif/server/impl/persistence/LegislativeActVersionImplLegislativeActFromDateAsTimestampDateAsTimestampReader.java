@@ -2,6 +2,8 @@ package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 
 import java.io.Serializable;
 
+import javax.persistence.EntityManager;
+
 import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
@@ -15,6 +17,11 @@ public class LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTim
 				,String.format("LEFT JOIN %1$s previous ON previous.%2$s = la.%2$s-1", LegislativeActImpl.ENTITY_NAME,LegislativeActImpl.FIELD_NUMBER));
 		arguments.getProjection(Boolean.TRUE).addFromTuple("t",LegislativeActVersionImpl.FIELD_IDENTIFIER).addFromTuple("e",ExerciseImpl.FIELD_YEAR).addFromTuple("previous",LegislativeActImpl.FIELD_DATE).addFromTuple("la",LegislativeActImpl.FIELD_DATE);		
 		return arguments;
+	}
+	
+	@Override
+	public LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader setEntityManager(EntityManager entityManager) {
+		return (LegislativeActVersionImplLegislativeActFromDateAsTimestampDateAsTimestampReader) super.setEntityManager(entityManager);
 	}
 	
 	@Override

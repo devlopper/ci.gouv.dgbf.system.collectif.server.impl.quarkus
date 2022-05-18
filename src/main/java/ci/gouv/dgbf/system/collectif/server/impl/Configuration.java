@@ -2,6 +2,7 @@ package ci.gouv.dgbf.system.collectif.server.impl;
 
 import java.util.List;
 
+import org.cyk.quarkus.extension.core_.configuration.When;
 import org.cyk.quarkus.extension.core_.configuration.processing.Copy;
 import org.cyk.quarkus.extension.core_.configuration.processing.Importation;
 import org.cyk.quarkus.extension.core_.configuration.processing.MaterializedViewActualization;
@@ -32,6 +33,24 @@ public interface Configuration extends org.cyk.quarkus.extension.core_.configura
 		@WithConverter(StringConverter.class)
 		@WithDefault("1")
 		String defaultIdentifier();
+	}
+	
+	LegislativeActVersion legislativeActVersion();
+	
+	interface LegislativeActVersion {
+		
+		Creation creation();
+		
+		interface Creation {
+			@WithDefault("WHILE")
+			When whenRegulatoryActIncluded();
+			
+			@WithDefault("WHILE")
+			When whenExpenditureImported();
+			
+			@WithDefault("WHILE")
+			When whenResourceImported();
+		}	
 	}
 	
 	Actor actor();

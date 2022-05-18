@@ -28,7 +28,10 @@ import javax.validation.constraints.NotNull;
 import org.cyk.utility.persistence.entity.AbstractIdentifiableSystemScalarStringAuditedImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
-import org.cyk.utility.persistence.server.view.MaterializedViewManager;
+import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
+import org.cyk.utility.persistence.server.view.MaterializedViewCreator;
+import org.cyk.utility.persistence.server.view.MaterializedViewDeletor;
+import org.cyk.utility.persistence.server.view.MaterializedViewUpdator;
 import org.hibernate.envers.AuditOverride;
 import org.hibernate.envers.AuditOverrides;
 import org.hibernate.envers.Audited;
@@ -70,10 +73,31 @@ import lombok.experimental.Accessors;
 })
 @NamedStoredProcedureQueries(value = {
 		@NamedStoredProcedureQuery(
-				name = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME
-				,procedureName = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PROCEDURE_NAME
+				name = MaterializedViewCreator.AbstractImpl.PROCEDURE_NAME
+				,procedureName = MaterializedViewCreator.AbstractImpl.PROCEDURE_NAME
 				,parameters = {
-					@StoredProcedureParameter(name = MaterializedViewManager.AbstractImpl.STORED_PROCEDURE_QUERY_PARAMETER_NAME_TABLE , mode = ParameterMode.IN,type = String.class)
+					@StoredProcedureParameter(name = MaterializedViewCreator.AbstractImpl.PARAMETER_NAME_TABLE , mode = ParameterMode.IN,type = String.class)
+				}
+			)
+		,@NamedStoredProcedureQuery(
+				name = MaterializedViewUpdator.AbstractImpl.PROCEDURE_NAME
+				,procedureName = MaterializedViewUpdator.AbstractImpl.PROCEDURE_NAME
+				,parameters = {
+					@StoredProcedureParameter(name = MaterializedViewUpdator.AbstractImpl.PARAMETER_NAME_TABLE , mode = ParameterMode.IN,type = String.class)
+				}
+			)
+		,@NamedStoredProcedureQuery(
+				name = MaterializedViewActualizer.AbstractImpl.PROCEDURE_NAME
+				,procedureName = MaterializedViewActualizer.AbstractImpl.PROCEDURE_NAME
+				,parameters = {
+					@StoredProcedureParameter(name = MaterializedViewActualizer.AbstractImpl.PARAMETER_NAME_TABLE , mode = ParameterMode.IN,type = String.class)
+				}
+			)
+		,@NamedStoredProcedureQuery(
+				name = MaterializedViewDeletor.AbstractImpl.PROCEDURE_NAME
+				,procedureName = MaterializedViewDeletor.AbstractImpl.PROCEDURE_NAME
+				,parameters = {
+					@StoredProcedureParameter(name = MaterializedViewDeletor.AbstractImpl.PARAMETER_NAME_TABLE , mode = ParameterMode.IN,type = String.class)
 				}
 			)
 	})

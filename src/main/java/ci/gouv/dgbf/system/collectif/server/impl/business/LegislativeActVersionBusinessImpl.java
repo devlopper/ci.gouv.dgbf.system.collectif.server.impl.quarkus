@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import org.cyk.quarkus.extension.core_.configuration.When;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
@@ -23,8 +24,10 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersisten
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.impl.Configuration;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
+import io.vertx.core.eventbus.EventBus;
 
 @ApplicationScoped
 public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessImpl<LegislativeActVersion> implements LegislativeActVersionBusiness,Serializable {
@@ -35,9 +38,24 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 	@Inject ExpenditureBusiness expenditureBusiness;
 	@Inject ResourceBusiness resourceBusiness;
 	@Inject RegulatoryActBusiness regulatoryActBusiness;
-
-	@Override @Transactional
+	@Inject Configuration configuration;
+	@Inject EventBus eventBus;
+	
+	@Override
 	public Result create(String code, String name, Byte number, String legislativeActIdentifier, String auditWho) {
+		Result result = createInTransaction(code, name, number, legislativeActIdentifier, auditWho);
+		if(When.AFTER.equals(configuration.legislativeActVersion().creation().whenRegulatoryActIncluded()))
+			eventBus.publish(RegulatoryActBusinessImpl.EVENT_CHANNEL_INCLUDE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER, new RegulatoryActBusinessImpl.EventMessage(((LegislativeActVersion)result.getMapValueByKey(LegislativeActVersion.class)).getIdentifier()
+					,auditWho));
+		if(When.AFTER.equals(configuration.legislativeActVersion().creation().whenExpenditureImported()))
+			eventBus.publish(ExpenditureBusinessImpl.EVENT_CHANNEL_IMPORT, new ExpenditureBusinessImpl.EventMessage(((LegislativeActVersion)result.getMapValueByKey(LegislativeActVersion.class)).getIdentifier(),auditWho));
+		if(When.AFTER.equals(configuration.legislativeActVersion().creation().whenResourceImported()))
+			eventBus.publish(ResourceBusinessImpl.EVENT_CHANNEL_IMPORT, new ResourceBusinessImpl.EventMessage(((LegislativeActVersion)result.getMapValueByKey(LegislativeActVersion.class)).getIdentifier(),auditWho));
+		return result;
+	}
+	
+	@Transactional
+	Result createInTransaction(String code, String name, Byte number, String legislativeActIdentifier, String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
@@ -45,9 +63,11 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		throwablesMessages.throwIfNotEmpty();
 		//All inputs are fine
 		LegislativeActVersionImpl legislativeActVersion = create(code, name, number, (LegislativeActImpl) instances[0],generateAuditIdentifier(), auditWho, null, null, entityManager);
+		result.map(LegislativeActVersion.class, legislativeActVersion);
 		// Return of message
 		result.close().setName(String.format("Création de %s par %s",legislativeActVersion.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Création de %s",legislativeActVersion.getName()));
+		//((RegulatoryActBusinessImpl)regulatoryActBusiness).actualizeExpenditureIncludedMovementView();
 		return result;
 	}
 	
@@ -70,13 +90,16 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		audit(legislativeActVersion,auditIdentifier, auditFunctionality, auditWho, auditWhen);
 		//Persist instance
 		entityManager.persist(legislativeActVersion);
-		entityManager.flush();
+		//entityManager.flush();
 		
 		legislativeActVersion.setActIdentifier(legislativeAct.getIdentifier());
 		
-		((RegulatoryActBusinessImpl)regulatoryActBusiness).includeByLegislativeActVersionIdentifier(legislativeActVersion,auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
-		((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion,auditIdentifier, auditWho,auditFunctionality,auditWhen,null,entityManager);
-		((ResourceBusinessImpl)resourceBusiness).import_(legislativeActVersion,auditIdentifier, auditWho,auditFunctionality,auditWhen,null,entityManager);
+		if(When.WHILE.equals(configuration.legislativeActVersion().creation().whenRegulatoryActIncluded()))
+			((RegulatoryActBusinessImpl)regulatoryActBusiness).includeByLegislativeActVersionIdentifier(legislativeActVersion,auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
+		if(When.WHILE.equals(configuration.legislativeActVersion().creation().whenExpenditureImported()))
+			((ExpenditureBusinessImpl)expenditureBusiness).import_(legislativeActVersion,auditIdentifier, auditWho,auditFunctionality,auditWhen,null,entityManager,Boolean.FALSE);
+		if(When.WHILE.equals(configuration.legislativeActVersion().creation().whenResourceImported()))
+			((ResourceBusinessImpl)resourceBusiness).import_(legislativeActVersion,auditIdentifier, auditWho,auditFunctionality,auditWhen,null,entityManager,Boolean.FALSE);
 		return legislativeActVersion;
 	}
 	
@@ -96,6 +119,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		// Return of message
 		result.close().setName(String.format("Copie de %s vers %s par %s",legislativeActVersionSource.getName(),legislativeActVersionTarget.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Copie de %s vers %s",legislativeActVersionSource.getName(),legislativeActVersionTarget.getName()));
+		//((RegulatoryActBusinessImpl)regulatoryActBusiness).actualizeExpenditureIncludedMovementView();
 		return result;
 	}
 	
@@ -131,6 +155,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		// Return of message
 		result.close().setName(String.format("Duplication de %s par %s",legislativeActVersionSource.getName(),auditWho)).log(getClass());
 		result.addMessages(String.format("Duplication de %s",legislativeActVersionSource.getName()));
+		//((RegulatoryActBusinessImpl)regulatoryActBusiness).actualizeExpenditureIncludedMovementView();
 		return result;
 	}
 	

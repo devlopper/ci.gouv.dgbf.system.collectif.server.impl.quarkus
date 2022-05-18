@@ -76,6 +76,22 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		}
 	}
 	
+	public class LegislativeActVersionWithOnCreationAfter implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(LegislativeActVersionWithOnCreationAfter.class);
+			map.put("collectif.legislative-act-version.creation.when-regulatory-act-included", "AFTER");
+			map.put("collectif.legislative-act-version.creation.when-expenditure-imported", "AFTER");
+			map.put("collectif.legislative-act-version.creation.when-resource-imported", "AFTER");
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(LegislativeActVersionWithOnCreationAfter.class);
+		}
+	}
+	
 	public class Expenditure implements QuarkusTestProfile{
 		@Override
 		public Map<String, String> getConfigOverrides() {

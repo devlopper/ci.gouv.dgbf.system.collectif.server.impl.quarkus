@@ -442,7 +442,9 @@ public class LegislativeActVersionTest {
 	void business_create() {
 		assertThat(persistence.readOne("2022_1_4")).isNull();
 		business.create(null, null,null,"2022_1", "meliane");
+		assertThat(persistence.readOne("2022_1_4")).isNotNull();
 		assertor.assertLegislativeActVersion("2022_1_4", "2022_1_4","Version 4 2022_1",Byte.valueOf("4"),"2022_1");
+		assertor.assertExpenditureByLegislativeActVersion("2022_1_4", List.of("2022_1_4_1","2022_1_4_2"));
 	}
 	
 	@Test @Order(2)

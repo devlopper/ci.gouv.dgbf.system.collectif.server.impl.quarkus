@@ -50,6 +50,9 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LessorImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
+import io.quarkus.vertx.ConsumeEvent;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @ApplicationScoped
 public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Expenditure> implements ExpenditureBusiness,Serializable {
@@ -433,6 +436,21 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 				result.setPaymentCreditAvailableIsNotEnough(identifiers);	
 			}
 		}
+	}
+	
+	/* Event */
+	
+	public static final String EVENT_CHANNEL_IMPORT = "expenditureImport";
+	@ConsumeEvent(EVENT_CHANNEL_IMPORT)
+    void listenImport(EventMessage message) {
+		import_(message.identifier, Boolean.TRUE, message.auditWho, EntityManagerGetter.getInstance().get(), Boolean.TRUE);
+		//import_( message.identifier,message.auditWho,EntityManagerGetter.getInstance().get(),Boolean.TRUE);
+    }
+	
+	@AllArgsConstructor @NoArgsConstructor
+	public static class EventMessage {
+		String identifier;
+		String auditWho;
 	}
 	
 	/**/
