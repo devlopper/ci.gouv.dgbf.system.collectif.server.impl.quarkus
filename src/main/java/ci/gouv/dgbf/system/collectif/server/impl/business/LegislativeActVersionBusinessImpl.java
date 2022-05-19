@@ -15,6 +15,7 @@ import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
+import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
@@ -25,6 +26,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersio
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.Configuration;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureIncludedMovementView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import io.vertx.core.eventbus.EventBus;
@@ -40,17 +42,22 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 	@Inject RegulatoryActBusiness regulatoryActBusiness;
 	@Inject Configuration configuration;
 	@Inject EventBus eventBus;
+	@Inject MaterializedViewActualizer materializedViewActualizer;
 	
 	@Override
 	public Result create(String code, String name, Byte number, String legislativeActIdentifier, String auditWho) {
 		Result result = createInTransaction(code, name, number, legislativeActIdentifier, auditWho);
-		if(When.AFTER.equals(configuration.legislativeActVersion().creation().whenRegulatoryActIncluded()))
+		if(When.WHILE.equals(configuration.legislativeActVersion().creation().whenRegulatoryActIncluded()))
+			materializedViewActualizer.executeAsynchronously(ExpenditureIncludedMovementView.class);
+		else if(When.AFTER.equals(configuration.legislativeActVersion().creation().whenRegulatoryActIncluded()))
 			eventBus.publish(RegulatoryActBusinessImpl.EVENT_CHANNEL_INCLUDE_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER, new RegulatoryActBusinessImpl.EventMessage(((LegislativeActVersion)result.getMapValueByKey(LegislativeActVersion.class)).getIdentifier()
 					,auditWho));
 		if(When.AFTER.equals(configuration.legislativeActVersion().creation().whenExpenditureImported()))
 			eventBus.publish(ExpenditureBusinessImpl.EVENT_CHANNEL_IMPORT, new ExpenditureBusinessImpl.EventMessage(((LegislativeActVersion)result.getMapValueByKey(LegislativeActVersion.class)).getIdentifier(),auditWho));
 		if(When.AFTER.equals(configuration.legislativeActVersion().creation().whenResourceImported()))
 			eventBus.publish(ResourceBusinessImpl.EVENT_CHANNEL_IMPORT, new ResourceBusinessImpl.EventMessage(((LegislativeActVersion)result.getMapValueByKey(LegislativeActVersion.class)).getIdentifier(),auditWho));
+		
+		
 		return result;
 	}
 	
@@ -77,7 +84,7 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		if(auditWhen == null)
 			auditWhen = LocalDateTime.now();
 		//Instantiate legislative act version
-		LegislativeActVersionImpl legislativeActVersion = new LegislativeActVersionImpl().setCode(code).setName(name).setNumber(number).setAct(legislativeAct);
+		LegislativeActVersionImpl legislativeActVersion = new LegislativeActVersionImpl().setCode(code).setName(name).setNumber(number).setAct(legislativeAct).setAdjustable(Boolean.TRUE);
 		//Derive blank attributes
 		if(legislativeActVersion.getNumber() == null)
 			legislativeActVersion.setNumber(NumberHelper.get(Byte.class,persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_IDENTIFIER,legislativeAct.getIdentifier())),Byte.valueOf("0")));

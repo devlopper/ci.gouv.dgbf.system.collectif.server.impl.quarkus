@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import org.cyk.quarkus.extension.core_.configuration.When;
 import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
@@ -16,15 +17,17 @@ import org.cyk.utility.__kernel__.time.TimeHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
+import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.LegislativeActVersionBusiness;
-import ci.gouv.dgbf.system.collectif.server.api.business.RegulatoryActBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
+import ci.gouv.dgbf.system.collectif.server.impl.Configuration;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExerciseImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureIncludedMovementView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 
@@ -34,11 +37,14 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 	@Inject EntityManager entityManager;
 	@Inject LegislativeActPersistence persistence;
 	@Inject LegislativeActVersionBusiness legislativeActVersionBusiness;
-	@Inject RegulatoryActBusiness regulatoryActBusiness;
+	@Inject MaterializedViewActualizer materializedViewActualizer;
+	@Inject Configuration configuration;
 	
 	@Override
 	public Result create(String code, String name, String exerciseIdentifier,LocalDate date, String auditWho) {
 		Result result = createInTransaction(code, name, exerciseIdentifier, date, auditWho);
+		if(When.WHILE.equals(configuration.legislativeActVersion().creation().whenRegulatoryActIncluded()))
+			materializedViewActualizer.executeAsynchronously(ExpenditureIncludedMovementView.class);
 		return result;
 	}
 	

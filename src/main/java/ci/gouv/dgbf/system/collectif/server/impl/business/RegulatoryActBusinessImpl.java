@@ -57,6 +57,7 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	@Override
 	public Result includeByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
 		Result result = includeByLegislativeActVersionIdentifierInTransaction(legislativeActVersionIdentifier, auditWho);
+		materializedViewActualizer.executeAsynchronously(ExpenditureIncludedMovementView.class);
 		return result;
 	}
 	
@@ -135,14 +136,26 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		__create__(arrays, regulatoryActs, legislativeActVersion,auditIdentifier,auditWho,auditFunctionality,auditWhen,entityManager);
 	}
 
-	@Override @Transactional
+	@Override
 	public Result include(String legislativeActIdentifier,Boolean existingIgnorable,String auditWho, String... identifiers) {
 		return include(CollectionHelper.listOf(Boolean.TRUE, identifiers), legislativeActIdentifier,existingIgnorable,auditWho);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override @Transactional
+	@Override
 	public Result exclude(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
+		Result result = excludeInTransaction(identifiers, legislativeActVersionIdentifier, existingIgnorable, auditWho);
+		materializedViewActualizer.executeAsynchronously(ExpenditureIncludedMovementView.class);
+		return result;
+	}
+
+	@Override
+	public Result exclude(String legislativeActIdentifier,Boolean existingIgnorable,String auditWho, String... identifiers) {
+		return exclude(CollectionHelper.listOf(Boolean.TRUE, identifiers), legislativeActIdentifier,existingIgnorable,auditWho);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Transactional
+	Result excludeInTransaction(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
 		//1 - Validate preconditions
 		Object[] data = validate(identifiers, legislativeActVersionIdentifier, existingIgnorable,Boolean.FALSE,auditWho);
 		Collection<Object[]> arrays = (Collection<Object[]>) data[0];
@@ -152,11 +165,6 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		//2 - Update to FALSE where TRUE
 		__update__(arrays, Boolean.FALSE,generateAuditIdentifier(),auditWho,EXCLUDE_AUDIT_IDENTIFIER,auditWhen,entityManager);
 		return result.close().log(getClass());
-	}
-
-	@Override @Transactional
-	public Result exclude(String legislativeActIdentifier,Boolean existingIgnorable,String auditWho, String... identifiers) {
-		return exclude(CollectionHelper.listOf(Boolean.TRUE, identifiers), legislativeActIdentifier,existingIgnorable,auditWho);
 	}
 
 	/**/

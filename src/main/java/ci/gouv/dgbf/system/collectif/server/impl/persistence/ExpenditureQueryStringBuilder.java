@@ -3,6 +3,7 @@ package ci.gouv.dgbf.system.collectif.server.impl.persistence;
 import static org.cyk.utility.persistence.query.Language.parenthesis;
 import static org.cyk.utility.persistence.query.Language.Where.and;
 import static org.cyk.utility.persistence.query.Language.Where.or;
+import static org.cyk.utility.persistence.server.hibernate.Language.coalesceZeroLong;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -107,7 +108,7 @@ public interface ExpenditureQueryStringBuilder {
 			}
 			
 			public static String get(String tupleName,String fieldName,Boolean sumable,Boolean isLessThanZero) {
-				String string = org.cyk.utility.persistence.server.hibernate.Language.coalesceZeroLong(FieldHelper.join(tupleName,fieldName));
+				String string = coalesceZeroLong(FieldHelper.join(tupleName,fieldName));
 				if(isLessThanZero != null) {
 					if(isLessThanZero)
 						string = Case.instantiateWhenIsNotGreaterThanOrEqualZeroThenZeroAndBuild(string,"0l");

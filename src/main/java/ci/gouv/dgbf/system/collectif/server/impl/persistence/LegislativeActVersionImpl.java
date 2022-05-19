@@ -60,6 +60,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	@Transient Long actFromDateAsTimestamp;
 	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) @Audited Byte number;
+	@NotNull @Column(name = COLUMN_ADJUSTABLE,nullable = false) @Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_ADJUSTABLE+"_MOD") Boolean adjustable;
 	
 	@Transient Boolean isDefaultVersion;
 	@Transient String isDefaultVersionAsString;
@@ -164,6 +165,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String COLUMN_RUNNING_PROCESSING = "TRAITEMENT_EN_COURS_EXECUTION";
 	public static final String COLUMN_ACT = "COLLECTIF";
 	public static final String COLUMN_NUMBER = "NUMERO";
+	public static final String COLUMN_ADJUSTABLE = "AJUSTABLE";
 	public static final String COLUMN___AUDIT_IDENTIFIER__ = "AUDIT_IDENTIFIANT";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";

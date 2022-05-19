@@ -15,9 +15,9 @@ SELECT
 	,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_code||' '||u.usb_liblg AS "USB_CODE_LIBELLE"
 	,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
 	,cb.uuid AS "CATEGORIE_BUDGET_IDENTIFIANT",cb.cbud_code AS "CATEGORIE_BUDGET_CODE",cb.cbud_liblg AS "CATEGORIE_BUDGET_LIBELLE",cb.cbud_code||' '||cb.cbud_liblg AS "CATEGORIE_BUDGET_CODE_LIBELLE"
-	,fd.FIND_BVOTE_AE AS "BUDGET_INITIAL_AE",fd.FIND_BVOTE_CP AS "BUDGET_INITIAL_CP"
-	,fd.FIND_MONTANT_AE - fd.FIND_BVOTE_AE AS "MOUVEMENT_AE",fd.FIND_MONTANT_CP - fd.FIND_BVOTE_CP AS "MOUVEMENT_CP"
-	,fd.FIND_MONTANT_AE AS "BUDGET_ACTUEL_AE",fd.FIND_MONTANT_CP AS "BUDGET_ACTUEL_CP"
+	,NVL(fd.FIND_BVOTE_AE,0) AS "BUDGET_INITIAL_AE",NVL(fd.FIND_BVOTE_CP,0) AS "BUDGET_INITIAL_CP"
+	,NVL(fd.FIND_MONTANT_AE,0) - NVL(fd.FIND_BVOTE_AE,0) AS "MOUVEMENT_AE",NVL(fd.FIND_MONTANT_CP,0) - NVL(fd.FIND_BVOTE_CP,0) AS "MOUVEMENT_CP"
+	,NVL(fd.FIND_MONTANT_AE,0) AS "BUDGET_ACTUEL_AE",NVL(fd.FIND_MONTANT_CP,0) AS "BUDGET_ACTUEL_CP"
 FROM financement_depenses fd
 LEFT JOIN ligne_de_depenses ld ON ld.ldep_id = fd.ldep_id AND ld.exo_num = fd.exo_num
 LEFT JOIN activite_de_service a ON a.ads_id = ld.ads_id
@@ -48,10 +48,10 @@ SELECT
 	,ne.nat_id AS "NATURE_ECONOMIQUE_IDENTIFIANT",ne.nat_code AS "NATURE_ECONOMIQUE_CODE",ne.nat_code||' '||ne.nat_liblg AS "NATURE_ECONOMIQUE_CODE_LIBELLE"
 	,u.usb_id AS "USB_IDENTIFIANT",u.usb_code AS "USB_CODE",u.usb_code||' '||u.usb_liblg AS "USB_CODE_LIBELLE"
 	,s.secb_id AS "SECTION_IDENTIFIANT",s.secb_num AS "SECTION_CODE",s.secb_num||' '||s.secb_liblg AS "SECTION_CODE_LIBELLE"
-	,lr.MONTANT_INITIAL AS "BUDGET_INITIAL",lr.MONTANT_ACTUEL AS "BUDGET_ACTUEL",lr.MONTANT_ACTUEL-lr.MONTANT_INITIAL AS "MOUVEMENT"
+	,NVL(lr.MONTANT_INITIAL,0) AS "BUDGET_INITIAL",NVL(lr.MONTANT_ACTUEL,0) AS "BUDGET_ACTUEL",NVL(lr.MONTANT_ACTUEL,0)-NVL(lr.MONTANT_INITIAL,0) AS "MOUVEMENT"
 FROM ligne_recette lr
 LEFT JOIN activite_de_recette a ON a.ads_code = lr.ads_id
 LEFT JOIN nature_economique ne ON ne.nat_id = lr.nat_id
 LEFT JOIN unite_spec_bud u ON u.usb_code = a.usb_code
 LEFT JOIN section_budgetaire s ON s.secb_id = u.secb_id
-WHERE lr.ads_id IS NOt NULL AND lr.nat_id IS NOT NULL;
+WHERE lr.ads_id IS NOt NULL AND a.ads_code IS NOT NULL AND lr.nat_id IS NOT NULL AND ne.nat_id IS NOT NULL;
