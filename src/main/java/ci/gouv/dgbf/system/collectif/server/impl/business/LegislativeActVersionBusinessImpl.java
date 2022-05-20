@@ -166,6 +166,30 @@ public class LegislativeActVersionBusinessImpl extends AbstractSpecificBusinessI
 		return result;
 	}
 	
+	@Override
+	public Result updateAdjustable(String identifier,Boolean adjustable, String auditWho) {
+		Result result = updateAdjustableInTransaction(identifier, adjustable, auditWho);
+		return result;
+	}
+	
+	@Transactional
+	Result updateAdjustableInTransaction(String identifier,Boolean adjustable, String auditWho) {
+		Result result = new Result().open();
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		// Validation of inputs
+		Object[] instances = ValidatorImpl.LegislativeActVersion.validateUpdateAdjustableInputs(identifier,adjustable,auditWho, throwablesMessages,entityManager);
+		throwablesMessages.throwIfNotEmpty();
+		
+		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
+		legislativeActVersion.setAdjustable(adjustable);
+		audit(legislativeActVersion,generateAuditIdentifier(), UPDATE_ADJUSTABLE_AUDIT_IDENTIFIER, auditWho, LocalDateTime.now());
+		entityManager.merge(legislativeActVersion);
+		// Return of message
+		result.close().setName(String.format("Mise à jour de <<ajustable>> de %s avec %s par %s",LegislativeActVersion.NAME,legislativeActVersion.getName(),adjustable,auditWho)).log(getClass());
+		result.addMessages(String.format("<<ajustable>> de %s : %s",legislativeActVersion.getName(),adjustable ? "Oui" : "Non"));
+		return result;
+	}
+	
 	private static final String CODE_FORMAT = "%s_%s";
 	private static final String NAME_FORMAT = "Version %s %s";
 }

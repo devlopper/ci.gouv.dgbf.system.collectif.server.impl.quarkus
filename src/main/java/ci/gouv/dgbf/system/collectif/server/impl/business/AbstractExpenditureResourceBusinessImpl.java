@@ -80,28 +80,6 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	
 	@Override
 	public Result import_(String legislativeActVersionIdentifier,Boolean throwIfRunning, String auditWho) {
-		/*Result result = new Result().open();
-		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
-		// Validation of inputs
-		Object[] instances = validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
-		throwablesMessages.throwIfNotEmpty();
-		
-		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
-		validateImport(legislativeActVersion, auditWho, throwablesMessages, entityManager);
-		throwablesMessages.throwIfNotEmpty();
-		
-		String auditIdentifier = generateAuditIdentifier();
-		LocalDateTime auditWhen = LocalDateTime.now();
-		
-		import_(legislativeActVersion,auditIdentifier, auditWho, getImportAuditIdentifier(), auditWhen,throwIfRunning,entityManager,Boolean.TRUE);
-		throwablesMessages.throwIfNotEmpty();
-		Long count = persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.__AUDIT_IDENTIFIER__,auditIdentifier));
-		
-		// Return of message
-		result.close().setName(String.format("Importation de %s %s(s) dans %s par %s",count,entityName,legislativeActVersion.getName(),auditWho)).log(getClass());
-		result.addMessages(String.format("Nombre de %s importée : %s",entityName, count));
-		return result;
-		*/
 		return import_(legislativeActVersionIdentifier, throwIfRunning, auditWho, entityManager, Boolean.FALSE);
 	}
 	
@@ -157,7 +135,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 			importRunning.add(legislativeActVersion.getIdentifier());
 		}
 		try {
-			updateMaterializedView();
+			materializedViewActualizer.execute(null,entityViewClass);
 			Long count = countImportable(legislativeActVersion,entityManager);
 			LogHelper.log(String.format("%s %s à importer",count,entityName),Result.getLogLevel(), getClass());
 			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(),configuration.importation().processing().batch().size());
@@ -229,10 +207,6 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	
 	String formatMessageImportIsRunning(LegislativeActVersion legislativeActVersion) {
 		return String.format("%s de %s en cours d'importation", entityName,legislativeActVersion.getName());
-	}
-	
-	void updateMaterializedView() {
-		materializedViewActualizer.execute(null,entityViewClass);
 	}
 	
 	abstract ENTITY instantiateForImport(LegislativeActVersion legislativeActVersion,Object[] array);

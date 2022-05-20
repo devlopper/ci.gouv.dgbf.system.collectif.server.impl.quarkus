@@ -11,9 +11,11 @@ import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.DependencyInjection;
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
+import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.Query;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.ResponseHelper;
+import org.cyk.utility.service.client.Controller;
 import org.cyk.utility.service.client.SpecificServiceGetter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
@@ -26,6 +28,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersio
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.service.LegislativeActVersionDto;
+import ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersionController;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
@@ -41,6 +44,7 @@ public class LegislativeActVersionTest {
 	@Inject Assertor assertor;
 	@Inject LegislativeActVersionPersistence persistence;
 	@Inject LegislativeActVersionBusiness business;
+	@Inject LegislativeActVersionController controller;
 	
 	@Test @Order(1)
 	void persistence_sumsAmounts() {
@@ -434,6 +438,19 @@ public class LegislativeActVersionTest {
 		assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
 		Long count = ResponseHelper.getEntityAsLong(response);
 		assertThat(count).isEqualTo(9l);
+    }
+	
+	@Test @Order(1)
+    public void client_() {
+		ci.gouv.dgbf.system.collectif.server.client.rest.LegislativeActVersion legislativeActVersion = controller.getOne(new Controller.GetArguments()//.setPostable(Boolean.TRUE)
+				.projections(LegislativeActVersionDto.JSON_IDENTIFIER,LegislativeActVersionDto.JSONS_STRINGS//,LegislativeActVersionDto.JSONS_RESOURCES_AMOUTNS,LegislativeActVersionDto.JSONS_EXPENDITURES_AMOUTNS
+						,LegislativeActVersionDto.JSON_IS_DEFAULT_VERSION,LegislativeActVersionDto.JSONS_LEGISLATIVE_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP,LegislativeActVersionDto.JSON_LEGISLATIVE_ACT
+						,LegislativeActVersionDto.JSONS_GENERATED_ACT_COUNT_ACT_GENERATABLE_GENERATED_ACT_DELETABLE,LegislativeActVersionDto.JSON_ADJUSTABLE,LegislativeActVersionDto.JSON___AUDIT__
+						)
+				.setFilter(new Filter.Dto().addField(Parameters.DEFAULT_LEGISLATIVE_ACT_VERSION_IN_LATEST_LEGISLATIVE_ACT, Boolean.TRUE)));
+		assertThat(legislativeActVersion.getIdentifier()).isEqualTo("2022_1_2");
+		assertThat(legislativeActVersion.getAct()).isNotNull();
+		assertThat(legislativeActVersion.getAct().getIdentifier()).isEqualTo("2022_1");
     }
 	
 	/* Create */

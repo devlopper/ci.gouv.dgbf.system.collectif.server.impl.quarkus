@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
+import org.cyk.utility.__kernel__.value.ValueHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
@@ -46,13 +47,14 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 	@Override
 	public Response adjust(List<AdjustmentDto> adjustmentsDtos,String auditWho) {
 		return buildResponseOk(business.adjust(adjustmentsDtos == null ? null : Optional.ofNullable(adjustmentsDtos).get().stream()
-				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> new Long[] {dto.getEntryAuthorization(),dto.getPaymentCredit()})),auditWho));
+				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> new Long[] {ValueHelper.defaultToIfNull(dto.getEntryAuthorization(),0l)
+						,ValueHelper.defaultToIfNull(dto.getPaymentCredit(),0l)})),auditWho));
 	}
 	
 	@Override
 	public Response adjustByEntryAuthorizations(List<AdjustmentDto> adjustmentsDtos,String auditWho) {
 		return buildResponseOk(business.adjustByEntryAuthorizations(adjustmentsDtos == null ? null : Optional.ofNullable(adjustmentsDtos).get().stream()
-				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> dto.getEntryAuthorization())),auditWho));
+				.collect(Collectors.toMap(dto -> dto.getIdentifier(), dto -> ValueHelper.defaultToIfNull(dto.getEntryAuthorization(),0l))),auditWho));
 	}
 	
 	@Override

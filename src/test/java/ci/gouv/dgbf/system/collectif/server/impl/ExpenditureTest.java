@@ -64,7 +64,7 @@ public class ExpenditureTest {
 	@Inject ExpenditurePersistence expenditurePersistence;
 	@Inject ExpenditureBusiness expenditureBusiness;
 	
-	Integer expectedCount = 15;
+	Integer expectedCount = 17;
 	
 	@Test @Order(1)
 	public void verifyLoadable(){
@@ -310,7 +310,7 @@ public class ExpenditureTest {
 	@Test @Order(1)
 	void persistence_amountsWithAdjustmentLessThanZeroGreaterThanZeroOnly() {
 		ExpenditureImpl expenditure = (ExpenditureImpl) expenditurePersistence.readOne(new QueryExecutorArguments().addProjectionsFromStrings(ExpenditureImpl.FIELDS_AMOUNTS_WITH_ADJUSTMENT_LESS_THAN_ZERO_GREATER_THAN_ZERO_ONLY)
-				.addFilterFieldsValues(Parameters.EXPENDITURES_IDENTIFIERS,List.of("2022_2_2_2")));
+				.addFilterFieldsValues(Parameters.EXPENDITURES_IDENTIFIERS,List.of("2022_2_1_2")));
 		assertThat(expenditure).isNotNull();
 		assertThat(expenditure.getEntryAuthorization()).as("AE").isNotNull();
 		assertThat(expenditure.getEntryAuthorization().getAdjustmentLessThanZero()).isEqualTo(-10l);
@@ -777,6 +777,14 @@ public class ExpenditureTest {
 	/* Adjust */
 	
 	@Test @Order(4)
+	void business_adjust_adjustableIsFalse() {
+		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+			expenditureBusiness.adjustByEntryAuthorizations(Map.of("2022_2_2_1",3l),"anonymous");
+	    });
+		assertThat(exception.getMessage()).isEqualTo("1 Dépenses non ajustable : 2022_2_2_1");
+	}
+	
+	@Test @Order(4)
 	void business_adjust() {
 		assertor.assertExpenditureAudits("2022_1_3_5", "christian", "AJUSTEMENT", "MODIFICATION", TimeHelper.toMillisecond(LocalDateTime.of(2000, 1, 2, 1, 1)));
 		assertor.assertExpenditureAudit("2022_1_3_5", "AJUSTEMENT par christian le");
@@ -802,11 +810,11 @@ public class ExpenditureTest {
 	
 	@Test @Order(4)
 	void business_adjust_availableNotMonitorable() {
-		assertor.assertEntryAuthorization("2022_2_2_1", 0l);
-		assertor.assertPaymentCredit("2022_2_2_1", 0l);
-		expenditureBusiness.adjust(Map.of("2022_2_2_1",new Long[] {-1l,-2l}),"meliane");
-		assertor.assertEntryAuthorization("2022_2_2_1", -1l);
-		assertor.assertPaymentCredit("2022_2_2_1", -2l);
+		assertor.assertEntryAuthorization("2022_2_1_1", 0l);
+		assertor.assertPaymentCredit("2022_2_1_1", 0l);
+		expenditureBusiness.adjust(Map.of("2022_2_1_1",new Long[] {-1l,-2l}),"meliane");
+		assertor.assertEntryAuthorization("2022_2_1_1", -1l);
+		assertor.assertPaymentCredit("2022_2_1_1", -2l);
 	}
 	
 	@Test @Order(4)

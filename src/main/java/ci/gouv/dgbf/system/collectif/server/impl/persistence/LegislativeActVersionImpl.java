@@ -61,6 +61,7 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	
 	@NotNull @Column(name = COLUMN_NUMBER,nullable = false) @Audited Byte number;
 	@NotNull @Column(name = COLUMN_ADJUSTABLE,nullable = false) @Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_ADJUSTABLE+"_MOD") Boolean adjustable;
+	@Transient String adjustableAsString;
 	
 	@Transient Boolean isDefaultVersion;
 	@Transient String isDefaultVersionAsString;
@@ -134,6 +135,8 @@ public class LegislativeActVersionImpl extends AbstractIdentifiableSystemScalarS
 	public static final String FIELD_ACT_AS_STRING = "actAsString";
 	public static final String FIELDS_ACT_FROM_DATE_AS_TIMESTAMP_DATE_AS_TIMESTAMP = "actFromDateAsTimestampDateAsTimestamp";
 	public static final String FIELD_NUMBER = "number";
+	public static final String FIELD_ADJUSTABLE = "adjustable";
+	public static final String FIELD_ADJUSTABLE_AS_STRING = "adjustableAsString";
 	public static final String FIELD_IS_DEFAULT_VERSION = "isDefaultVersion";
 	public static final String FIELD_IS_DEFAULT_VERSION_AS_STRING = "isDefaultVersionAsString";
 	public static final String FIELD_CREATION_DATE = "creationDate";

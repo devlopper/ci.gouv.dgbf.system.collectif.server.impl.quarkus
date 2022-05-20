@@ -2,24 +2,25 @@ package ci.gouv.dgbf.system.collectif.server.impl.business;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.EntityManagerGetter;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ResourceBusiness;
-import ci.gouv.dgbf.system.collectif.server.api.persistence.ExpenditurePersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Resource;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImplAdjustableIsFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImportableView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RevenueImpl;
@@ -30,8 +31,6 @@ import lombok.NoArgsConstructor;
 @ApplicationScoped
 public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImpl<Resource> implements ResourceBusiness,Serializable {
 
-	@Inject ExpenditurePersistence expenditurePersistence;
-	
 	@Override
 	void __listenPostConstruct__() {
 		entityClass = Resource.class;
@@ -51,6 +50,13 @@ public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImp
 		throwablesMessages.throwIfNotEmpty();
 		
 		Collection<String> providedIdentifiers = adjustments.entrySet().stream().map(x -> x.getKey()).collect(Collectors.toList());		
+		
+		// Validation of adjustable
+		Collection<Object[]> notAdjustable = new ResourceImplAdjustableIsFalseReader().readByIdentifiers(new ArrayList<String>(providedIdentifiers), null);
+		if(CollectionHelper.isNotEmpty(notAdjustable)) {
+			throwablesMessages.add(String.format("%s %s non ajustable : %s",notAdjustable.size(),Resource.NAME_PLURAL, notAdjustable.stream().map(x -> (String)x[0]).collect(Collectors.joining(","))));
+		}
+		throwablesMessages.throwIfNotEmpty();
 		
 		// Validation of objects
 		Collection<ResourceImpl> resources = entityManager.createNamedQuery(ResourceImpl.QUERY_READ_BY_IDENTIIFERS, ResourceImpl.class)

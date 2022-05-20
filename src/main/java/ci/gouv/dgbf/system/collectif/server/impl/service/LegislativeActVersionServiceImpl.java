@@ -36,4 +36,9 @@ public class LegislativeActVersionServiceImpl extends AbstractSpecificServiceImp
 	public Response duplicate(String identifier, String auditWho) {
 		return buildResponseOk(business.duplicate(identifier, auditWho));
 	}
+	
+	@Override
+	public Response updateAdjustable(String identifier, Boolean adjustable, String auditWho) {
+		return buildResponseOk(business.updateAdjustable(identifier, adjustable, auditWho));
+	}
 }

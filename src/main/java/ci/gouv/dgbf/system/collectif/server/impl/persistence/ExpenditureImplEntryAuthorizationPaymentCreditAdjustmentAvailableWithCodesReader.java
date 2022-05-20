@@ -14,5 +14,6 @@ public class ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWi
 		arguments.getProjection(Boolean.TRUE).add(String.format("CONCAT(v.%s,v.%s,v.%s,v.%s)",ExpenditureView.FIELD_ACTIVITY_CODE,ExpenditureView.FIELD_ECONOMIC_NATURE_CODE,ExpenditureView.FIELD_FUNDING_SOURCE_CODE,ExpenditureView.FIELD_LESSOR_CODE));
 		return arguments;
 	}
-	
+
+	public static final Integer CODES_INDEX = 5;
 }

@@ -94,8 +94,14 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		return result;
 	}
 	
-	@Override @Transactional
+	@Override
 	public Result updateDefaultVersion(String legislativeActVersionIdentifier, String auditWho) {
+		Result result = updateDefaultVersionInTransaction(legislativeActVersionIdentifier, auditWho);
+		return result;
+	}
+	
+	@Transactional
+	Result updateDefaultVersionInTransaction(String legislativeActVersionIdentifier, String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs
@@ -112,8 +118,14 @@ public class LegislativeActBusinessImpl extends AbstractSpecificBusinessImpl<Leg
 		return result;
 	}
 	
-	@Override @Transactional
+	@Override
 	public Result updateInProgress(String legislativeActIdentifier,Boolean inProgress, String auditWho) {
+		Result result = updateInProgressInTransaction(legislativeActIdentifier, inProgress, auditWho);
+		return result;
+	}
+	
+	@Transactional
+	Result updateInProgressInTransaction(String legislativeActIdentifier,Boolean inProgress, String auditWho) {
 		Result result = new Result().open();
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
 		// Validation of inputs

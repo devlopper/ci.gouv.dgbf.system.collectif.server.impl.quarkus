@@ -22,6 +22,8 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
 	@JsonbProperty(value = JSON_IDENTIFIER) String identifier;
 	@JsonbProperty(value = JSON_CODE) String code;
 	@JsonbProperty(value = JSON_NAME) String name;
+	@JsonbProperty(value = JSON_ADJUSTABLE) Boolean adjustable;
+	@JsonbProperty(value = JSON_ADJUSTABLE_AS_STRING) String adjustableAsString;
 	@JsonbProperty(value = JSON_IS_DEFAULT_VERSION) Boolean isDefaultVersion;
 	@JsonbProperty(value = JSON_IS_DEFAULT_VERSION_AS_STRING) String isDefaultVersionAsString;
 	@JsonbProperty(value = JSON_LEGISLATIVE_ACT) LegislativeActDtoImpl act;
@@ -74,6 +76,8 @@ public class LegislativeActVersionDtoImpl extends AbstractObject implements Legi
     			LegislativeActVersionDto.JSONS_EXPENDITURES_AMOUTNS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE,LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE
     			,LegislativeActVersionDto.JSONS_EXPENDITURES_AMOUTNS_WITH_INCLUDED_MOVEMENT_ONLY,LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY
     			,LegislativeActVersionDto.JSONS_EXPENDITURES_AMOUTNS_WITH_ADJUSTMENT_LESS_THAN_ZERO_GREATER_THAN_ZERO_ONLY,LegislativeActVersionImpl.FIELDS_EXPENDITURES_AMOUNTS_WITH_ADJUSTMENT_LESS_THAN_ZERO_GREATER_THAN_ZERO_ONLY
+    			,LegislativeActVersionDto.JSON_ADJUSTABLE,LegislativeActVersionImpl.FIELD_ADJUSTABLE
+    			,LegislativeActVersionDto.JSON_ADJUSTABLE_AS_STRING,LegislativeActVersionImpl.FIELD_ADJUSTABLE_AS_STRING
     			));
 		AbstractServiceImpl.setProjections(LegislativeActVersionDtoImpl.class, map);
 	}

@@ -41,6 +41,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ActivityImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EconomicNatureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAdjustableIsFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAvailableMonitorableIsNotFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWithCodesReader;
@@ -89,8 +90,16 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		ValidatorImpl.Expenditure.validateAdjust(adjustments, auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
-		// Validation of adjustments
 		Collection<String> providedIdentifiers = adjustments.entrySet().stream().map(x -> x.getKey()).collect(Collectors.toList());
+		
+		// Validation of adjustable
+		Collection<Object[]> notAdjustable = new ExpenditureImplAdjustableIsFalseReader().readByIdentifiers(new ArrayList<String>(providedIdentifiers), null);
+		if(CollectionHelper.isNotEmpty(notAdjustable)) {
+			throwablesMessages.add(String.format("%s %s non ajustable : %s",notAdjustable.size(),Expenditure.NAME_PLURAL, notAdjustable.stream().map(x -> (String)x[0]).collect(Collectors.joining(","))));
+		}
+		throwablesMessages.throwIfNotEmpty();
+		
+		// Validation of adjustments
 		Collection<Object[]> arrays = readEntryAuthorizationPaymentCreditAdjustmentAvailable(providedIdentifiers);
 		ValidatorImpl.Expenditure.validateAdjustmentsAvailable(adjustments, arrays, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.ENTRY_AUTHORIZATION_AVAILABLE_INDEX
 				, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.PAYMENT_CREDIT_AVAILABLE_INDEX, throwablesMessages);
@@ -394,7 +403,8 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		if(CollectionHelper.isEmpty(arrays))
 			return;
 		arrays.forEach(array -> {
-			Expenditure expenditure = CollectionHelper.getFirst(expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode().equals(array[5])).collect(Collectors.toList()));
+			Expenditure expenditure = CollectionHelper.getFirst(expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode()
+					.equals(array[ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWithCodesReader.CODES_INDEX])).collect(Collectors.toList()));
 			if(expenditure == null)
 				return;
 			if(StringHelper.isNotBlank(expenditure.getIdentifier())) {
@@ -417,7 +427,8 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		
 		for(String fieldName : new String[] {ExpenditureImpl.FIELD_HAS_NO_ENTRY_AUTHORIZATION_AVAILABLE_AMOUNT,ExpenditureImpl.FIELD_HAS_NO_PAYMENT_CREDIT_AVAILABLE_AMOUNT}) {
 			identifiers = arrays.stream().filter(array -> {
-				Expenditure expenditure = CollectionHelper.getFirst(expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode().equals(array[5])).collect(Collectors.toList()));
+				Expenditure expenditure = CollectionHelper.getFirst(expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode()
+						.equals(array[ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWithCodesReader.CODES_INDEX])).collect(Collectors.toList()));
 				if(expenditure == null)
 					return Boolean.FALSE;
 				if(fieldName.equals(ExpenditureImpl.FIELD_HAS_NO_ENTRY_AUTHORIZATION_AVAILABLE_AMOUNT))
@@ -425,7 +436,8 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 				else if(fieldName.equals(ExpenditureImpl.FIELD_HAS_NO_PAYMENT_CREDIT_AVAILABLE_AMOUNT))
 					return expenditure.getHasNoPaymentCreditAvailableAmount();
 				return Boolean.FALSE;
-			}).map(array -> expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode().equals(array[5])).findFirst().get().getIdentifier()).collect(Collectors.toList());
+			}).map(array -> expenditures.stream().filter(i -> i.getActivityCodeEconomicNatureCodeFundingSourceCodeLessorCode()
+					.equals(array[ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWithCodesReader.CODES_INDEX])).findFirst().get().getIdentifier()).collect(Collectors.toList());
 			if(CollectionHelper.isEmpty(identifiers))
 				continue;
 			if(fieldName.equals(ExpenditureImpl.FIELD_HAS_NO_ENTRY_AUTHORIZATION_AVAILABLE_AMOUNT)) {
