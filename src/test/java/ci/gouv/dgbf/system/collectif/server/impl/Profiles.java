@@ -23,6 +23,19 @@ public interface Profiles extends org.cyk.quarkus.extension.test.Profile {
 		}
 	}
 	
+	public class Jasper implements QuarkusTestProfile{
+		@Override
+		public Map<String, String> getConfigOverrides() {
+			Map<String, String> map = Profile.buildConfig(Jasper.class);
+			return map;
+		}
+		
+		@Override
+		public Set<String> tags() {
+			return Profile.buildTags(Jasper.class);
+		}
+	}
+	
 	public class Actor implements QuarkusTestProfile{
 		@Override
 		public Map<String, String> getConfigOverrides() {

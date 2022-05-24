@@ -6,7 +6,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class ClientRequestFilter implements javax.ws.rs.client.ClientRequestFilter {
+public class ClientRequestFilterTest implements javax.ws.rs.client.ClientRequestFilter {
 
 	@Override
 	public void filter(ClientRequestContext requestContext) throws IOException {

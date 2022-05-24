@@ -29,6 +29,11 @@
 
 		<dependency>
 			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-resteasy-multipart</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-rest-client</artifactId>
 		</dependency>
 
@@ -46,16 +51,28 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-scheduler</artifactId>
 		</dependency>
-		
+
 		<dependency>
-	        <groupId>io.quarkus</groupId>
-	        <artifactId>quarkus-hibernate-envers</artifactId>
-	    </dependency>
-	
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-hibernate-envers</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.cyk.jee.utility.file.excel</groupId>
 			<artifactId>jee-utility-file-excel</artifactId>
 			<version>0.1.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.cyk.jee.utility.report.jasper.server</groupId>
+			<artifactId>jee-utility-report-jasper-server</artifactId>
+			<version>0.1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.owlike</groupId>
+					<artifactId>genson</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		
 		<!-- TEST -->
@@ -66,12 +83,12 @@
 			<version>0.0.1</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.github.tomakehurst</groupId>
-		    <artifactId>wiremock-jre8</artifactId>
-		    <version>${com.github.tomakehurst.wiremock-jre8.version}</version> 
-		    <scope>test</scope>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock-jre8</artifactId>
+			<version>${com.github.tomakehurst.wiremock-jre8.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
