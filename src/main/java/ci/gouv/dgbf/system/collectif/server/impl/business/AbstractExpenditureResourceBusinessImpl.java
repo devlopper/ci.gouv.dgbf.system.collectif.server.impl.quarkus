@@ -1,5 +1,7 @@
 package ci.gouv.dgbf.system.collectif.server.impl.business;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 
 import org.cyk.utility.__kernel__.collection.CollectionHelper;
 import org.cyk.utility.__kernel__.field.FieldHelper;
@@ -28,9 +31,11 @@ import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.SpecificPersistence;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
+import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.SpecificPersistenceGetter;
 import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
+import org.cyk.utility.report.GenericReportService;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureResourceBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
@@ -49,6 +54,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	SpecificPersistence<ENTITY> persistence;
 	@Inject LegislativeActPersistence legislativeActPersistence;
 	@Inject MaterializedViewActualizer materializedViewActualizer;
+	@Inject GenericReportService genericReportService;
 	
 	@Inject Configuration configuration;
 	
@@ -233,4 +239,29 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 	List<Object[]> readImportable(LegislativeActVersion legislativeActVersion,EntityManager entityManager) {
 		return entityManager.createNamedQuery(readImportableByLegislativeActIdentifierQueryIdentifier).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getResultList();
 	}
+
+	@Override
+	public Result buildAdjustmentIsNotZeroReportResponse(Filter filter,String auditWho) {
+		Result result = new Result();
+		String filterAsJson = null;
+		org.cyk.utility.report.configuration.Report configuration = getAdjustmentIsNotZeroReportConfiguration();
+		result.setValue(genericReportService.get(configuration.identifier(), configuration.fileType(), configuration.isContentInline(), filterAsJson));
+		return result;
+	}
+	
+	@Override
+	public Result buildAdjustmentIsNotZeroReportStream(Filter filter,String auditWho) {
+		Result result = new Result();
+		Result temp = buildAdjustmentIsNotZeroReportResponse(filter, auditWho);
+		Response response = (Response) temp.getValue();
+		InputStream inputStream = null;
+		if(response.getEntity() instanceof InputStream)
+			inputStream = (InputStream) response.getEntity();
+		else if(response.getEntity() instanceof byte[])
+			inputStream = new ByteArrayInputStream((byte[])response.getEntity());
+		result.setValue(inputStream);
+		return result;
+	}
+	
+	abstract org.cyk.utility.report.configuration.Report getAdjustmentIsNotZeroReportConfiguration();
 }

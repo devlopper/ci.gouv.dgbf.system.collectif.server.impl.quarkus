@@ -15,6 +15,7 @@ import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.EntityManagerGetter;
+import org.cyk.utility.report.configuration.Report;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ResourceBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
@@ -93,6 +94,11 @@ public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImp
 	public Result copy(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	Report getAdjustmentIsNotZeroReportConfiguration() {
+		return configuration.resource().reports().adjustmentIsNotZero();
 	}
 	
 	/* Event */

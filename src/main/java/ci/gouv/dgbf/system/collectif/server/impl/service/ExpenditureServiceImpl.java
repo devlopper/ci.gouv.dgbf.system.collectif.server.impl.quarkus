@@ -88,6 +88,16 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 		return buildResponseOk(business.verifyLoadable(legislativeActVersionIdentifier,map(loads)),new LoadResponseBuilderListenerImpl());
 	}
 	
+	/**/
+	
+	@Override
+	public Response getAdjustmentIsNotZeroReport(String filterAsJson,String auditWho) {
+		Result result = business.buildAdjustmentIsNotZeroReportResponse(Filter.instantiateFromJson(filterAsJson), auditWho);
+		return (Response) result.getValue();
+	}
+	
+	/**/
+	
 	private Collection<Expenditure> map(List<ExpenditureDto.LoadDto> loads) {
 		return CollectionHelper.isEmpty(loads) ? null : loads.stream().map(
 				dto -> new ExpenditureImpl().setIdentifier(dto.getIdentifier()).setActivityCode(dto.getActivity()).setEconomicNatureCode(dto.getEconomicNature()).setFundingSourceCode(dto.getFundingSource())

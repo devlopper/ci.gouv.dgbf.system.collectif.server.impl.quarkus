@@ -8,10 +8,10 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import org.cyk.utility.report.jasper.server.JasperServerClient;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.Test;
 
-import ci.gouv.dgbf.system.collectif.server.impl.client.JasperServerClient;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;

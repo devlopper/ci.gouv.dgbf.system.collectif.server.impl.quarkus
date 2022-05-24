@@ -12,9 +12,9 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
+import org.cyk.utility.report.jasper.server.JasperServerClient;
 
-import ci.gouv.dgbf.system.collectif.server.impl.client.JasperServerClient; 
+import com.github.tomakehurst.wiremock.WireMockServer;
 
 public class JasperQuarkusTestResourceLifecycleManager implements io.quarkus.test.common.QuarkusTestResourceLifecycleManager {
 

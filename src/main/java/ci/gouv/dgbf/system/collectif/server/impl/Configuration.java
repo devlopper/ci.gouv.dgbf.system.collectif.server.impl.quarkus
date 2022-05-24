@@ -6,6 +6,7 @@ import org.cyk.quarkus.extension.core_.configuration.When;
 import org.cyk.quarkus.extension.core_.configuration.processing.Copy;
 import org.cyk.quarkus.extension.core_.configuration.processing.Importation;
 import org.cyk.quarkus.extension.core_.configuration.processing.MaterializedViewActualization;
+import org.cyk.utility.report.configuration.Report;
 
 import io.quarkus.runtime.annotations.StaticInitSafe;
 import io.smallrye.config.ConfigMapping;
@@ -51,6 +52,28 @@ public interface Configuration extends org.cyk.quarkus.extension.core_.configura
 			@WithDefault("WHILE")
 			When whenResourceImported();
 		}	
+	}
+	
+	Expenditure expenditure();
+	
+	interface Expenditure {
+		Reports reports();
+		
+		interface Reports {
+			Report adjustmentIsNotZero();
+			
+		}
+	}
+	
+	Resource resource();
+	
+	interface Resource {
+		Reports reports();
+		
+		interface Reports {
+			Report adjustmentIsNotZero();
+			
+		}
 	}
 	
 	Actor actor();

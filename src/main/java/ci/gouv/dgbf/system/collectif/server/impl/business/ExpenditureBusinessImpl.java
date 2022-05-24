@@ -31,6 +31,8 @@ import org.cyk.utility.business.Result;
 import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.server.query.ReaderByCollection;
 import org.cyk.utility.persistence.server.query.executor.field.CodeExecutor;
+import org.cyk.utility.report.configuration.Report;
+import org.cyk.utility.service.client.ServiceGetter;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Expenditure;
@@ -60,6 +62,7 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 
 	@Inject CodeExecutor codeExecutor;
 	@Inject LegislativeActVersionPersistence legislativeActVersionPersistence;
+	@Inject ServiceGetter serviceGetter;
 	
 	@Override
 	void __listenPostConstruct__() {
@@ -448,6 +451,13 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 				result.setPaymentCreditAvailableIsNotEnough(identifiers);	
 			}
 		}
+	}
+	
+	/* Report */
+	
+	@Override
+	Report getAdjustmentIsNotZeroReportConfiguration() {
+		return configuration.expenditure().reports().adjustmentIsNotZero();
 	}
 	
 	/* Event */
