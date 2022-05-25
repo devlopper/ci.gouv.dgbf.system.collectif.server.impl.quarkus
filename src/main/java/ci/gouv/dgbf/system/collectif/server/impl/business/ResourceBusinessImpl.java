@@ -20,6 +20,7 @@ import org.cyk.utility.report.configuration.Report;
 import ci.gouv.dgbf.system.collectif.server.api.business.ResourceBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Resource;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImplAdjustableIsFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ResourceImportableView;
@@ -94,6 +95,11 @@ public class ResourceBusinessImpl extends AbstractExpenditureResourceBusinessImp
 	public Result copy(String legislativeActVersionIdentifier, String legislativeActVersionSourceIdentifier,String auditWho) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	String getReadAdjustmentIsNotZeroReportIdentifierQueryName() {
+		return LegislativeActImpl.QUERY_READ_RESOURCE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER_BY_LEGISLATIVE_ACT_IDENTIIFER;
 	}
 	
 	@Override

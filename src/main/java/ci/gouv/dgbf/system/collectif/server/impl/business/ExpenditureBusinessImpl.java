@@ -50,6 +50,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntr
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportableView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.FundingSourceImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LessorImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.PaymentCreditImpl;
@@ -458,6 +459,11 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 	@Override
 	Report getAdjustmentIsNotZeroReportConfiguration() {
 		return configuration.expenditure().reports().adjustmentIsNotZero();
+	}
+	
+	@Override
+	String getReadAdjustmentIsNotZeroReportIdentifierQueryName() {
+		return LegislativeActImpl.QUERY_READ_EXPENDITURE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER_BY_LEGISLATIVE_ACT_IDENTIIFER;
 	}
 	
 	/* Event */

@@ -3,6 +3,7 @@ package ci.gouv.dgbf.system.collectif.server.impl.service;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,9 @@ import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.rest.RequestExecutor;
 import org.cyk.utility.service.server.AbstractSpecificServiceImpl;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness;
 import ci.gouv.dgbf.system.collectif.server.api.business.ExpenditureBusiness.LoadableVerificationResult;
@@ -91,8 +95,8 @@ public class ExpenditureServiceImpl extends AbstractSpecificServiceImpl<Expendit
 	/**/
 	
 	@Override
-	public Response getAdjustmentIsNotZeroReport(String filterAsJson,String auditWho) {
-		Result result = business.buildAdjustmentIsNotZeroReportResponse(Filter.instantiateFromJson(filterAsJson), auditWho);
+	public Response getAdjustmentIsNotZeroReport(String filterAsJson,String fileType,Boolean isContentInline,String auditWho) {
+		Result result = business.buildAdjustmentIsNotZeroReportResponse(new Gson().fromJson(filterAsJson, new TypeToken<Map<String, String>>() {}.getType()),fileType,isContentInline, auditWho);
 		return (Response) result.getValue();
 	}
 	

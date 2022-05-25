@@ -8,13 +8,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.json.bind.JsonbBuilder;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.ws.rs.core.Response;
 
@@ -26,12 +30,12 @@ import org.cyk.utility.__kernel__.number.NumberHelper;
 import org.cyk.utility.__kernel__.object.marker.AuditableWhoDoneWhatWhen;
 import org.cyk.utility.__kernel__.string.StringHelper;
 import org.cyk.utility.__kernel__.throwable.ThrowablesMessages;
+import org.cyk.utility.__kernel__.value.ValueHelper;
 import org.cyk.utility.business.Result;
 import org.cyk.utility.business.server.AbstractSpecificBusinessImpl;
 import org.cyk.utility.persistence.EntityManagerGetter;
 import org.cyk.utility.persistence.SpecificPersistence;
 import org.cyk.utility.persistence.entity.EntityLifeCycleListenerImpl;
-import org.cyk.utility.persistence.query.Filter;
 import org.cyk.utility.persistence.query.QueryExecutorArguments;
 import org.cyk.utility.persistence.server.SpecificPersistenceGetter;
 import org.cyk.utility.persistence.server.view.MaterializedViewActualizer;
@@ -45,6 +49,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.impl.Configuration;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.LegislativeActVersionImpl;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.SectionImpl;
 import io.quarkus.scheduler.Scheduled;
 
 public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends AbstractSpecificBusinessImpl<ENTITY> implements ExpenditureResourceBusiness<ENTITY>,Serializable{
@@ -240,19 +245,48 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		return entityManager.createNamedQuery(readImportableByLegislativeActIdentifierQueryIdentifier).setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getResultList();
 	}
 
+	abstract String getReadAdjustmentIsNotZeroReportIdentifierQueryName();
+	
 	@Override
-	public Result buildAdjustmentIsNotZeroReportResponse(Filter filter,String auditWho) {
+	public Result buildAdjustmentIsNotZeroReportResponse(Map<String,String> parameters,String fileType,Boolean isContentInline,String auditWho) {
+		if(parameters == null)
+			throw new RuntimeException("Le filtre est obligatoire");
+		String legislativeActVersionIdentifier = parameters.get(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER);
+		if(StringHelper.isBlank(legislativeActVersionIdentifier))
+			throw new RuntimeException(String.format("L'identifiant de %s est obligatoire",LegislativeActVersion.NAME));
 		Result result = new Result();
-		String filterAsJson = null;
+		String identifier = null;
+		String queryName = getReadAdjustmentIsNotZeroReportIdentifierQueryName();
+		if(StringHelper.isNotBlank(queryName))
+			try {
+				identifier = entityManager.createNamedQuery(queryName, String.class).setParameter("legislativeActVersionIdentifier", legislativeActVersionIdentifier).getSingleResult();
+			} catch (NoResultException exception) {
+				identifier = null;
+			}
 		org.cyk.utility.report.configuration.Report configuration = getAdjustmentIsNotZeroReportConfiguration();
-		result.setValue(genericReportService.get(configuration.identifier(), configuration.fileType(), configuration.isContentInline(), filterAsJson));
+		if(StringHelper.isBlank(identifier))
+			identifier = configuration.identifier();
+		//Change identifier to code
+		parameters.entrySet().forEach(entry -> {
+			if(Parameters.SECTION_IDENTIFIER.equals(entry.getKey()))
+				entry.setValue(entityManager.createQuery(String.format("SELECT t.code FROM %s t WHERE t.identifier = :identifier",SectionImpl.ENTITY_NAME),String.class).setParameter("identifier", entry.getValue()).getSingleResult());
+		});
+		//Parameters name must match Report parameters name
+		parameters = parameters.entrySet().stream().collect(Collectors.toMap(x -> {
+			org.cyk.utility.report.configuration.Report.Parameter parameter = org.cyk.utility.report.configuration.Report.getParameterByName(configuration, x.getKey());
+			return parameter == null ? x.getKey() : parameter.mappedTo();
+		}, x -> x.getValue()));
+		String parametersAsJson = ValueHelper.defaultToIfBlank(JsonbBuilder.create().toJson(parameters),configuration.parametersAsJson());
+		fileType = ValueHelper.defaultToIfBlank(fileType, configuration.fileType());
+		isContentInline = isContentInline == null ? configuration.isContentInline() : isContentInline;
+		result.setValue(genericReportService.get(identifier, parametersAsJson, fileType, isContentInline));
 		return result;
 	}
 	
 	@Override
-	public Result buildAdjustmentIsNotZeroReportStream(Filter filter,String auditWho) {
+	public Result buildAdjustmentIsNotZeroReportStream(Map<String,String> parameters,String fileType,String auditWho) {
 		Result result = new Result();
-		Result temp = buildAdjustmentIsNotZeroReportResponse(filter, auditWho);
+		Result temp = buildAdjustmentIsNotZeroReportResponse(parameters,fileType,Boolean.TRUE, auditWho);
 		Response response = (Response) temp.getValue();
 		InputStream inputStream = null;
 		if(response.getEntity() instanceof InputStream)

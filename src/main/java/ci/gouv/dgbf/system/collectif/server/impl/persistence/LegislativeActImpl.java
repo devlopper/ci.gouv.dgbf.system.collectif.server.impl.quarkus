@@ -42,6 +42,9 @@ import lombok.experimental.Accessors;
 })
 @NamedQueries(value = {
 		@NamedQuery(name = LegislativeActImpl.QUERY_READ_BY_IDENTIIFER,query = "SELECT t FROM LegislativeActImpl t WHERE t.identifier = :identifier")
+		,@NamedQuery(name = LegislativeActImpl.QUERY_READ_EXPENDITURE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER_BY_LEGISLATIVE_ACT_IDENTIIFER,query = "SELECT t.expenditureAdjustmentIsNotZeroReportIdentifier "
+				+ "FROM LegislativeActImpl t JOIN LegislativeActVersionImpl lav ON lav.act = t "
+				+ "WHERE lav.identifier = :legislativeActVersionIdentifier")
 })
 @AttributeOverrides(value= {
 		@AttributeOverride(name = LegislativeActImpl.FIELD___AUDIT_IDENTIFIER__,column = @Column(name=LegislativeActImpl.COLUMN___AUDIT_IDENTIFIER__,nullable = false))
@@ -102,6 +105,9 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	@Column(name = COLUMN_AVAILABLE_MONITORABLE) @Audited(withModifiedFlag = true,modifiedColumnName = COLUMN_AVAILABLE_MONITORABLE+"_MOD") Boolean availableMonitorable;
 	@Transient String availableMonitorableAsString;
 	
+	@Column(name = COLUMN_EXPENDITURE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER) String expenditureAdjustmentIsNotZeroReportIdentifier;
+	@Column(name = COLUMN_RESOURCE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER) String resourceAdjustmentIsNotZeroReportIdentifier;
+	
 	@Override
 	public LegislativeActImpl setIdentifier(String identifier) {
 		return (LegislativeActImpl) super.setIdentifier(identifier);
@@ -152,6 +158,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String FIELD_SIGNATORY = "signatory";
 	public static final String FIELD_REFERENCE = "reference";
 	public static final String FIELD_VERSIONS = "versions";
+	public static final String FIELD_EXPENDITURE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER = "expenditureAdjustmentIsNotZeroReportIdentifier";
+	public static final String FIELD_RESOURCE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER = "resourceAdjustmentIsNotZeroReportIdentifier";
 	
 	public static final String ENTITY_NAME = "LegislativeActImpl";
 	public static final String TABLE_NAME = "TA_COLLECTIF";
@@ -169,6 +177,8 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN_REFERENCE = "REFERENCE";
 	public static final String COLUMN_AVAILABLE_MONITORABLE = "DISPONIBLE_SURVEILLABLE";
 	public static final String COLUMN_NUMBER = "NUMERO";
+	public static final String COLUMN_EXPENDITURE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER = "RAPPORT_SAISIE_DEPENSE";
+	public static final String COLUMN_RESOURCE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER = "RAPPORT_SAISIE_RESSOURCE";
 	
 	public static final String COLUMN___AUDIT_IDENTIFIER__ = "AUDIT_IDENTIFIANT";
 	public static final String COLUMN___AUDIT_WHO__ = "AUDIT_ACTEUR";
@@ -177,4 +187,6 @@ public class LegislativeActImpl extends AbstractIdentifiableSystemScalarStringId
 	public static final String COLUMN___AUDIT_WHEN__ = "AUDIT_DATE";
 	
 	public static final String QUERY_READ_BY_IDENTIIFER = "LegislativeActImpl.readByIdentifier";
+	public static final String QUERY_READ_EXPENDITURE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER_BY_LEGISLATIVE_ACT_IDENTIIFER = "LegislativeActImpl.readExpenditureAdjustmentIsNotZeroReportIdentifierByLegislativeActVersionIdentifier";
+	public static final String QUERY_READ_RESOURCE_ADJUSTMENT_IS_NOT_ZERO_REPORT_IDENTIFIER_BY_LEGISLATIVE_ACT_IDENTIIFER = "LegislativeActImpl.readResourceAdjustmentIsNotZeroReportIdentifierByLegislativeActVersionIdentifier";
 }
