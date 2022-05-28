@@ -41,11 +41,11 @@ public interface ExpenditureQueryStringBuilder {
 				if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE)))
 					amounts.setAdjustmentLessThanZero(Boolean.TRUE).setAdjustmentGreaterThanZero(Boolean.TRUE).setIncludedMovement(null).setAvailable(null);
 				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY)))
-					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(Boolean.TRUE).setAvailable(null);
+					amounts.setAdjustment(null).setExpected(null).setView(null).setActualAtLegislativeActDate(null).setIncludedMovement(Boolean.TRUE).setAvailable(null);
 				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY)))
-					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(null).setAvailable(Boolean.TRUE);
+					amounts.setAdjustment(null).setExpected(null).setView(null).setActualAtLegislativeActDate(null).setIncludedMovement(null).setAvailable(Boolean.TRUE);
 				else if(Boolean.TRUE.equals(queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY)))
-					amounts.setAdjustment(null).setExpected(null).setView(null).setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE);
+					amounts.setAdjustment(null).setExpected(null).setView(null).setActualAtLegislativeActDate(null).setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE);
 				amounts.build(builderArguments);
 			}
 		}
@@ -54,7 +54,7 @@ public interface ExpenditureQueryStringBuilder {
 		
 		@Setter @Accessors(chain = true)
 		public static class Amounts {
-			protected Boolean adjustment=Boolean.TRUE,adjustmentLessThanZero,adjustmentGreaterThanZero,expected,view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE;
+			protected Boolean adjustment=Boolean.TRUE,adjustmentLessThanZero,adjustmentGreaterThanZero,expected,view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE,actualAtLegislativeActDate=Boolean.TRUE;
 			protected String variableName = "t",expectedVariableName;
 			protected Boolean sumable = Boolean.FALSE;
 
@@ -64,7 +64,6 @@ public interface ExpenditureQueryStringBuilder {
 				for(String fieldName : ENTRY_AUTHORIZATION_PAYMENT_CREDIT) {
 					if(Boolean.TRUE.equals(adjustment))
 						arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT)));
-					
 					if(Boolean.TRUE.equals(adjustmentLessThanZero))
 						arguments.getProjection(Boolean.TRUE).add(get(variableName, FieldHelper.join(fieldName,AbstractAmountsImpl.FIELD_ADJUSTMENT),sumable,Boolean.TRUE));
 					if(Boolean.TRUE.equals(adjustmentGreaterThanZero))
@@ -81,6 +80,8 @@ public interface ExpenditureQueryStringBuilder {
 						arguments.getProjection(Boolean.TRUE).add(get("im", fieldName));
 					if(Boolean.TRUE.equals(available))
 						arguments.getProjection(Boolean.TRUE).add(get("available", fieldName));
+					if(Boolean.TRUE.equals(actualAtLegislativeActDate))
+						arguments.getProjection(Boolean.TRUE).add(get("actual", fieldName));
 				}
 			}
 			
@@ -92,6 +93,7 @@ public interface ExpenditureQueryStringBuilder {
 				view = null;
 				includedMovement = null;
 				available = null;
+				actualAtLegislativeActDate = null;
 				return this;
 			}
 			
@@ -132,6 +134,7 @@ public interface ExpenditureQueryStringBuilder {
 				Boolean view;
 				Boolean includedMovement;
 				Boolean available;
+				Boolean actualAtLegislativeActDate;
 			}
 			
 			public static Integer set(SetArguments arguments) {
@@ -161,6 +164,8 @@ public interface ExpenditureQueryStringBuilder {
 					arguments.amounts.setMovementIncluded(NumberHelper.getLong(arguments.array[arguments.index++],0l));
 				if(Boolean.TRUE.equals(arguments.available) && arguments.index < arguments.array.length)
 					arguments.amounts.setAvailable(NumberHelper.getLong(arguments.array[arguments.index++],0l));
+				if(Boolean.TRUE.equals(arguments.actualAtLegislativeActDate) && arguments.index < arguments.array.length)
+					arguments.amounts.setActualAtLegislativeActDate(NumberHelper.getLong(arguments.array[arguments.index++],0l));
 				
 				arguments.amounts.computeActualPlusAdjustment();
 				if(Boolean.TRUE.equals(arguments.view) && Boolean.TRUE.equals(arguments.includedMovement) && Boolean.TRUE.equals(arguments.adjustment))
@@ -170,39 +175,9 @@ public interface ExpenditureQueryStringBuilder {
 				return arguments.index;
 			}
 			
-			public static Integer set(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
-				return set(new SetArguments().setAmounts(amounts).setArray(array).setIndex(index).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available));
-				/*
-				if(amounts == null || index == null || index < 0)
-					return index;
-				amounts.nullify();
-				if(Boolean.TRUE.equals(adjustment) && index < array.length)
-					amounts.setAdjustment(NumberHelper.getLong(array[index++],0l));
-				if(Boolean.TRUE.equals(expected)) {
-					amounts.setExpectedAdjustment(NumberHelper.getLong(array[index++],0l));
-					amounts.computeExpectedAdjustmentMinusAdjustment();
-				}
-				if(Boolean.TRUE.equals(view)) {
-					if(index < array.length)
-						amounts.setInitial(NumberHelper.getLong(array[index++],0l));
-					if(index < array.length)
-						amounts.setMovement(NumberHelper.getLong(array[index++],0l));
-					if(index < array.length)
-						amounts.setActual(NumberHelper.getLong(array[index++],0l));
-				}
-				
-				if(Boolean.TRUE.equals(includedMovement) && index < array.length)
-					amounts.setMovementIncluded(NumberHelper.getLong(array[index++],0l));
-				if(Boolean.TRUE.equals(available) && index < array.length)
-					amounts.setAvailable(NumberHelper.getLong(array[index++],0l));
-				
-				amounts.computeActualPlusAdjustment();
-				if(Boolean.TRUE.equals(view) && Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(adjustment))
-					amounts.computeActualMinusMovementIncludedPlusAdjustment();
-				if(Boolean.TRUE.equals(includedMovement) && Boolean.TRUE.equals(available)  && Boolean.TRUE.equals(adjustment))
-					amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
-				return index;
-				*/
+			public static Integer set(AbstractAmountsImpl amounts,Object[] array,Integer index,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available,Boolean actualAtLegislativeActDate) {
+				return set(new SetArguments().setAmounts(amounts).setArray(array).setIndex(index).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available)
+						.setActualAtLegislativeActDate(actualAtLegislativeActDate));
 			}
 			
 			static void set(ExpenditureImpl expenditure,SetArguments arguments) {
@@ -214,8 +189,9 @@ public interface ExpenditureQueryStringBuilder {
 				arguments.index = set(arguments);
 			}
 			
-			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available,Integer index) {
-				set(expenditure,new SetArguments().setArray(array).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available).setIndex(index));
+			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available,Boolean actualAtLegislativeActDate,Integer index) {
+				set(expenditure,new SetArguments().setArray(array).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available).setActualAtLegislativeActDate(actualAtLegislativeActDate)
+						.setIndex(index));
 				/*
 				if(expenditure == null)
 					return;
@@ -224,8 +200,8 @@ public interface ExpenditureQueryStringBuilder {
 				*/
 			}
 			
-			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
-				set(expenditure, array,adjustment,expected, view, includedMovement, available, 1);
+			static void set(ExpenditureImpl expenditure,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available,Boolean actualAtLegislativeActDate) {
+				set(expenditure, array,adjustment,expected, view, includedMovement, available,actualAtLegislativeActDate, 1);
 			}
 		}
 	}
@@ -250,21 +226,36 @@ public interface ExpenditureQueryStringBuilder {
 			return getIncludedMovement("t");
 		}
 		
+		static String buildGetAmount(String entityName,String amountVariable,String variableName) {
+			return String.format("JOIN %3$s %10$s ON %10$s.%4$s = exercise.%5$s AND %10$s.%6$s = %1$s.%6$s AND %10$s.%7$s = %1$s.%7$s AND %10$s.%8$s = %1$s.%8$s AND %10$s.%9$s = %1$s.%9$s"
+					, variableName, "exercise",entityName
+					,AbstractExpenditureEntryAuthorizationPaymentCreditView.FIELD_YEAR,ExerciseImpl.FIELD_YEAR
+					,AbstractExpenditureEntryAuthorizationPaymentCreditView.FIELD_ACTIVITY_IDENTIFIER,AbstractExpenditureEntryAuthorizationPaymentCreditView.FIELD_ECONOMIC_NATURE_IDENTIFIER
+					,AbstractExpenditureEntryAuthorizationPaymentCreditView.FIELD_FUNDING_SOURCE_IDENTIFIER,AbstractExpenditureEntryAuthorizationPaymentCreditView.FIELD_LESSOR_IDENTIFIER
+					,amountVariable);
+		}
+		
 		public static String getAvailable(String variableName) {
-			return String.format("JOIN %3$s available ON available.%4$s = exercise.%5$s AND available.%6$s = %1$s.%6$s AND available.%7$s = %1$s.%7$s AND available.%8$s = %1$s.%8$s AND available.%9$s = %1$s.%9$s", variableName, "exercise"
-					,ExpenditureAvailableView.ENTITY_NAME,ExpenditureAvailableView.FIELD_YEAR,ExerciseImpl.FIELD_YEAR,ExpenditureAvailableView.FIELD_ACTIVITY_IDENTIFIER,ExpenditureAvailableView.FIELD_ECONOMIC_NATURE_IDENTIFIER
-					,ExpenditureAvailableView.FIELD_FUNDING_SOURCE_IDENTIFIER,ExpenditureAvailableView.FIELD_LESSOR_IDENTIFIER);
+			return buildGetAmount(ExpenditureAvailableView.ENTITY_NAME, "available", variableName);
 		}
 		
 		public static String getAvailable() {
 			return getAvailable("t");
 		}
 		
+		public static String getActualAtLegislativeActDate(String variableName) {
+			return buildGetAmount(ExpenditureActualAtLegislativeActDateView.ENTITY_NAME, "actual", variableName);
+		}
+		
+		public static String getActualAtLegislativeActDate() {
+			return getActualAtLegislativeActDate("t");
+		}
+		
 		/**/
 		
 		@Setter @Accessors(chain = true)
 		public static class Amounts implements Serializable {
-			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE,joinActVersion=Boolean.TRUE,joinAct=Boolean.TRUE;
+			protected Boolean view=Boolean.TRUE,includedMovement=Boolean.TRUE,available=Boolean.TRUE,actualAtLegislativeActDate=Boolean.FALSE,joinActVersion=Boolean.TRUE,joinAct=Boolean.TRUE;
 			protected String expenditureVariableName = "t",actVersionVariableName="lav",actVariableName="la",exerciseVariableName="exercise";
 			
 			public void build(Arguments arguments) {
@@ -283,6 +274,16 @@ public interface ExpenditureQueryStringBuilder {
 						joinExercise(arguments);
 					}
 					joinAvailable(arguments);
+				}
+				if(Boolean.TRUE.equals(actualAtLegislativeActDate)) {
+					if(!Boolean.TRUE.equals(view) && !Boolean.TRUE.equals(available)) {
+						joinActVersion(arguments);
+						joinAct(arguments);
+						joinExercise(arguments);
+					}
+					joinActualAtLegislativeActDate(arguments);
+					//throw new RuntimeException("JOINED");
+					//System.out.println("ExpenditureQueryStringBuilder.Tuple.Amounts.build() JOINED");
 				}
 			}
 			
@@ -321,12 +322,28 @@ public interface ExpenditureQueryStringBuilder {
 				arguments.getTuple().addJoins("LEFT "+getJoinAvailable());
 			}
 			
+			protected void joinActualAtLegislativeActDate(Arguments arguments) {
+				arguments.getTuple().addJoins("LEFT "+getJoinActualAtLegislativeActDate());
+			}
+			
 			protected String getJoinIncludedMovement() {
 				return Tuple.getIncludedMovement(expenditureVariableName);
 			}
 			
 			protected String getJoinAvailable() {
 				return Tuple.getAvailable(expenditureVariableName);
+			}
+			
+			protected String getJoinActualAtLegislativeActDate() {
+				return Tuple.getActualAtLegislativeActDate(expenditureVariableName);
+			}
+			
+			public Amounts nullify() {
+				view = null;
+				includedMovement = null;
+				available = null;
+				actualAtLegislativeActDate = null;
+				return this;
 			}
 		}
 		
@@ -416,8 +433,9 @@ public interface ExpenditureQueryStringBuilder {
 			if(CollectionHelper.isNotEmpty(arguments.getProcessableTransientFieldsNames()) 
 					&& CollectionUtils.containsAny(arguments.getProcessableTransientFieldsNames(),ExpenditureImpl.VIEW_FIELDS_NAMES))
 				return Boolean.TRUE;
-					
-			if(StringHelper.isNotBlank((String)arguments.getFilterFieldValue(Parameters.SECTION_IDENTIFIER)) 
+			if(
+					StringHelper.isNotBlank((String)arguments.getFilterFieldValue(Parameters.BUDGET_CATEGORY_IDENTIFIER)) 
+					|| StringHelper.isNotBlank((String)arguments.getFilterFieldValue(Parameters.SECTION_IDENTIFIER)) 
 					|| StringHelper.isNotBlank((String)arguments.getFilterFieldValue(Parameters.EXPENDITURE_NATURE_IDENTIFIER))
 					|| StringHelper.isNotBlank((String)arguments.getFilterFieldValue(Parameters.BUDGET_SPECIALIZATION_UNIT_IDENTIFIER))
 					|| StringHelper.isNotBlank((String)arguments.getFilterFieldValue(Parameters.ACTION_IDENTIFIER))

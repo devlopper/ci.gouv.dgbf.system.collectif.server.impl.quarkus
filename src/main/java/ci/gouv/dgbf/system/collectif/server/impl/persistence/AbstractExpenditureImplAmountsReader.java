@@ -10,8 +10,8 @@ public class AbstractExpenditureImplAmountsReader extends AbstractExpenditureImp
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
 		new ExpenditureQueryStringBuilder.Projection.Amounts().setAdjustment(hasAdjustment()).setAdjustmentLessThanZero(hasAdjustmentLessThanZero()).setAdjustmentGreaterThanZero(hasAdjustmentGreaterThanZero())
-			.setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
-		new ExpenditureQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+			.setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).setActualAtLegislativeActDate(hasActualAtLegislativeActDate()).build(arguments);
+		new ExpenditureQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).setActualAtLegislativeActDate(hasActualAtLegislativeActDate()).build(arguments);
 		return arguments;
 	}
 	
@@ -19,12 +19,12 @@ public class AbstractExpenditureImplAmountsReader extends AbstractExpenditureImp
 	protected void __set__(ExpenditureImpl expenditure, Object[] array) {
 		ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure, new ExpenditureQueryStringBuilder.Projection.Amounts.SetArguments().setArray(array).setAdjustment(hasAdjustment())
 				.setAdjustmentLessThanZero(hasAdjustmentLessThanZero()).setAdjustmentGreaterThanZero(hasAdjustmentGreaterThanZero()).setExpected(hasExpectedAdjustment())
-				.setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()));
+				.setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).setActualAtLegislativeActDate(hasActualAtLegislativeActDate()));
 	}
-	
+	/*
 	protected ExpenditureQueryStringBuilder.Projection.Amounts instantiateProjectionAmounts(){
 		return new ExpenditureQueryStringBuilder.Projection.Amounts().nullify().setAdjustment(Boolean.TRUE).setView(Boolean.TRUE);
-	}
+	}*/
 	
 	protected Boolean hasAdjustment() {
 		return Boolean.TRUE;
@@ -51,6 +51,10 @@ public class AbstractExpenditureImplAmountsReader extends AbstractExpenditureImp
 	}
 	
 	protected Boolean hasAvailable() {
+		return null;
+	}
+	
+	protected Boolean hasActualAtLegislativeActDate() {
 		return null;
 	}
 }

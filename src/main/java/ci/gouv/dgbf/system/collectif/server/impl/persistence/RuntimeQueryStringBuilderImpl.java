@@ -79,6 +79,14 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 	
 	@Inject @RestClient ActorClient actorClient;
 	
+	/*@Override
+	public String build(QueryExecutorArguments arguments) {
+		// TODO Auto-generated method stub
+		String s = super.build(arguments);
+		System.out.println(s);
+		return s;
+	}*/
+	
 	@Override
 	protected void setProjection(QueryExecutorArguments queryExecutorArguments, Arguments builderArguments) {
 		Boolean amountSumable = queryExecutorArguments.getFilterFieldValueAsBoolean(null,Parameters.AMOUNT_SUMABLE);
@@ -123,17 +131,34 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 		
 		if(Boolean.TRUE.equals(expenditurePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ExpenditureImpl.ENTITY_NAME));
-			/*if(ExpenditureQueryStringBuilder.Join.isJoinedToRegulatoryActLegislativeActVersionAndAvailable(arguments, builderArguments)) {
-				ExpenditureQueryStringBuilder.Join.joinRegulatoryActLegislativeActVersionAndAvailable(builderArguments);
-				builderArguments.getGroup(Boolean.TRUE).add("t.identifier");
-			}else {*/
-				if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null || arguments.getFilterField(Parameters.AMOUNT_SUMABLE) != null || arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null)
-					new ExpenditureQueryStringBuilder.Tuple.Amounts().build(builderArguments);
-				
-				if(Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
-					builderArguments.getTuple().addJoins(String.format("JOIN %s ev ON ev.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
-				}
-			//}
+			Boolean amountSumable = arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE);
+			ExpenditureQueryStringBuilder.Tuple.Amounts amounts = null;
+			if(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null
+					|| arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null || arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null) {
+				amounts = new ExpenditureQueryStringBuilder.Tuple.Amounts().nullify();
+				amounts.setAvailable(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null);
+				amounts.setIncludedMovement(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null || arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null
+						|| arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null );
+			}else if(amountSumable) {
+				amounts = new ExpenditureQueryStringBuilder.Tuple.Amounts().nullify();
+				if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))
+					amounts.setView(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY))
+					amounts.setIncludedMovement(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY))
+					amounts.setAvailable(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY))
+					amounts.setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE);
+				else
+					amounts.setView(Boolean.TRUE).setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE);
+			}
+			
+			if(amounts != null)
+				amounts.build(builderArguments);
+			
+			if((amounts == null || !Boolean.TRUE.equals(amounts.view)) && Boolean.TRUE.equals(isExpenditureJoinedToView(arguments, builderArguments))) {
+				builderArguments.getTuple().addJoins(String.format("JOIN %s ev ON ev.identifier = t.identifier",ExpenditureView.ENTITY_NAME));
+			}			
 		}else if(Boolean.TRUE.equals(resourcePersistence.isProcessable(arguments))) {
 			builderArguments.getTuple(Boolean.TRUE).add(String.format("%s t",ResourceImpl.ENTITY_NAME));
 			

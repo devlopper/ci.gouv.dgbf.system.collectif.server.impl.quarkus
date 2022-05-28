@@ -13,4 +13,9 @@ public class LegislativeActVersionImplExpendituresAmountsReader extends Abstract
 	protected Boolean hasAvailable() {
 		return Boolean.TRUE;
 	}
+	
+	@Override
+	protected Boolean hasActualAtLegislativeActDate() {
+		return Boolean.TRUE;
+	}
 }

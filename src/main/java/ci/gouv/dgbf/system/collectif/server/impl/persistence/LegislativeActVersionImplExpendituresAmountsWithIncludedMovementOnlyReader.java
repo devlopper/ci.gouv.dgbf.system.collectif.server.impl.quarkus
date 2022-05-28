@@ -28,4 +28,9 @@ public class LegislativeActVersionImplExpendituresAmountsWithIncludedMovementOnl
 	protected Boolean hasAvailable() {
 		return Boolean.FALSE;
 	}
+	
+	@Override
+	protected Boolean hasActualAtLegislativeActDate() {
+		return Boolean.FALSE;
+	}
 }

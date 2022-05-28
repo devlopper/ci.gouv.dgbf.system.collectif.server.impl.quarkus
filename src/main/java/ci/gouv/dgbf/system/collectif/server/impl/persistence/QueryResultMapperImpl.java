@@ -21,17 +21,17 @@ public class QueryResultMapperImpl extends org.cyk.utility.persistence.query.Que
 			ExpenditureImpl expenditure = new ExpenditureImpl();
 			if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))
 				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,new ExpenditureQueryStringBuilder.Projection.Amounts.SetArguments().setArray(array).setAdjustment(Boolean.TRUE).setView(Boolean.TRUE)
-						.setAdjustmentLessThanZero(Boolean.TRUE).setAdjustmentGreaterThanZero(Boolean.TRUE)
+						.setAdjustmentLessThanZero(Boolean.TRUE).setAdjustmentGreaterThanZero(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE)
 						.setIndex(0));	
 				//ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,0);
 			else if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_ONLY))
-				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,0);
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,Boolean.FALSE,0);
 			else if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_AVAILABLE_ONLY))
-				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,0);
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.FALSE,Boolean.TRUE,Boolean.FALSE,0);
 			else if(fieldsNamesIndexes.containsKey(ExpenditureImpl.FIELDS_AMOUNTS_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY))
-				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE,0);
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.FALSE,null,Boolean.FALSE,Boolean.TRUE,Boolean.TRUE,Boolean.FALSE,0);
 			else
-				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,0);
+				ExpenditureQueryStringBuilder.Projection.Amounts.set(expenditure,array,Boolean.TRUE,null,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,0);
 			return (T) expenditure;
 		}
 		if((Resource.class.equals(klass) || ResourceImpl.class.equals(klass)) && fieldsNamesIndexes.containsKey(ResourceImpl.FIELDS_AMOUNTS_SUMS)) {

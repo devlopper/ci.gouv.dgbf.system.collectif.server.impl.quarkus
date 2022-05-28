@@ -9,8 +9,8 @@ public class AbstractLegislativeActImplAmountsReader extends AbstractLegislative
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
-		new LegislativeActQueryStringBuilder.Projection.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
-		new LegislativeActQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		new LegislativeActQueryStringBuilder.Projection.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).setActualAtLegislativeActDate(hasActualAtLegislativeActDate()).build(arguments);
+		new LegislativeActQueryStringBuilder.Tuple.Amounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).setActualAtLegislativeActDate(hasActualAtLegislativeActDate()).build(arguments);
 		arguments.getGroup(Boolean.TRUE).add("t.identifier");
 		return arguments;
 	}
@@ -29,6 +29,10 @@ public class AbstractLegislativeActImplAmountsReader extends AbstractLegislative
 	}
 	
 	protected Boolean hasAvailable() {
+		return null;
+	}
+	
+	protected Boolean hasActualAtLegislativeActDate() {
 		return null;
 	}
 }

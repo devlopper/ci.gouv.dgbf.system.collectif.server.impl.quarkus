@@ -24,5 +24,5 @@ public abstract class AbstractAmountsView extends AbstractObject implements Seri
 	
 	public static final String COLUMN_INITIAL = "BUDGET_INITIAL";
 	public static final String COLUMN_MOVEMENT = "MOUVEMENT";
-	public static final String COLUMN_ACTUAL = "BUDGET_ACTUEL";	
+	public static final String COLUMN_ACTUAL = "BUDGET_ACTUEL";
 }

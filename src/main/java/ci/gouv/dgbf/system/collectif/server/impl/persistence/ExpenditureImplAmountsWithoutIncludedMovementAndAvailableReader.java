@@ -13,4 +13,9 @@ public class ExpenditureImplAmountsWithoutIncludedMovementAndAvailableReader ext
 	protected Boolean hasAvailable() {
 		return Boolean.FALSE;
 	}
+	
+	@Override
+	protected Boolean hasActualAtLegislativeActDate() {
+		return Boolean.TRUE;
+	}
 }

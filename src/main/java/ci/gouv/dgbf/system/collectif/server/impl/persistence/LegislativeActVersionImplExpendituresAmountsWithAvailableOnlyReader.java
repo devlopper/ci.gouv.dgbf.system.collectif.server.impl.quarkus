@@ -28,4 +28,9 @@ public class LegislativeActVersionImplExpendituresAmountsWithAvailableOnlyReader
 	protected Boolean hasAvailable() {
 		return Boolean.TRUE;
 	}
+	
+	@Override
+	protected Boolean hasActualAtLegislativeActDate() {
+		return Boolean.FALSE;
+	}
 }

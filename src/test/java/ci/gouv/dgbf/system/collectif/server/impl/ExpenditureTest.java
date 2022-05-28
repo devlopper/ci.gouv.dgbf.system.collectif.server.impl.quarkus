@@ -67,7 +67,7 @@ public class ExpenditureTest {
 	Integer expectedCount = 17;
 	
 	@Test @Order(1)
-	public void verifyLoadable(){
+	void verifyLoadable(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -77,7 +77,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_undefined_activity_code(){
+	void verifyLoadable_undefined_activity_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode(null).setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -87,7 +87,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_undefined_economic_nature_code(){
+	void verifyLoadable_undefined_economic_nature_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -97,7 +97,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_undefined_funding_source_code(){
+	void verifyLoadable_undefined_funding_source_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode(" ").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -106,7 +106,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_undefined_lessor_code(){
+	void verifyLoadable_undefined_lessor_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("     ").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -116,7 +116,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_undefined_entry_authorization_adjustment(){
+	void verifyLoadable_undefined_entry_authorization_adjustment(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("id1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(null));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -126,7 +126,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_unknown_activity_code(){
+	void verifyLoadable_unknown_activity_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setActivityCode("unknown_activity_code").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -136,7 +136,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_unknown_economicNature_code(){
+	void verifyLoadable_unknown_economicNature_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("unknown_economicNature_code").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -145,7 +145,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_unknown_fundingsSources_code(){
+	void verifyLoadable_unknown_fundingsSources_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("unknown_fundingSource_code").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -154,7 +154,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_unknown_lessor_code(){
+	void verifyLoadable_unknown_lessor_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("unknown_lessor_code").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -163,7 +163,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_unknown_all_code(){
+	void verifyLoadable_unknown_all_code(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setActivityCode("uac").setEconomicNatureCode("uenc").setFundingSourceCode("ufsc").setLessorCode("ulc").setEntryAuthorizationAdjustment(0l));
 		LoadableVerificationResult result = expenditureBusiness.verifyLoadable("2022_1_1",expenditures);
@@ -173,7 +173,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_duplicates(){
+	void verifyLoadable_duplicates(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("2").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
@@ -185,7 +185,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_entry_authorization_available_not_enough(){
+	void verifyLoadable_entry_authorization_available_not_enough(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(-10000000l));
@@ -196,7 +196,7 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(1)
-	public void verifyLoadable_credit_payment_available_not_enough(){
+	void verifyLoadable_credit_payment_available_not_enough(){
 		Collection<Expenditure> expenditures = new ArrayList<>();
 		expenditures.add(new ExpenditureImpl().setIdentifier("1").setActivityCode("1").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l));
 		expenditures.add(new ExpenditureImpl().setIdentifier("2").setActivityCode("a05").setEconomicNatureCode("1").setFundingSourceCode("1").setLessorCode("1").setEntryAuthorizationAdjustment(0l).setPaymentCreditAdjustment(-10000000l));
@@ -256,9 +256,11 @@ public class ExpenditureTest {
 		assertor.assertExpenditureAmounts(expenditure.getPaymentCredit(),new PaymentCreditImpl().setInitial(5l).setMovement(12l).setActual(17l).setAdjustment(7l).setAvailable(null).setMovementIncluded(null)
 				.setActualMinusMovementIncludedPlusAdjustment(null).setAvailableMinusMovementIncludedPlusAdjustment(null));
 		
+		assertThat(expenditure.getEntryAuthorization().getActualAtLegislativeActDate()).isEqualTo(123l);
 		assertThat(expenditure.getEntryAuthorization().getAdjustmentLessThanZero()).isEqualTo(0l);
 		assertThat(expenditure.getEntryAuthorization().getAdjustmentGreaterThanZero()).isEqualTo(33l);
 		
+		assertThat(expenditure.getPaymentCredit().getActualAtLegislativeActDate()).isEqualTo(456l);
 		assertThat(expenditure.getPaymentCredit().getAdjustmentLessThanZero()).isEqualTo(0l);
 		assertThat(expenditure.getPaymentCredit().getAdjustmentGreaterThanZero()).isEqualTo(7l);
 	}
@@ -494,7 +496,7 @@ public class ExpenditureTest {
 	@Test @Order(1)
     public void service_get_amounts_sums_without_includedMovementAndAvailable() {
 		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")
-				.addField(Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE, "true")))
+				.addField(Parameters.AMOUNT_SUMABLE, "true").addField(Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE, "true")))
 				//.log().all()
 				.get("/api/depenses/sommation-montants");
 		response.then()

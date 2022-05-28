@@ -29,11 +29,6 @@
 
 		<dependency>
 			<groupId>io.quarkus</groupId>
-			<artifactId>quarkus-resteasy-multipart</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-rest-client</artifactId>
 		</dependency>
 
@@ -67,12 +62,6 @@
 			<groupId>org.cyk.jee.utility.report.jasper.server</groupId>
 			<artifactId>jee-utility-report-jasper-server</artifactId>
 			<version>1.0.0</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.cyk.jee.utility.service.client</groupId>
-			<artifactId>jee-utility-service-client</artifactId>
-			<version>0.1.0</version>
 		</dependency>
 		
 		<!-- TEST -->

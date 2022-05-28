@@ -63,10 +63,11 @@ public interface LegislativeActVersionQueryStringBuilder {
 				ExpenditureQueryStringBuilder.Projection.Amounts.set(arguments.setAmounts(legislativeActVersion.getPaymentCredit(Boolean.TRUE)));
 			}
 			
-			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available) {
+			public static void set(LegislativeActVersionImpl legislativeActVersion,Object[] array,Boolean adjustment,Boolean expected,Boolean view,Boolean includedMovement,Boolean available,Boolean actualAtLegislativeActDate) {
 				if(legislativeActVersion == null)
 					return;
-				set(legislativeActVersion,new ExpenditureQueryStringBuilder.Projection.Amounts.SetArguments().setArray(array).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available));
+				set(legislativeActVersion,new ExpenditureQueryStringBuilder.Projection.Amounts.SetArguments().setArray(array).setAdjustment(adjustment).setExpected(expected).setView(view).setIncludedMovement(includedMovement).setAvailable(available)
+						.setActualAtLegislativeActDate(actualAtLegislativeActDate));
 			}
 		}
 	}

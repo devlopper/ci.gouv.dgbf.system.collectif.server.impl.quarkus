@@ -12,8 +12,8 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
 		QueryStringBuilder.Arguments arguments =  super.instantiateQueryStringBuilderArguments();
 		new LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts().setAdjustment(hasAdjustment()).setAdjustmentLessThanZero(hasAdjustmentLessThanZero()).setAdjustmentGreaterThanZero(hasAdjustmentGreaterThanZero())
-		.setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
-		new LegislativeActVersionQueryStringBuilder.Tuple.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).build(arguments);
+		.setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).setActualAtLegislativeActDate(hasActualAtLegislativeActDate()).build(arguments);
+		new LegislativeActVersionQueryStringBuilder.Tuple.ExpendituresAmounts().setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()).setActualAtLegislativeActDate(hasActualAtLegislativeActDate()).build(arguments);
 		arguments.getGroup(Boolean.TRUE).add("t.identifier");
 		return arguments;
 	}
@@ -21,7 +21,8 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 	@Override
 	protected void __set__(LegislativeActVersionImpl legislativeActVersion, Object[] array) {
 		LegislativeActVersionQueryStringBuilder.Projection.ExpendituresAmounts.set(legislativeActVersion,new SetArguments().setArray(array).setAdjustment(hasAdjustment()).setAdjustmentLessThanZero(hasAdjustmentLessThanZero())
-				.setAdjustmentGreaterThanZero(hasAdjustmentGreaterThanZero()).setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable()));
+				.setAdjustmentGreaterThanZero(hasAdjustmentGreaterThanZero()).setExpected(hasExpectedAdjustment()).setView(hasView()).setIncludedMovement(hasIncludedMovement()).setAvailable(hasAvailable())
+				.setActualAtLegislativeActDate(hasActualAtLegislativeActDate()));
 	}
 	
 	protected Boolean hasAdjustment() {
@@ -49,6 +50,10 @@ public class AbstractLegislativeActVersionImplExpendituresAmountsReader extends 
 	}
 	
 	protected Boolean hasAvailable() {
+		return null;
+	}
+	
+	protected Boolean hasActualAtLegislativeActDate() {
 		return null;
 	}
 }
