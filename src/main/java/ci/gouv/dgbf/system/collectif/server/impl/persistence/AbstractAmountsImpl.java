@@ -29,13 +29,18 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 	@Transient Long initial = 0l;
 	@Transient Long movement = 0l;
 	@Transient Long movementIncluded = 0l;
+	@Transient Long movementIncludedPlusAdjustment = 0l;
 	@Transient Long actual = 0l;
 	@Transient Long actualAtLegislativeActDate = 0l;
+	@Transient Long actualAtLegislativeActDatePlusAdjustment = 0l;
+	@Transient Long actualAtLegislativeActDateMinusMovementIncludedPlusAdjustment = 0l;
 	@Transient Long actualMinusMovementIncluded = 0l;
 	@Transient Long available = 0l;	
 	@Transient Long actualPlusAdjustment = 0l;
 	@Transient Long actualMinusMovementIncludedPlusAdjustment = 0l;
 	@Transient Long availableMinusMovementIncludedPlusAdjustment = 0l;
+	@Transient Long initialPlusMovementIncludedPlusAdjustment = 0l;
+	@Transient Long initialPlusMovementIncluded = 0l;
 	
 	public AbstractAmountsImpl copy(AbstractAmountsView amounts) {
 		if(amounts == null)
@@ -50,10 +55,13 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 		adjustment = null;
 		expectedAdjustment = null;
 		expectedAdjustmentMinusAdjustment = null;
+		adjustmentLessThanZero = null;
+		adjustmentGreaterThanZero = null;
 		
 		initial = null;
 		movement = null;
 		movementIncluded = null;
+		movementIncludedPlusAdjustment = null;
 		actual = null;
 		actualAtLegislativeActDate = null;
 		actualMinusMovementIncluded = null;
@@ -61,6 +69,10 @@ public abstract class AbstractAmountsImpl extends AbstractObject implements Amou
 		actualPlusAdjustment = null;
 		actualMinusMovementIncludedPlusAdjustment = null;
 		availableMinusMovementIncludedPlusAdjustment = null;
+		initialPlusMovementIncludedPlusAdjustment = null;
+		initialPlusMovementIncluded = null;
+		actualAtLegislativeActDatePlusAdjustment = null;
+		actualAtLegislativeActDateMinusMovementIncludedPlusAdjustment = null;
 	}
 	
 	@Override

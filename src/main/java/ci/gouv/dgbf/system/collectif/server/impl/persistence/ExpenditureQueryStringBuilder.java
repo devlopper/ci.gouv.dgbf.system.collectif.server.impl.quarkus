@@ -167,11 +167,23 @@ public interface ExpenditureQueryStringBuilder {
 				if(Boolean.TRUE.equals(arguments.actualAtLegislativeActDate) && arguments.index < arguments.array.length)
 					arguments.amounts.setActualAtLegislativeActDate(NumberHelper.getLong(arguments.array[arguments.index++],0l));
 				
+				// Derivations
+				
 				arguments.amounts.computeActualPlusAdjustment();
+				if(Boolean.TRUE.equals(arguments.actualAtLegislativeActDate) && Boolean.TRUE.equals(arguments.adjustment))
+					arguments.amounts.computeActualAtLegislativeActDatePlusAdjustment();
+				if(Boolean.TRUE.equals(arguments.actualAtLegislativeActDate) && Boolean.TRUE.equals(arguments.includedMovement) && Boolean.TRUE.equals(arguments.adjustment))
+					arguments.amounts.computeActualAtLegislativeActDateMinusMovementIncludedPlusAdjustment();
 				if(Boolean.TRUE.equals(arguments.view) && Boolean.TRUE.equals(arguments.includedMovement) && Boolean.TRUE.equals(arguments.adjustment))
 					arguments.amounts.computeActualMinusMovementIncludedPlusAdjustment();
 				if(Boolean.TRUE.equals(arguments.includedMovement) && Boolean.TRUE.equals(arguments.available)  && Boolean.TRUE.equals(arguments.adjustment))
 					arguments.amounts.computeAvailableMinusMovementIncludedPlusAdjustment();
+				if(Boolean.TRUE.equals(arguments.view) && Boolean.TRUE.equals(arguments.includedMovement)  && Boolean.TRUE.equals(arguments.adjustment))
+					arguments.amounts.computeInitialPlusMovementIncludedPlusAdjustment();
+				if(Boolean.TRUE.equals(arguments.includedMovement)  && Boolean.TRUE.equals(arguments.adjustment))
+					arguments.amounts.computeMovementIncludedPlusAdjustment();
+				if(Boolean.TRUE.equals(arguments.view)  && Boolean.TRUE.equals(arguments.includedMovement))
+					arguments.amounts.computeInitialPlusMovementIncluded();
 				return arguments.index;
 			}
 			

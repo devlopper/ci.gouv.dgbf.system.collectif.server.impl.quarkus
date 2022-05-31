@@ -34,11 +34,9 @@ WHERE ld.ads_id IS NOT NULL AND ld.nat_id IS NOT NULL AND fd.sfin_id IS NOT NULL
 -- Disponibles dépenses
 CREATE OR REPLACE VIEW VA_DEPENSE_DISPONIBLE AS
 SELECT
-    ld.exo_num AS "EXERCICE",ld.ads_id AS "ACTIVITE",ld.nat_id AS "NATURE_ECONOMIQUE",fd.sfin_id AS "SOURCE_FINANCEMENT",fd.bai_id AS "BAILLEUR"
-    ,NVL(vlb.DISPONIBLE_AE,0) AS "AE",NVL(vlb.DISPONIBLE_CP,0) AS "CP"
-FROM financement_depenses fd
-LEFT JOIN ligne_de_depenses ld ON ld.ldep_id = fd.ldep_id AND ld.exo_num = fd.exo_num
-LEFT JOIN vs_ligne_budgetaire vlb on vlb.fin_id = fd.find_id AND vlb.ab_exercice = fd.exo_num;
+    d.ab_exercice AS "EXERCICE",d.ads_id AS "ACTIVITE",d.nat_id AS "NATURE_ECONOMIQUE",d.fin_sfin_id AS "SOURCE_FINANCEMENT",d.bailleur_id AS "BAILLEUR"
+    ,NVL(d.DISPONIBLE_AE,0) AS "AE",NVL(d.DISPONIBLE_CP,0) AS "CP"
+FROM vs_ligne_budgetaire d;
 
 -- Ressources
 CREATE OR REPLACE VIEW VA_RESSOURCE AS

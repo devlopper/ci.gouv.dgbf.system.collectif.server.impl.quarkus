@@ -623,19 +623,30 @@ public class ExpenditureTest {
 	}
 	
 	@Test @Order(2)
-	void business_import_running() {
+	void business_import_running_throw() {
 		new Thread() {
 			public void run() {
-				expenditureBusiness.import_("2021_1_running","christian");
+				expenditureBusiness.import_("2021_1_running",Boolean.TRUE,"christian");
 			}
 		}.start();
 		TimeHelper.pause(1l * 500);
 		Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
-			expenditureBusiness.import_("2021_1_running","christian");
+			expenditureBusiness.import_("2021_1_running",Boolean.TRUE,"christian");
 	    });
 		assertThat(exception.getMessage()).isEqualTo("Dépense de 2021_1_running en cours d'importation");
 		TimeHelper.pause(1l * 2000);
-		expenditureBusiness.import_("2021_1_running","christian");
+		expenditureBusiness.import_("2021_1_running",Boolean.TRUE,"christian");
+	}
+	
+	@Test @Order(2)
+	void business_import_running_block() {
+		new Thread() {
+			public void run() {
+				expenditureBusiness.import_("2021_1_running",Boolean.FALSE,"christian");
+			}
+		}.start();
+		expenditureBusiness.import_("2021_1_running",Boolean.FALSE,"christian");
+		expenditureBusiness.import_("2021_1_running",Boolean.FALSE,"christian");
 	}
 	
 	/* Copy */

@@ -146,7 +146,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 			importRunning.add(legislativeActVersion.getIdentifier());
 		}
 		try {
-			materializedViewActualizer.execute(null,entityViewClass);
+			materializedViewActualizer.execute(new MaterializedViewActualizer.Arguments().addClasses(entityViewClass).setBlockableIfRunning(!Boolean.TRUE.equals(throwIfRunning)) /*null,entityViewClass*/);
 			Long count = countImportable(legislativeActVersion,entityManager);
 			LogHelper.log(String.format("%s %s à importer",count,entityName),Result.getLogLevel(), getClass());
 			List<Integer> batchSizes = NumberHelper.getProportions(count.intValue(),configuration.importation().processing().batch().size());

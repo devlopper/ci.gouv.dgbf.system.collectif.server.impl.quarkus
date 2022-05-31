@@ -22,11 +22,16 @@ public abstract class AbstractAmountsDtoImpl extends AbstractObject implements A
 	@JsonbProperty(value = JSON_INITIAL) Long initial;
 	@JsonbProperty(value = JSON_MOVEMENT) Long movement;
 	@JsonbProperty(value = JSON_MOVEMENT_INCLUDED) Long movementIncluded;
+	@JsonbProperty(value = JSON_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT) Long movementIncludedPlusAdjustment;
 	@JsonbProperty(value = JSON_ACTUAL) Long actual;
 	@JsonbProperty(value = JSON_ACTUAL_AT_LEGISLATIVE_ACT_DATE) Long actualAtLegislativeActDate;
+	@JsonbProperty(value = JSON_ACTUAL_AT_LEGISLATIVE_ACT_DATE_PLUS_ADJUSTMENT) Long actualAtLegislativeActDatePlusAdjustment;
+	@JsonbProperty(value = JSON_ACTUAL_AT_LEGISLATIVE_ACT_DATE_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT) Long actualAtLegislativeActDateMinusMovementIncludedPlusAdjustment;
 	@JsonbProperty(value = JSON_ACTUAL_MINUS_MOVEMENT_INCLUDED) Long actualMinusMovementIncluded;
 	@JsonbProperty(value = JSON_ACTUAL_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT) Long actualMinusMovementIncludedPlusAdjustment;
 	@JsonbProperty(value = JSON_AVAILABLE_MINUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT) Long availableMinusMovementIncludedPlusAdjustment;
 	@JsonbProperty(value = JSON_ACTUAL_PLUS_ADJUSTMENT) Long actualPlusAdjustment;
 	@JsonbProperty(value = JSON_AVAILABLE) Long available;
+	@JsonbProperty(value = JSON_INITIAL_PLUS_MOVEMENT_INCLUDED_PLUS_ADJUSTMENT) Long initialPlusMovementIncludedPlusAdjustment;
+	@JsonbProperty(value = JSON_INITIAL_PLUS_MOVEMENT_INCLUDED) Long initialPlusMovementIncluded;
 }
