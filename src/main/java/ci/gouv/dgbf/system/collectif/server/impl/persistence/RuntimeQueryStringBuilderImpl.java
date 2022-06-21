@@ -139,8 +139,35 @@ public class RuntimeQueryStringBuilderImpl extends RuntimeQueryStringBuilder.Abs
 				amounts.setAvailable(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null);
 				amounts.setIncludedMovement(arguments.getFilterField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO) != null || arguments.getFilterField(Parameters.INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null
 						|| arguments.getFilterField(Parameters.ADJUSTMENTS_NOT_EQUAL_ZERO_OR_INCLUDED_MOVEMENT_NOT_EQUAL_ZERO) != null );
-			}else if(amountSumable) {
+				/*
+				if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))
+					amounts.setView(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY))
+					amounts.setIncludedMovement(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY))
+					amounts.setAvailable(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY))
+					amounts.setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE);
+				else
+					amounts.setView(Boolean.TRUE).setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE);
+				*/
+			}/*else if(amountSumable) {
 				amounts = new ExpenditureQueryStringBuilder.Tuple.Amounts().nullify();
+				if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))
+					amounts.setView(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY))
+					amounts.setIncludedMovement(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_AVAILABLE_ONLY))
+					amounts.setAvailable(Boolean.TRUE);
+				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_AND_AVAILABLE_ONLY))
+					amounts.setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE);
+				else
+					amounts.setView(Boolean.TRUE).setIncludedMovement(Boolean.TRUE).setAvailable(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE);
+			}*/
+			
+			if(amountSumable) {
+				if(amounts == null)
+					amounts = new ExpenditureQueryStringBuilder.Tuple.Amounts().nullify();
 				if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITHOUT_INCLUDED_MOVEMENT_AND_AVAILABLE))
 					amounts.setView(Boolean.TRUE).setActualAtLegislativeActDate(Boolean.TRUE);
 				else if(arguments.getFilterFieldValueAsBoolean(Boolean.FALSE,Parameters.AMOUNT_SUMABLE_WITH_INCLUDED_MOVEMENT_ONLY))

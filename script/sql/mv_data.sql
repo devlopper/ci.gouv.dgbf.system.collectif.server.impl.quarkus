@@ -117,7 +117,7 @@ Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MA
     END AS "CODE"
     ,ab.acte_ref_externe_acte as "LIBELLE"
     ,TO_NUMBER(ab.exo_num) AS "EXERCICE"
-    ,ab.acte_date_signature AS "DATE_"
+    ,ab.acte_date_mis_en_execution AS "DATE_"
     ,SUM(fd.find_montant_ae) as "MONTANT_AE"
     ,SUM(fd.find_montant_cp) as "MONTANT_CP"
 FROM 
@@ -125,7 +125,7 @@ FROM
 JOIN MEATEST.financement_depenses fd ON fd.acte_id = ab.acte_id
 JOIN MEATEST.categorie_acte_budgetaire cab ON cab.cab_id = ab.acte_cab_id AND cab.cab_tact_code IN (''REGLEMENTAIRE'')
 WHERE ab.acte_statut = ''APPLIQUE''
-GROUP BY ab.acte_id,ab.acte_numero,ab.acte_ref_externe_acte,ab.exo_num,ab.acte_date_signature','CODE','DELETED');
+GROUP BY ab.acte_id,ab.acte_numero,ab.acte_ref_externe_acte,ab.exo_num,ab.acte_date_mis_en_execution','CODE','DELETED');
 
 Insert into AT_MV (NAME,ORDER_NUMBER,ENABLED,QUERY,DELETABLE_COLUMN,DELETABLE_MARKER) values ('VMA_ACTE_GESTION_DEPENSE',20,1,'SELECT
     ld.acte_id||ld.ldep_id||fd.find_id AS "IDENTIFIANT"

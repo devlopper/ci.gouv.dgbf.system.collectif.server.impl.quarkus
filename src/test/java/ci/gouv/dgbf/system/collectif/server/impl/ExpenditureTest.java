@@ -483,7 +483,24 @@ public class ExpenditureTest {
 	
 	@Test @Order(1)
     public void service_get_amounts_sums() {
-		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto().addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")))
+		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto()
+				.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")
+				))
+				//.log().all()
+				.get("/api/depenses/sommation-montants");
+		response.then()
+			//.log().all()
+        	.statusCode(Response.Status.OK.getStatusCode())
+        	//.body(ExpenditureDto.JSON_IDENTIFIER, hasItems("2022_1_2_1"))
+        	;
+    }
+	
+	@Test @Order(1)
+    public void service_get_amounts_sums_AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO() {
+		io.restassured.response.Response response = given().when().param("f", JsonbBuilder.create().toJson(new Filter.Dto()
+				.addField(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER, "2022_1_2")
+				.addField(Parameters.AVAILABLE_MINUS_INCLUDED_MOVEMENT_PLUS_ADJUSTMENT_LESS_THAN_ZERO, "true")
+				))
 				//.log().all()
 				.get("/api/depenses/sommation-montants");
 		response.then()
@@ -636,6 +653,7 @@ public class ExpenditureTest {
 		assertThat(exception.getMessage()).isEqualTo("Dépense de 2021_1_running en cours d'importation");
 		TimeHelper.pause(1l * 2000);
 		expenditureBusiness.import_("2021_1_running",Boolean.TRUE,"christian");
+		TimeHelper.pause(1l * 2000);
 	}
 	
 	@Test @Order(2)

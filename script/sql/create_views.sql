@@ -36,7 +36,12 @@ GROUP BY depense.identifiant;
 CREATE OR REPLACE VIEW VA_DEPENSE_IMPORTEE AS
 SELECT depense.*
 FROM VMA_DEPENSE depense
-JOIN TA_DEPENSE tdepense ON tdepense.identifiant = depense.identifiant;
+JOIN TA_DEPENSE tdepense 
+    ON tdepense.version_collectif = depense.version_collectif 
+    AND tdepense.activite = depense.activite_identifiant
+    AND tdepense.nature_economique = depense.nature_economique_identifiant
+    AND tdepense.source_financement = depense.source_financement_identifiant
+    AND tdepense.bailleur = depense.bailleur_identifiant;
 
 -- Liste des dépenses importables
 CREATE OR REPLACE VIEW VA_DEPENSE_IMPORTABLE AS
