@@ -327,3 +327,37 @@ BEGIN
     --AP_LOG_TABLE_END_DATE(uuid);
 END;
 /
+
+CREATE OR REPLACE PROCEDURE AP_ACTUALIZE_MV_CALD_FRM_JOB AUTHID CURRENT_USER AS
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Specify materialized view to actualize');
+END;
+/
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+-- JOBS
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------ ACTUALIZE MATERIALIZED VIEWS ---------------------------------------------------------------------
+BEGIN
+    DBMS_SCHEDULER.DROP_JOB(job_name => '"AJ_ACTUALIZE_MV"',defer => false,force => true);
+END;
+/
+
+BEGIN
+    DBMS_SCHEDULER.CREATE_JOB (
+            job_name => '"AJ_ACTUALIZE_MV"',
+            job_type => 'PLSQL_BLOCK',
+            job_action => 'AP_ACTUALIZE_MV_CALD_FRM_JOB;',
+            number_of_arguments => 0,
+            start_date => NULL,
+            repeat_interval => 'FREQ=MINUTELY;INTERVAL=10',
+            end_date => NULL,
+            enabled => FALSE,
+            auto_drop => FALSE,
+            comments => 'This job is used to actualize materialized view.It can be splitted if taking too long to run');
+
+    DBMS_SCHEDULER.SET_ATTRIBUTE( 
+             name => '"AJ_ACTUALIZE_MV"', 
+             attribute => 'logging_level', value => DBMS_SCHEDULER.LOGGING_OFF);
+END;
+/
