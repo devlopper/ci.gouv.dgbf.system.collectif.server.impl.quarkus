@@ -20,6 +20,7 @@ import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActLegislativeActVersionPersistence;
 import ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryActPersistence;
+import ci.gouv.dgbf.system.collectif.server.client.rest.RegulatoryActController;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.RegulatoryActImpl;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -33,17 +34,18 @@ public class RegulatoryActTest {
 	@Inject RegulatoryActPersistence persistence;
 	@Inject RegulatoryActLegislativeActVersionPersistence regulatoryActLegislativeActVersionPersistence;
 	@Inject RegulatoryActBusiness business;
+	@Inject RegulatoryActController controller;
 	
 	@Test @Order(1)
 	void persistence_readRegulatoryActMany_REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL() {
 		Collection<RegulatoryAct> regulatoryActs = persistence.readMany(new QueryExecutorArguments().addFilterFieldsValues(Parameters.REGULATORY_ACT_DATE_GREATER_THAN_OR_EQUAL,LocalDate.of(2019, 1, 1)));
-		assertThat(regulatoryActs).hasSize(9);
+		assertThat(regulatoryActs).hasSize(12);
 	}
 	
 	@Test @Order(1)
 	void persistence_readRegulatoryActMany() {
 		Collection<RegulatoryAct> regulatoryActs = persistence.readMany(null, null, null);
-		assertThat(regulatoryActs).hasSize(20);
+		assertThat(regulatoryActs).hasSize(23);
 	}
 	
 	@Test @Order(1)
@@ -227,6 +229,97 @@ public class RegulatoryActTest {
 		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_02","2021_2_1",Boolean.TRUE);
 		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_03","2021_2_1",Boolean.TRUE);
 		assertor.assertRegulatoryAct("include_by_lav_2021_2_1_04","2021_2_1",Boolean.TRUE);
+	}
+	
+	@Test @Order(3)
+	void business_include_comprehensively_2021_3_1() {
+		
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(0l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);
+		
+		Long count = regulatoryActLegislativeActVersionPersistence.count();
+		controller.includeComprehensively("2021_3_1", "meliane",null);
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 0);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(0l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);
+		
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		controller.includeComprehensively("2021_3_1", "meliane", new String[]{"include_comprehensively_2021_3_1_01"});
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 1);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(1l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);
+		
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		business.includeComprehensively("2021_3_1", "meliane", "include_comprehensively_2021_3_1_02");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 1);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(1l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",Boolean.FALSE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);
+		
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		business.includeComprehensively("2021_3_1", "meliane", "include_comprehensively_2021_3_1_01");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 0);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(1l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",Boolean.FALSE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);
+		
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		business.includeComprehensively("2021_3_1", "meliane", "include_comprehensively_2021_3_1_01", "include_comprehensively_2021_3_1_02");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 0);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(2l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);
+		
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		business.includeComprehensively("2021_3_1", "meliane", "include_comprehensively_2021_3_1_01", "include_comprehensively_2021_3_1_03");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 1);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(2l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",Boolean.FALSE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",Boolean.TRUE);
+		
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		business.includeComprehensively("2021_3_1", "meliane");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 0);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(0l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",Boolean.FALSE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",Boolean.FALSE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",Boolean.FALSE);
+		
+		/*
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		business.includeComprehensively("2021_3_1", "meliane", "include_comprehensively_2021_3_1_01");
+		
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 0);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(1l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",Boolean.TRUE);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);
+		
+		count = regulatoryActLegislativeActVersionPersistence.count();
+		business.includeComprehensively("2021_3_1", "meliane");
+		/*
+		assertThat(regulatoryActLegislativeActVersionPersistence.count()).isEqualTo(count + 0);
+		assertThat(persistence.count(new QueryExecutorArguments().addFilterFieldsValues(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,"2021_3_1",Parameters.REGULATORY_ACT_INCLUDED,Boolean.TRUE))).isEqualTo(1l);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_01","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_02","2021_3_1",null);
+		assertor.assertRegulatoryAct("include_comprehensively_2021_3_1_03","2021_3_1",null);*/
 	}
 	
 	/**/

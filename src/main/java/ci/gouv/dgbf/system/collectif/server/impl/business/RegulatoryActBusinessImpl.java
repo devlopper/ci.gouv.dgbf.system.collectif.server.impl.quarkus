@@ -3,6 +3,7 @@ package ci.gouv.dgbf.system.collectif.server.impl.business;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,15 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	@Inject MaterializedViewActualizer materializedViewActualizer;
 	@Inject EntityManager entityManager;
 	
+	/* Include */
+	
+	public void include(Collection<RegulatoryAct> regulatoryActs, LegislativeActVersion legislativeActVersion,Collection<Object[]> arrays,Boolean existingIgnorable,String auditIdentifier,String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {		
+		//1 - Update to TRUE where FALSE OR NULL (NOT TRUE)
+		__update__(arrays, Boolean.TRUE,auditIdentifier,auditWho,auditFunctionality,auditWhen,entityManager);
+		//2 - Create
+		__create__(arrays, regulatoryActs, legislativeActVersion,auditIdentifier,auditWho,auditFunctionality,auditWhen,entityManager);
+	}
+	
 	@Override
 	public Result includeByLegislativeActVersionIdentifier(String legislativeActVersionIdentifier, String auditWho) {
 		Result result = includeByLegislativeActVersionIdentifierInTransaction(legislativeActVersionIdentifier, auditWho);
@@ -97,7 +107,8 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 			return null;
 		}
 		Collection<RegulatoryAct> regulatoryActs = CollectionHelper.cast(RegulatoryAct.class, entityManager.createNamedQuery(RegulatoryActImpl.QUERY_READ_WHERE_NOT_INCLUDED_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_FROM_DATE_BY_TO_DATE,RegulatoryActImpl.class)
-				.setParameter("fromDate", LegislativeActImplFromDateAsTimestampReader.buildDate((LocalDate) dates[2], year)).setParameter("toDate", dates[3])
+				.setParameter("fromDate", LegislativeActImplFromDateAsTimestampReader.buildDate((LocalDate) dates[2], year))
+				.setParameter("toDate", dates[3])
 				.setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier()).getResultList());
 		if(CollectionHelper.isEmpty(regulatoryActs))
 			return null;
@@ -129,18 +140,30 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		return result.close().log(getClass());
 	}
 	
-	public void include(Collection<RegulatoryAct> regulatoryActs, LegislativeActVersion legislativeActVersion,Collection<Object[]> arrays,Boolean existingIgnorable,String auditIdentifier,String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {		
-		//1 - Update to TRUE where FALSE OR NULL (NOT TRUE)
-		__update__(arrays, Boolean.TRUE,auditIdentifier,auditWho,auditFunctionality,auditWhen,entityManager);
-		//2 - Create
-		__create__(arrays, regulatoryActs, legislativeActVersion,auditIdentifier,auditWho,auditFunctionality,auditWhen,entityManager);
-	}
-
 	@Override
 	public Result include(String legislativeActIdentifier,Boolean existingIgnorable,String auditWho, String... identifiers) {
 		return include(CollectionHelper.listOf(Boolean.TRUE, identifiers), legislativeActIdentifier,existingIgnorable,auditWho);
 	}
 
+	/* Excluded */
+
+	private void exclude(Collection<Object[]> arrays,String auditIdentifier,String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {
+		//1 - Update to FALSE where TRUE
+		__update__(arrays, Boolean.FALSE,auditIdentifier,auditWho,auditFunctionality,auditWhen,entityManager);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Transactional
+	Result excludeInTransaction(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
+		//1 - Validate preconditions
+		Object[] data = validate(identifiers, legislativeActVersionIdentifier, existingIgnorable,Boolean.FALSE,auditWho);
+		Collection<Object[]> arrays = (Collection<Object[]>) data[0];
+		Result result = (Result) data[3];
+		
+		exclude(arrays, generateAuditIdentifier(),auditWho,EXCLUDE_AUDIT_IDENTIFIER,LocalDateTime.now(),entityManager);
+		return result.close().log(getClass());
+	}
+	
 	@Override
 	public Result exclude(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
 		Result result = excludeInTransaction(identifiers, legislativeActVersionIdentifier, existingIgnorable, auditWho);
@@ -152,21 +175,59 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	public Result exclude(String legislativeActIdentifier,Boolean existingIgnorable,String auditWho, String... identifiers) {
 		return exclude(CollectionHelper.listOf(Boolean.TRUE, identifiers), legislativeActIdentifier,existingIgnorable,auditWho);
 	}
+		
+	/* Include Comprehensively */
+	
+	public void includeComprehensively(Collection<RegulatoryAct> regulatoryActs, LegislativeActVersion legislativeActVersion,Collection<Object[]> arrays,String auditIdentifier,String auditWho, String auditFunctionality,LocalDateTime auditWhen, EntityManager entityManager) {		
+		/* 1 - Find those to include
+		 * 	a - identifier does not exist -> identifier is blank
+		 *  b - identifier exists and identifier belongs to regulatories acts identifiers and included is not true
+		 */
+		Collection<Object[]> includableArrays = arrays == null ? null : arrays.stream().filter(array -> array[1] == null || Boolean.FALSE.equals(array[1]) || StringHelper.isBlank((String)array[2])).collect(Collectors.toList());
+		if(CollectionHelper.isNotEmpty(includableArrays))
+			include(regulatoryActs, legislativeActVersion, includableArrays, Boolean.TRUE, auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
+		
+		/* 2 - Find those to exclude
+		 * 	a - identifier exists and identifier does not belong to regulatories acts identifiers and included is true
+		 */
+		Collection<Object[]> excludableArrays = CollectionHelper.isEmpty(regulatoryActs) 
+				? entityManager.createNamedQuery(RegulatoryActLegislativeActVersionImpl.QUERY_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER,Object[].class)
+					.setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier())
+					.getResultList() 
+				: entityManager.createNamedQuery(RegulatoryActLegislativeActVersionImpl.QUERY_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_REGULATORIES_ACTS_IDENTIFIERS,Object[].class)
+					.setParameter("legislativeActVersionIdentifier", legislativeActVersion.getIdentifier())
+					.setParameter("identifiers", regulatoryActs.stream().map(x -> x.getIdentifier()).collect(Collectors.toSet()))
+					.getResultList();
+		if(CollectionHelper.isNotEmpty(excludableArrays))
+			exclude(excludableArrays, auditIdentifier, auditWho, auditFunctionality, auditWhen, entityManager);
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	Result excludeInTransaction(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
+	Result includeComprehensivelyInTransaction(Collection<String> identifiers, String legislativeActVersionIdentifier,String auditWho) {
 		//1 - Validate preconditions
-		Object[] data = validate(identifiers, legislativeActVersionIdentifier, existingIgnorable,Boolean.FALSE,auditWho);
+		Object[] data = validate(identifiers, legislativeActVersionIdentifier,Boolean.TRUE,Boolean.TRUE,Boolean.TRUE,auditWho);
 		Collection<Object[]> arrays = (Collection<Object[]>) data[0];
+		Collection<RegulatoryAct> regulatoryActs = (Collection<RegulatoryAct>) data[1];
+		LegislativeActVersion legislativeActVersion = (LegislativeActVersion) data[2];
 		Result result = (Result) data[3];
 		
-		LocalDateTime auditWhen = LocalDateTime.now();
-		//2 - Update to FALSE where TRUE
-		__update__(arrays, Boolean.FALSE,generateAuditIdentifier(),auditWho,EXCLUDE_AUDIT_IDENTIFIER,auditWhen,entityManager);
+		includeComprehensively(regulatoryActs, legislativeActVersion, arrays,generateAuditIdentifier(), auditWho, INCLUDE_COMPREHENSIVELY_AUDIT_IDENTIFIER, LocalDateTime.now(), entityManager);
 		return result.close().log(getClass());
 	}
 
+	@Override
+	public Result includeComprehensively(Collection<String> identifiers, String legislativeActVersionIdentifier, String auditWho) {
+		Result result = includeComprehensivelyInTransaction(identifiers, legislativeActVersionIdentifier, auditWho);
+		materializedViewActualizer.executeAsynchronously(ExpenditureIncludedMovementView.class);
+		return result;
+	}
+	
+	@Override
+	public Result includeComprehensively(String legislativeActIdentifier, String auditWho,String... identifiers) {
+		return includeComprehensively(CollectionHelper.listOf(Boolean.TRUE, identifiers), legislativeActIdentifier,auditWho);
+	}
+	
 	/**/
 	
 	private void __create__(Collection<Object[]> arrays,Collection<RegulatoryAct> regulatoryActs,LegislativeActVersion legislativeActVersion,String auditIdentifier,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
@@ -185,22 +246,36 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 	}
 	
 	private void __update__(Collection<Object[]> arrays,Boolean include,String auditIdentifier,String auditWho,String auditFunctionality,LocalDateTime auditWhen,EntityManager entityManager) {
+		if(CollectionHelper.isEmpty(arrays))
+			return;
 		Collection<Object[]> updatesArrays = arrays.stream().filter(array -> (Boolean.TRUE.equals(include) ? !Boolean.TRUE.equals(array[1]) : Boolean.TRUE.equals(array[1])) && StringHelper.isNotBlank((String)array[2])).collect(Collectors.toList());
-		if(CollectionHelper.isNotEmpty(updatesArrays)) {
-			Collection<RegulatoryActLegislativeActVersionImpl> updates = updatesArrays.stream().map(array -> entityManager.find(RegulatoryActLegislativeActVersionImpl.class, array[2])).collect(Collectors.toList());
-			if(CollectionHelper.getSize(updatesArrays) != CollectionHelper.getSize(updates))
-				throw new RuntimeException("Certains objets à mettre à jour non trouvés");
-			for(RegulatoryActLegislativeActVersionImpl regulatoryActLegislativeActVersion : updates) {
-				regulatoryActLegislativeActVersion.setIncluded(Boolean.TRUE.equals(include));
-				audit(regulatoryActLegislativeActVersion,auditIdentifier, auditFunctionality, auditWho, auditWhen);
-				entityManager.merge(regulatoryActLegislativeActVersion);
+		if(CollectionHelper.isEmpty(updatesArrays))
+			return;
+		Collection<RegulatoryActLegislativeActVersionImpl> updates = null;
+		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
+		for(Object[] array : updatesArrays) {
+			RegulatoryActLegislativeActVersionImpl instance = entityManager.find(RegulatoryActLegislativeActVersionImpl.class, array[2]);
+			if(instance == null) {
+				throwablesMessages.add(String.format("RegulatoryActLegislativeActVersionImpl instance with id <<%s>> not found"));
+				continue;
 			}
+			if(updates == null)
+				updates = new ArrayList<>();
+			updates.add(instance);
+		}
+		throwablesMessages.throwIfNotEmpty();
+		if(CollectionHelper.isEmpty(updates))
+			return;
+		for(RegulatoryActLegislativeActVersionImpl regulatoryActLegislativeActVersion : updates) {
+			regulatoryActLegislativeActVersion.setIncluded(Boolean.TRUE.equals(include));
+			audit(regulatoryActLegislativeActVersion,auditIdentifier, auditFunctionality, auditWho, auditWhen);
+			entityManager.merge(regulatoryActLegislativeActVersion);
 		}
 	}
 	
-	private Object[] validate(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,Boolean include,String auditWho) {
+	private Object[] validate(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,Boolean include,Boolean comprehensively,String auditWho) {
 		ThrowablesMessages throwablesMessages = new ThrowablesMessages();
-		ValidatorImpl.RegulatoryAct.validateIncludeOrExcludeInputs(identifiers, legislativeActVersionIdentifier, auditWho, throwablesMessages);
+		ValidatorImpl.RegulatoryAct.validateIncludeOrExcludeInputs(identifiers, legislativeActVersionIdentifier,comprehensively, auditWho, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
 		Collection<Object[]> arrays = new RegulatoryActImplIncludedLegislativeActJoinIdentifierNameDateReader().readByIdentifiers(identifiers, Map.of(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier));
@@ -213,6 +288,10 @@ public class RegulatoryActBusinessImpl extends AbstractSpecificBusinessImpl<Regu
 		throwablesMessages.throwIfNotEmpty();
 		Result result = new Result().setName(String.format("%sclusion des actes de gestion à une version du collectif",Boolean.TRUE.equals(include) ? "In" : "Ex")).open();
 		return new Object[] {arrays,regulatoryActs,legislativeActVersion,result};
+	}
+	
+	private Object[] validate(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,Boolean include,String auditWho) {
+		return validate(identifiers, legislativeActVersionIdentifier, existingIgnorable, include, Boolean.FALSE, auditWho);
 	}
 
 	/* Event */

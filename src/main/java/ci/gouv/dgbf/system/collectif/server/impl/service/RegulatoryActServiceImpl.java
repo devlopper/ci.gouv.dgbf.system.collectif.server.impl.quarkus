@@ -37,4 +37,9 @@ public class RegulatoryActServiceImpl extends AbstractSpecificServiceImpl<Regula
 	public Response exclude(List<String> identifiers, String legislativeActVersionIdentifier,Boolean existingIgnorable,String auditWho) {
 		return buildResponseOk(business.exclude(identifiers, legislativeActVersionIdentifier, existingIgnorable,auditWho));
 	}
+
+	@Override
+	public Response includeComprehensively(List<String> identifiers, String legislativeActVersionIdentifier, String auditWho) {
+		return buildResponseOk(business.includeComprehensively(identifiers, legislativeActVersionIdentifier,auditWho));
+	}
 }

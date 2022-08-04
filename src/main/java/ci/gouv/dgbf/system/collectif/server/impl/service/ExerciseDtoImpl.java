@@ -53,7 +53,7 @@ public class ExerciseDtoImpl extends AbstractIdentifiableSystemScalarStringIdent
 		return super.getName();
 	}
 	
-	static {
+	public static void setProjections() {
 		Map<String,String> map = new HashMap<>();
 		map.putAll(Map.of(
 				JSON_IDENTIFIER,AbstractIdentifiableSystemScalarStringIdentifiableBusinessStringNamableImpl.FIELD_IDENTIFIER

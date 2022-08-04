@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -45,6 +47,13 @@ import lombok.experimental.Accessors;
 	@AuditOverride(forClass = AbstractIdentifiableSystemScalarStringAuditedImpl.class)
 })
 @AuditTable(value = RegulatoryActLegislativeActVersionImpl.AUDIT_TABLE_NAME)
+@NamedQueries(value = {
+		@NamedQuery(name = RegulatoryActLegislativeActVersionImpl.QUERY_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_REGULATORIES_ACTS_IDENTIFIERS
+			,query = RegulatoryActLegislativeActVersionImpl.QUERY_STRING_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER
+			+" AND t.legislativeActVersion.identifier = :legislativeActVersionIdentifier AND t.regulatoryAct.identifier NOT IN :identifiers")
+		,@NamedQuery(name = RegulatoryActLegislativeActVersionImpl.QUERY_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER
+				,query = RegulatoryActLegislativeActVersionImpl.QUERY_STRING_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER)
+})
 public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiableSystemScalarStringAuditedImpl implements RegulatoryActLegislativeActVersion,Serializable {
 
 	@NotNull @ManyToOne @JoinColumn(name = COLUMN_REGULATORY_ACT,nullable = false) @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED) RegulatoryActImpl regulatoryAct;
@@ -87,4 +96,8 @@ public class RegulatoryActLegislativeActVersionImpl extends AbstractIdentifiable
 	public static final String COLUMN___AUDIT_WHAT__ = "AUDIT_ACTION";
 	public static final String COLUMN___AUDIT_FUNCTIONALITY__ = "AUDIT_FONCTIONNALITE";
 	public static final String COLUMN___AUDIT_WHEN__ = "AUDIT_DATE";
+	
+	public static final String QUERY_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER_BY_REGULATORIES_ACTS_IDENTIFIERS = "RegulatoryActLegislativeActVersionImpl.readToBeExcludedComprehensivelyByLegislativeActIdentifierByRegulatoriesActsIdentifiers";
+	public static final String QUERY_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "RegulatoryActLegislativeActVersionImpl.readToBeExcludedComprehensivelyByLegislativeActIdentifier";
+	public static final String QUERY_STRING_READ_TO_BE_EXCLUDED_COMPREHENSIVELY_BY_LEGISLATIVE_ACT_VERSION_IDENTIFIER = "SELECT t.regulatoryAct.identifier,t.included,t.identifier FROM RegulatoryActLegislativeActVersionImpl t WHERE t.included = TRUE AND t.legislativeActVersion.identifier = :legislativeActVersionIdentifier";
 }

@@ -88,6 +88,8 @@ public class ApplicationLifeCycleListener {
     	
     	EntityLifeCycleListenerImpl.useFrenchValues();
     	
+    	ExerciseDtoImpl.setProjections();;
+    	
     	MapperClassGetter.MAP.put(ExerciseDtoImpl.class, ExerciseDtoImplMapper.class);
     	PersistenceEntityClassGetterImpl.MAP.put(ExerciseDtoImpl.class,ExerciseImpl.class);
     	

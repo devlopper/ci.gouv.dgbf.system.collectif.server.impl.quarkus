@@ -55,12 +55,17 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 		return new Object[] {legislativeActVersion};
 	}
 	
-	static void validateImport(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Class<?> entityClass,Set<String> running,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
-		validateImportNotRunning(legislativeActVersion,entityClass,running, throwablesMessages, entityManager);
+	static void validateImport(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Class<?> entityClass,Set<String> running,String auditWho,ThrowablesMessages throwablesMessages,EntityManager entityManager
+			,Boolean throwIfRunning) {
+		validateImportNotRunning(legislativeActVersion,entityClass,running, throwablesMessages, entityManager,throwIfRunning);
 	}
 	
-	static Boolean validateImportNotRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Class<?> entityClass,Set<String> running,ThrowablesMessages throwablesMessages,EntityManager entityManager) {
-		if(!isImportRunning(legislativeActVersion,running, entityManager))
+	static Boolean validateImportNotRunning(ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,Class<?> entityClass,Set<String> running,ThrowablesMessages throwablesMessages,EntityManager entityManager
+			,Boolean throwIfRunning) {
+		if(throwIfRunning == null)
+			throwIfRunning = Boolean.FALSE;
+		Boolean isImportRunning = isImportRunning(legislativeActVersion,running, entityManager);
+		if(!isImportRunning || !Boolean.TRUE.equals(throwIfRunning))
 			return Boolean.TRUE;
 		throwablesMessages.add(formatMessageImportIsRunning(legislativeActVersion,entityClass));
 		return Boolean.FALSE;
@@ -317,10 +322,19 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 	}
 
 	public static interface RegulatoryAct {
-		static void validateIncludeOrExcludeInputs(Collection<String> identifiers, String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
-			throwablesMessages.addIfTrue("Les identifiants des actes de gestion sont requis", CollectionHelper.isEmpty(identifiers));
+		static void validateIncludeOrExcludeInputs(Collection<String> identifiers, String legislativeActVersionIdentifier,Boolean comprehensively,String auditWho,ThrowablesMessages throwablesMessages) {
+			if(!Boolean.TRUE.equals(comprehensively))
+				throwablesMessages.addIfTrue("Les identifiants des actes de gestion sont requis", CollectionHelper.isEmpty(identifiers));
 			throwablesMessages.addIfTrue("L'identifiant de la version du collectif est requis", StringHelper.isBlank(legislativeActVersionIdentifier));
 			Validator.getInstance().validateAuditWho(auditWho, throwablesMessages);
+		}
+		
+		static void validateIncludeOrExcludeInputs(Collection<String> identifiers, String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIncludeOrExcludeInputs(identifiers, legislativeActVersionIdentifier, Boolean.FALSE, auditWho, throwablesMessages);
+		}
+		
+		static void validateSetAsIncludedOrExcludedInputs(Collection<String> identifiers, String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {
+			validateIncludeOrExcludeInputs(identifiers, legislativeActVersionIdentifier, Boolean.TRUE, auditWho, throwablesMessages);
 		}
 		
 		static void validateIncludeOrExclude(Collection<Object[]> arrays,Boolean include,Boolean existingIgnorable,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages) {
@@ -342,11 +356,16 @@ public class ValidatorImpl extends Validator.AbstractImpl implements Serializabl
 							, dateGreaterThanActDate.stream().map(array -> (String)array[3]).collect(Collectors.joining(","))));
 				}
 			}
+			
 			Collection<Object[]> includedOrExcluded = arrays.stream().filter(array -> Boolean.TRUE.equals(include) ? Boolean.TRUE.equals(array[1]) : (array[1] == null || Boolean.FALSE.equals(array[1]))).collect(Collectors.toList());
 			if(CollectionHelper.isEmpty(includedOrExcluded))
 				return;
 			throwablesMessages.add(String.format("Les %s suivant sont déja %s : %s",ci.gouv.dgbf.system.collectif.server.api.persistence.RegulatoryAct.NAME_PLURAL,Boolean.TRUE.equals(include) ? "inclus" : "exclus"
 				, includedOrExcluded.stream().map(array -> (String)array[3]).collect(Collectors.joining(","))));
+		}
+		
+		static void validateSetAsIncludedOrExcluded(Collection<Object[]> arrays,Boolean included,ci.gouv.dgbf.system.collectif.server.api.persistence.LegislativeActVersion legislativeActVersion,ThrowablesMessages throwablesMessages) {
+			validateIncludeOrExclude(arrays, included, Boolean.TRUE, legislativeActVersion, throwablesMessages);
 		}
 		
 		static Object[] validateIncludeByLegislativeActVersionIdentifierInputs(String legislativeActVersionIdentifier,String auditWho,ThrowablesMessages throwablesMessages) {

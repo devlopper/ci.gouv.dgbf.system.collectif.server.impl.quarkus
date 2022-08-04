@@ -102,7 +102,7 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		throwablesMessages.throwIfNotEmpty();
 		
 		LegislativeActVersionImpl legislativeActVersion = (LegislativeActVersionImpl) instances[0];
-		validateImport(legislativeActVersion, auditWho, throwablesMessages, entityManager);
+		validateImport(legislativeActVersion, auditWho, throwablesMessages, entityManager,throwIfRunning);
 		throwablesMessages.throwIfNotEmpty();
 		
 		String auditIdentifier = generateAuditIdentifier();
@@ -127,8 +127,8 @@ public abstract class AbstractExpenditureResourceBusinessImpl<ENTITY> extends Ab
 		return ValidatorImpl.validateImportInputs(legislativeActVersionIdentifier,auditWho, throwablesMessages,entityManager);
 	}
 	
-	void validateImport(LegislativeActVersionImpl legislativeActVersion, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager) {
-		ValidatorImpl.validateImport(legislativeActVersion,entityClass,importRunning, auditWho, throwablesMessages, entityManager);
+	void validateImport(LegislativeActVersionImpl legislativeActVersion, String auditWho,ThrowablesMessages throwablesMessages, EntityManager entityManager,Boolean throwIfRunning) {
+		ValidatorImpl.validateImport(legislativeActVersion,entityClass,importRunning, auditWho, throwablesMessages, entityManager,throwIfRunning);
 	}
 	
 	@SuppressWarnings("unchecked")
