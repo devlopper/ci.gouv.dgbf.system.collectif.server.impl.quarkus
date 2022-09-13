@@ -66,6 +66,7 @@ BEGIN
 	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'INSERT INTO AT_TABLE_LOG (identifier,table_name,actor,action,start_date) VALUES (:1,:2,:3,:4,SYSDATE)' USING p_identifier,p_table_name,p_actor,p_action;
+    	COMMIT;
     END IF;
 END;
 /
@@ -75,6 +76,7 @@ BEGIN
 	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET end_date = SYSDATE WHERE identifier = :1' USING p_identifier;
+    	COMMIT;
     END IF;
 END;
 /
@@ -84,6 +86,7 @@ BEGIN
 	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET inputs = '''||p_inputs||''' WHERE identifier = :1' USING p_identifier;
+    	COMMIT;
     END IF;
 END;
 /
@@ -93,6 +96,7 @@ BEGIN
 	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET outputs = '''||p_outputs||''' WHERE identifier = :1' USING p_identifier;
+    	COMMIT;
     END IF;
 END;
 /
@@ -102,6 +106,7 @@ BEGIN
 	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND  table_name = 'AT_TABLE_LOG';
     IF ocount = 1 THEN
     	EXECUTE IMMEDIATE 'UPDATE AT_TABLE_LOG SET end_date = SYSDATE , exception = '''||p_exception||''' WHERE identifier = :1' USING p_identifier;
+    	COMMIT;
     END IF;
 END;
 /
@@ -204,7 +209,6 @@ BEGIN
     AP_LOG_TABLE_OUTPUTS(uuid,'Scripted');
     AP_LOG_TABLE_END_DATE(uuid);
     EXCEPTION WHEN others THEN AP_LOG_TABLE_EXCEPTION(uuid,SUBSTR( DBMS_UTILITY.format_error_stack || DBMS_UTILITY.format_error_backtrace, 1, 4000)); 
-    COMMIT;
 END;
 /
 
@@ -256,6 +260,7 @@ BEGIN
 	IF query_string IS NOT NULL THEN
 		IF ocount = 1 THEN
 	        EXECUTE IMMEDIATE query_string;
+	        COMMIT;
 	        AP_LOG_TABLE_OUTPUTS(uuid,'Merged');
 	    ELSE
 	        AP_LOG_TABLE_OUTPUTS(uuid,'Does not exist');
@@ -263,7 +268,8 @@ BEGIN
 	ELSE
 		AP_LOG_TABLE_OUTPUTS(uuid,'No query has been defined');
 	END IF;
-	AP_LOG_TABLE_END_DATE(uuid); 
+	AP_LOG_TABLE_END_DATE(uuid);
+	EXCEPTION WHEN others THEN ROLLBACK; 
 END;
 /
 
@@ -315,14 +321,18 @@ END;
 
 CREATE OR REPLACE PROCEDURE AP_ACTUALIZE_MV(p_table_name IN VARCHAR2) AUTHID CURRENT_USER AS
 ocount NUMBER;
+v_enabled NUMBER;
 uuid VARCHAR2(32) := SYS_GUID();
 BEGIN
     --AP_LOG_TABLE(uuid,p_table_name,'SYSTEME','ACTUALIZE');
+    SELECT enabled INTO v_enabled FROM AT_MV WHERE name = p_table_name;
 	SELECT COUNT(*) INTO ocount FROM all_tables WHERE owner = USER AND table_name = p_table_name;
-    IF ocount = 1 THEN
+    IF ocount = 1 AND v_enabled = 1 THEN
         AP_MERGE_MV(p_table_name);
-    ELSE
+    ELSIF v_enabled = 1 THEN
         AP_CREATE_MV(p_table_name);
+    ELSE
+        AP_LOG_TABLE(uuid,p_table_name,'SYSTEME','ACTUALIZATION HAS BEEN DISABLED');
     END IF;
     --AP_LOG_TABLE_END_DATE(uuid);
 END;
