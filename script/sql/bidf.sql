@@ -29,7 +29,7 @@ LEFT JOIN action ac ON ac.adp_id = a.adp_id
 LEFT JOIN unite_spec_bud u ON u.usb_id = ac.usb_id
 LEFT JOIN categorie_budget cb ON cb.uuid = u.cbud_id
 LEFT JOIN section_budgetaire s ON s.secb_id = u.secb_id
-WHERE ld.ads_id IS NOT NULL AND ld.nat_id IS NOT NULL AND fd.sfin_id IS NOT NULL AND fd.bai_id IS NOT NULL;
+WHERE ld.ads_id IS NOT NULL AND ld.nat_id IS NOT NULL AND fd.sfin_id IS NOT NULL AND fd.bai_id IS NOT NULL AND cb.uuid IN ('1','3');
 
 -- Disponibles dépenses
 CREATE OR REPLACE VIEW VA_DEPENSE_DISPONIBLE AS
