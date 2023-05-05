@@ -26,7 +26,7 @@ public class LegislativeActVersionPersistenceImpl extends AbstractSpecificPersis
 	public static void readAmounts(Collection<LegislativeActVersionImpl> legislativeActVersions) {
 		if(CollectionHelper.isEmpty(legislativeActVersions))
 			return;
-		new LegislativeActVersionImplAmountsInitialActualMovementAdjustmentActualPlusAdjustmentExpectedAdjustmentExpectedAdjustmentMinusAdjustmentReader().readThenSet(legislativeActVersions, null);
+		new LegislativeActVersionImplAmountsIniActMovAdjActPlusAdjExpAdjExpAdjMinusAdjReader().readThenSet(legislativeActVersions, null);
 		new LegislativeActVersionImplAmountsMovementIncludedReader().readThenSet(legislativeActVersions, null);
 		legislativeActVersions.forEach(legislativeActVersion -> { legislativeActVersion.computeActualMinusMovementIncludedPlusAdjustment(); });
 	}

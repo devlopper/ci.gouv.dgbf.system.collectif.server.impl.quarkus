@@ -26,7 +26,7 @@ public class LegislativeActPersistenceImpl extends AbstractSpecificPersistenceIm
 	public static void readAmounts(Collection<LegislativeActImpl> legislativeActs) {
 		if(CollectionHelper.isEmpty(legislativeActs))
 			return;
-		new LegislativeActImplAmountsInitialActualMovementAdjustmentActualPlusAdjustmentExpectedAdjustmentExpectedAdjustmentMinusAdjustmentReader().readThenSet(legislativeActs, null);
+		new LegislativeActImplAmountsIniActMovAdjActPlusAdjExpAdjExpAdjMinusAdjReader().readThenSet(legislativeActs, null);
 		new LegislativeActImplAmountsMovementIncludedReader().readThenSet(legislativeActs, null);
 		legislativeActs.forEach(legislativeAct -> { legislativeAct.computeActualMinusMovementIncludedPlusAdjustment(); });
 	}

@@ -6,7 +6,7 @@ import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.persistence.query.Language;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
-public class LegislativeActVersionImplAmountsInitialActualMovementAdjustmentActualPlusAdjustmentExpectedAdjustmentExpectedAdjustmentMinusAdjustmentReader extends AbstractLegislativeActVersionImplReader implements Serializable {
+public class LegislativeActVersionImplAmountsIniActMovAdjActPlusAdjExpAdjExpAdjMinusAdjReader extends AbstractLegislativeActVersionImplReader implements Serializable {
 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
