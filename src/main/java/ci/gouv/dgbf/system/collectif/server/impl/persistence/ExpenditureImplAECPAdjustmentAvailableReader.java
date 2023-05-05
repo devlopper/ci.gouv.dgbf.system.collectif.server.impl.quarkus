@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.cyk.utility.__kernel__.field.FieldHelper;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
-public class ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader extends AbstractExpenditureImplReader implements Serializable {
+public class ExpenditureImplAECPAdjustmentAvailableReader extends AbstractExpenditureImplReader implements Serializable {
 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {

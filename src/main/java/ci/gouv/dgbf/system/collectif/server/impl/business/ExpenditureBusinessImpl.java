@@ -44,7 +44,7 @@ import ci.gouv.dgbf.system.collectif.server.impl.persistence.EntryAuthorizationI
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImpl;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAdjustableIsFalseReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAvailableMonitorableIsNotFalseReader;
-import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader;
+import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplAECPAdjustmentAvailableReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableWithCodesReader;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureImportableView;
 import ci.gouv.dgbf.system.collectif.server.impl.persistence.ExpenditureView;
@@ -76,14 +76,14 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		return adjust(adjustments,generateAuditIdentifier(), auditWho, ADJUST_AUDIT_IDENTIFIER);
 	}
 	
-	private Collection<Object[]> readEntryAuthorizationPaymentCreditAdjustmentAvailable(Collection<String> identifiers,Class<? extends ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader> readerClass) {
+	private Collection<Object[]> readEntryAuthorizationPaymentCreditAdjustmentAvailable(Collection<String> identifiers,Class<? extends ExpenditureImplAECPAdjustmentAvailableReader> readerClass) {
 		Collection<Object[]> availablesMonitorables = new ExpenditureImplAvailableMonitorableIsNotFalseReader().readByIdentifiers(new ArrayList<String>(identifiers), null);
 		Collection<String> availablesMonitorablesIdentifiers = CollectionHelper.isEmpty(availablesMonitorables) ? null : availablesMonitorables.stream().map(array -> (String)array[0]).collect(Collectors.toList());
 		return CollectionHelper.isEmpty(availablesMonitorablesIdentifiers) ? null :  ClassHelper.instanciate(readerClass).readByIdentifiers(availablesMonitorablesIdentifiers, null);
 	}
 	
 	private Collection<Object[]> readEntryAuthorizationPaymentCreditAdjustmentAvailable(Collection<String> identifiers) {
-		return readEntryAuthorizationPaymentCreditAdjustmentAvailable(identifiers, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.class);
+		return readEntryAuthorizationPaymentCreditAdjustmentAvailable(identifiers, ExpenditureImplAECPAdjustmentAvailableReader.class);
 	}
 	
 	private Collection<ExpenditureImpl> adjust(Map<String, Long[]> adjustments,String auditIdentifier,String auditWho,String auditFunctionality,Result result) {
@@ -103,8 +103,8 @@ public class ExpenditureBusinessImpl extends AbstractExpenditureResourceBusiness
 		
 		// Validation of adjustments
 		Collection<Object[]> arrays = readEntryAuthorizationPaymentCreditAdjustmentAvailable(providedIdentifiers);
-		ValidatorImpl.Expenditure.validateAdjustmentsAvailable(adjustments, arrays, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.ENTRY_AUTHORIZATION_AVAILABLE_INDEX
-				, ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableReader.PAYMENT_CREDIT_AVAILABLE_INDEX, throwablesMessages);
+		ValidatorImpl.Expenditure.validateAdjustmentsAvailable(adjustments, arrays, ExpenditureImplAECPAdjustmentAvailableReader.ENTRY_AUTHORIZATION_AVAILABLE_INDEX
+				, ExpenditureImplAECPAdjustmentAvailableReader.PAYMENT_CREDIT_AVAILABLE_INDEX, throwablesMessages);
 		throwablesMessages.throwIfNotEmpty();
 		
 		// Validation of objects

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
-public class ActivityImplSectionAdministrativeUnitExpenditureNatureBudgetSpecializationUnitActionReader extends AbstractActivityImplReader implements Serializable {
+public class ActivityImplSectionUaExpenditureNatureUsbActionReader extends AbstractActivityImplReader implements Serializable {
 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {

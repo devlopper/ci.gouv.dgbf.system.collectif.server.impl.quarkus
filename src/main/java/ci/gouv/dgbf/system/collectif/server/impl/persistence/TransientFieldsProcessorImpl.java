@@ -120,7 +120,7 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 	public void processActivities(Collection<ActivityImpl> activities,Collection<String> fieldsNames) {
 		for(String fieldName : fieldsNames) {
 			if(ActivityImpl.FIELDS_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION.equals(fieldName))
-				new ActivityImplSectionAdministrativeUnitExpenditureNatureBudgetSpecializationUnitActionReader().readThenSet(activities, null);
+				new ActivityImplSectionUaExpenditureNatureUsbActionReader().readThenSet(activities, null);
 			else if(ActivityImpl.FIELDS_BUDGET_CATEGORY_SECTION_ADMINISTRATIVE_UNIT_EXPENDITURE_NATURE_BUDGET_SPECIALIZATION_UNIT_ACTION.equals(fieldName))
 				new ActivityImplBudgetCategorySectionAdministrativeUnitExpenditureNatureBudgetSpecializationUnitActionReader().readThenSet(activities, null);
 			else if(ActivityImpl.FIELD_ECONOMIC_NATURES.equals(fieldName))
@@ -210,9 +210,9 @@ public class TransientFieldsProcessorImpl extends org.cyk.utility.persistence.se
 		Map<String,Object> map = StringHelper.isBlank(legislativeActVersionIdentifier) ? null  : Map.of(Parameters.LEGISLATIVE_ACT_VERSION_IDENTIFIER,legislativeActVersionIdentifier);
 		for(String fieldName : fieldsNames) {
 			if(RegulatoryActImpl.FIELDS_YEAR_NAME_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING.equals(fieldName))				
-				new RegulatoryActImplYearNameEntryAuthorizationAmountPaymentCreditAmountIncludedAndIncludedAsStringReader().readThenSet(regulatoryActs, map);
+				new RegulatoryActImplYearNameEntryAuthAmntPntCditAmoIncAndIncAsStrReader().readThenSet(regulatoryActs, map);
 			else if(RegulatoryActImpl.FIELDS_CODE_NAME_YEAR_DATE_AS_STRING_ENTRY_AUTHORIZATION_AMOUNT_PAYMENT_CREDIT_AMOUNT_INCLUDED_AND_INCLUDED_AS_STRING.equals(fieldName))				
-				new RegulatoryActImplCodeNameYearDateAsStringEntryAuthorizationAmountPaymentCreditAmountIncludedAndIncludedAsStringReader().readThenSet(regulatoryActs, map);
+				new RegulatoryActImplCodeNameYearDateAsStrEntryAutAmntPyntCrdtAmntIncAndIncAsStrReader().readThenSet(regulatoryActs, map);
 			else if(RegulatoryActImpl.FIELDS_AUDITS_AS_STRINGS.equals(fieldName))
 				new RegulatoryActImplAuditsAsStringsReader().readThenSet(regulatoryActs, map);
 			else if(RegulatoryActImpl.FIELD___AUDIT__.equals(fieldName))

@@ -5,7 +5,13 @@ import java.io.Serializable;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 import org.cyk.utility.persistence.server.query.string.QueryStringBuilder.Arguments;
 
-public class ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableLegislativeActVersionAdjustableWithCodesReader extends ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableLegislativeActVersionAdjustableReader implements Serializable {
+/**
+ * ExpenditureImplEntryAuthorizationPaymentCreditAdjustmentAvailableLegislativeActVersionAdjustableWithCodesReader
+ *
+ * @author Christian
+ *
+ */
+public class ExpenditureImplAECPAdjustmentAvailableLegislativeActVersionAdjustableWithCodesReader extends ExpenditureImplAECPAdjustmentAvailableLegislativeActVersionAdjustableReader implements Serializable {
 
 	@Override
 	protected Arguments instantiateQueryStringBuilderArguments() {

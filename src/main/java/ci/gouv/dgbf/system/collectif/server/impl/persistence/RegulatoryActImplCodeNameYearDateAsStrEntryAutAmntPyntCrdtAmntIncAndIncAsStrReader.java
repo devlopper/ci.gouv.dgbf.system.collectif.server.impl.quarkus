@@ -14,7 +14,7 @@ import org.cyk.utility.persistence.server.query.string.QueryStringBuilder;
 
 import ci.gouv.dgbf.system.collectif.server.api.persistence.Parameters;
 
-public class RegulatoryActImplCodeNameYearDateAsStringEntryAuthorizationAmountPaymentCreditAmountIncludedAndIncludedAsStringReader extends AbstractRegulatoryActImplReader implements Serializable {
+public class RegulatoryActImplCodeNameYearDateAsStrEntryAutAmntPyntCrdtAmntIncAndIncAsStrReader extends AbstractRegulatoryActImplReader implements Serializable {
 
 	@Override
 	protected QueryStringBuilder.Arguments instantiateQueryStringBuilderArguments() {
